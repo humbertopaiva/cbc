@@ -5,6 +5,11 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { join } from 'path';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { MoviesModule } from './movies/movies.module';
+import { GenresModule } from './genres/genres.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -33,6 +38,11 @@ import { join } from 'path';
       playground: true,
     }),
     ScheduleModule.forRoot(),
+    AuthModule,
+    UsersModule,
+    MoviesModule,
+    GenresModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
