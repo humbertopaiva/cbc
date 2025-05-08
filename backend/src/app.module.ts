@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { join } from 'path';
@@ -10,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { MoviesModule } from './movies/movies.module';
 import { GenresModule } from './genres/genres.module';
 import { CommonModule } from './common/common.module';
+import { GraphQLModule } from './graphql.module';
 
 @Module({
   imports: [
@@ -25,18 +24,13 @@ import { CommonModule } from './common/common.module';
         port: configService.get('DB_PORT', 5432),
         username: configService.get('DB_USERNAME', 'postgres'),
         password: configService.get('DB_PASSWORD', 'postgres'),
-        database: configService.get('DB_DATABASE', 'cubos_movies'),
+        database: configService.get('DB_DATABASE', 'movies_challenge'),
         entities: [join(__dirname, '**', '*.entity.{ts,js}')],
         synchronize: configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') !== 'production',
       }),
     }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
-      playground: true,
-    }),
+    GraphQLModule,
     ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
@@ -44,7 +38,5 @@ import { CommonModule } from './common/common.module';
     GenresModule,
     CommonModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
