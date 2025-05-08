@@ -7,7 +7,7 @@ import {
   JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { Movie } from './entities/movie.entity';
+import { Movie } from './movie.entity';
 
 @ObjectType()
 @Entity('pending_notifications')
