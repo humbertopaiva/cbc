@@ -7,8 +7,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-
-import type { Movie } from '../../movies/entities/movie.entity';
+import { Movie } from '../../movies/entities/movie.entity';
 
 @ObjectType()
 @Entity('users')
@@ -36,7 +35,7 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @Field(() => [Object], { nullable: true, description: 'Filmes criados pelo usuário' })
-  @OneToMany('Movie', 'createdBy')
+  @Field(() => [Movie], { nullable: true })
+  @OneToMany(() => Movie, movie => movie.createdBy)
   movies?: Movie[];
 }
