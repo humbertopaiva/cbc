@@ -1,3 +1,4 @@
+// src/movies/entities/movie.entity.ts
 import { Field, ID, ObjectType, Float, Int } from '@nestjs/graphql';
 import {
   Entity,
@@ -11,7 +12,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import type { Genre } from '../../genres/entities/genre.entity';
+import { Genre } from '../../genres/entities/genre.entity';
 
 @ObjectType()
 @Entity('movies')
@@ -26,35 +27,35 @@ export class Movie {
 
   @Field({ nullable: true })
   @Column({ name: 'original_title', nullable: true })
-  originalTitle?: string;
+  originalTitle?: string | null;
 
   @Field({ nullable: true })
   @Column({ type: 'text', nullable: true })
-  description?: string;
+  description?: string | null;
 
   @Field(() => Float, { nullable: true })
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  budget?: number;
+  budget?: number | null;
 
   @Field({ nullable: true })
   @Column({ name: 'release_date', nullable: true })
-  releaseDate?: Date;
+  releaseDate?: Date | null;
 
   @Field(() => Int, { nullable: true })
   @Column({ nullable: true })
-  duration?: number;
+  duration?: number | null;
 
   @Field({ nullable: true })
   @Column({ name: 'image_url', nullable: true })
-  imageUrl?: string;
+  imageUrl?: string | null;
 
   @Field({ nullable: true })
   @Column({ name: 'backdrop_url', nullable: true })
-  backdropUrl?: string;
+  backdropUrl?: string | null;
 
   @Field(() => Float, { nullable: true })
   @Column({ type: 'decimal', precision: 3, scale: 1, nullable: true })
-  rating?: number;
+  rating?: number | null;
 
   @Field(() => User)
   @ManyToOne(() => User, user => user.movies)
@@ -69,8 +70,8 @@ export class Movie {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @Field(() => [Object], { description: 'Generos relacionados' })
-  @ManyToMany('Genre', 'movies')
+  @Field(() => [Genre])
+  @ManyToMany(() => Genre, genre => genre.movies)
   @JoinTable({
     name: 'movie_genres',
     joinColumn: { name: 'movie_id', referencedColumnName: 'id' },
