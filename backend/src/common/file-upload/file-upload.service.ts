@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
 import { Readable } from 'stream';
 
@@ -92,5 +93,41 @@ export class FileUploadService {
       }
       return false;
     }
+  }
+
+  async getPresignedUploadUrl(
+    folder: string,
+    filename: string,
+    contentType: string,
+    expiresIn = 3600,
+  ): Promise<{ url: string; key: string }> {
+    try {
+      const extension = filename.split('.').pop() || '';
+      const key = `${folder}/${randomUUID()}.${extension}`;
+
+      const command = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        ContentType: contentType,
+      });
+
+      const url = await getSignedUrl(this.s3Client, command, { expiresIn });
+
+      this.logger.log(`Generated presigned URL for uploading: ${key}`);
+
+      return { url, key };
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Error generating presigned URL: ${error.message}`);
+        throw new Error(`Could not generate presigned URL: ${error.message}`);
+      }
+      this.logger.error('Unknown error generating presigned URL');
+      throw new Error('Could not generate presigned URL due to an unknown error');
+    }
+  }
+
+  getFileUrl(key: string): string {
+    const endpoint = this.configService.get<string>('S3_ENDPOINT');
+    return `${endpoint}/${this.bucket}/${key}`;
   }
 }

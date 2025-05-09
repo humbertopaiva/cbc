@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react'
 import { FiUpload, FiX } from 'react-icons/fi'
+
 import { s3UploadService } from '../services/s3-upload.service'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/features/auth/context/auth.context'
 
 interface ImageUploadProps {
   imageUrl: string | undefined
@@ -16,74 +16,27 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   imageUrl,
   onImageChange,
   label,
-  movieTitle = 'default',
-  folder = 'posters',
+  folder = 'images',
 }) => {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
-  const { user } = useAuth()
 
   const uploadImage = useCallback(
     async (file: File) => {
-      if (!file) return
-
       setIsUploading(true)
       setUploadProgress(0)
       setError(null)
 
       try {
-        // Fazer upload do arquivo usando XMLHttpRequest para acompanhar o progresso
-        const userId = user?.id || 'anonymous'
-        const xhr = new XMLHttpRequest()
+        // Upload simples para demonstração
+        setUploadProgress(10)
 
-        // Criar um nome de arquivo seguro com base no título do filme
-        const sanitizedFileName = movieTitle
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '')
+        // Upload do arquivo para o S3
+        const fileUrl = await s3UploadService.uploadFile(file, folder)
 
-        const timestamp = Date.now()
-        const extension = file.name.split('.').pop() || 'jpg'
-
-        // Gera um nome de arquivo único
-        const key = `${folder}/${userId}/${sanitizedFileName}-${timestamp}.${extension}`
-
-        // Obter URL pré-assinada
-        const presignedUrl = await s3UploadService.getPresignedUploadUrl(
-          file,
-          key,
-        )
-
-        // Configurar XMLHttpRequest para acompanhar o progresso
-        xhr.open('PUT', presignedUrl)
-        xhr.setRequestHeader('Content-Type', file.type)
-
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded / event.total) * 100)
-            setUploadProgress(progress)
-          }
-        }
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            // A URL final da imagem
-            const finalImageUrl = `http://localhost:9000/cubos-movies/${key}`
-            onImageChange(finalImageUrl)
-            setUploadProgress(100)
-          } else {
-            setError(`Falha no upload: ${xhr.status} ${xhr.statusText}`)
-          }
-          setIsUploading(false)
-        }
-
-        xhr.onerror = () => {
-          setError('Erro de rede durante o upload.')
-          setIsUploading(false)
-        }
-
-        xhr.send(file)
+        setUploadProgress(100)
+        onImageChange(fileUrl)
       } catch (error) {
         console.error('Error uploading image:', error)
         setError(
@@ -91,10 +44,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             ? error.message
             : 'Erro desconhecido durante o upload.',
         )
+      } finally {
         setIsUploading(false)
       }
     },
-    [folder, movieTitle, onImageChange, user],
+    [folder, onImageChange],
   )
 
   const handleFileChange = useCallback(
