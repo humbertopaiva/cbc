@@ -1,59 +1,67 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { gql } from '@apollo/client'
+import { apolloClient } from '@/core/lib/apollo'
+
+const GET_PRESIGNED_URL = gql`
+  mutation GetPresignedUploadUrl($input: PresignedUrlInput!) {
+    getPresignedUploadUrl(input: $input) {
+      presignedUrl
+      key
+      fileUrl
+    }
+  }
+`
+
+interface PresignedUrlResponse {
+  getPresignedUploadUrl: {
+    presignedUrl: string
+    key: string
+    fileUrl: string
+  }
+}
+
+interface PresignedUrlInput {
+  folder: string
+  filename: string
+  contentType: string
+}
 
 class S3UploadService {
-  private client: S3Client
-
-  constructor() {
-    this.client = new S3Client({
-      region: 'us-east-1',
-      endpoint: 'http://localhost:9000',
-      credentials: {
-        accessKeyId: 'minio_access_key',
-        secretAccessKey: 'minio_secret_key',
-      },
-      forcePathStyle: true,
-    })
-  }
-
   async getPresignedUploadUrl(
     file: File,
-    key: string,
-    bucket: string = 'cubos-movies',
-  ): Promise<string> {
-    const command = new PutObjectCommand({
-      Bucket: bucket,
-      Key: key,
-      ContentType: file.type,
-    })
+    folder: string,
+  ): Promise<{ presignedUrl: string; fileUrl: string }> {
+    try {
+      const { data } = await apolloClient.mutate<PresignedUrlResponse>({
+        mutation: GET_PRESIGNED_URL,
+        variables: {
+          input: {
+            folder,
+            filename: file.name,
+            contentType: file.type,
+          },
+        },
+      })
 
-    return getSignedUrl(this.client, command, { expiresIn: 600 })
+      if (!data) {
+        throw new Error('Failed to get presigned URL')
+      }
+
+      return {
+        presignedUrl: data.getPresignedUploadUrl.presignedUrl,
+        fileUrl: data.getPresignedUploadUrl.fileUrl,
+      }
+    } catch (error) {
+      console.error('Error getting presigned URL:', error)
+      throw error
+    }
   }
 
-  async uploadFile(
+  async uploadFileWithPresignedUrl(
     file: File,
-    folder: string,
-    movieTitle: string,
-    userId: string = 'user-' + Math.random().toString(36).substring(2, 9),
-  ): Promise<string> {
+    presignedUrl: string,
+  ): Promise<void> {
     try {
-      // Criar um nome de arquivo seguro com base no título do filme
-      const sanitizedFileName = movieTitle
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '')
-
-      const timestamp = Date.now()
-      const extension = file.name.split('.').pop() || 'jpg'
-
-      // Gera um nome de arquivo único
-      const key = `${folder}/${userId}/${sanitizedFileName}-${timestamp}.${extension}`
-
-      // Obter URL pré-assinada
-      const presignedUrl = await this.getPresignedUploadUrl(file, key)
-
-      // Fazer o upload com fetch
-      const uploadResponse = await fetch(presignedUrl, {
+      const response = await fetch(presignedUrl, {
         method: 'PUT',
         body: file,
         headers: {
@@ -61,14 +69,30 @@ class S3UploadService {
         },
       })
 
-      if (!uploadResponse.ok) {
+      if (!response.ok) {
         throw new Error(
-          `Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`,
+          `Upload failed: ${response.status} ${response.statusText}`,
         )
       }
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      throw error
+    }
+  }
+
+  async uploadFile(file: File, folder: string): Promise<string> {
+    try {
+      // Obter URL pré-assinada
+      const { presignedUrl, fileUrl } = await this.getPresignedUploadUrl(
+        file,
+        folder,
+      )
+
+      // Fazer o upload com fetch
+      await this.uploadFileWithPresignedUrl(file, presignedUrl)
 
       // Retornar a URL final da imagem
-      return `http://localhost:9000/cubos-movies/${key}`
+      return fileUrl
     } catch (error) {
       console.error('Error uploading file:', error)
       throw error
