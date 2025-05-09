@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Movie } from './entities/movie.entity';
 import { CreateMovieInput } from './dto/create-movie.input';
 import { UpdateMovieInput } from './dto/update-movie.input';
@@ -89,7 +89,7 @@ export class MoviesService {
 
     if (pagination?.after) {
       const afterMovie = await this.moviesRepository.findOne({
-        where: { id: pagination.after } as FindOptionsWhere<Movie>,
+        where: { id: pagination.after },
       });
 
       if (afterMovie) {
@@ -117,8 +117,8 @@ export class MoviesService {
     const pageInfo: PageInfo = {
       hasNextPage: movies.length === limit,
       hasPreviousPage: !!pagination?.after,
-      startCursor: edges[0]?.cursor ?? null,
-      endCursor: edges[edges.length - 1]?.cursor ?? null,
+      startCursor: edges[0]?.cursor,
+      endCursor: edges[edges.length - 1]?.cursor,
     };
 
     return {
@@ -130,7 +130,7 @@ export class MoviesService {
 
   async findById(id: string): Promise<Movie> {
     const movie = await this.moviesRepository.findOne({
-      where: { id } as FindOptionsWhere<Movie>,
+      where: { id },
       relations: ['genres', 'createdBy'],
     });
 
@@ -156,15 +156,14 @@ export class MoviesService {
         rating,
       } = createMovieInput;
 
-      let imageUrl: string | null = null;
-      let backdropUrl: string | null = null;
+      let imageUrl: string | undefined = undefined;
+      let backdropUrl: string | undefined = undefined;
 
-      // Aqui está a correção principal: verificamos se imageFile existe e tratamos como Upload
+      // Processar uploads de imagens
       if (imageFile) {
         imageUrl = await this.fileUploadService.uploadFile(imageFile.promise, 'movies/posters');
       }
 
-      // Mesma correção para backdropFile
       if (backdropFile) {
         backdropUrl = await this.fileUploadService.uploadFile(
           backdropFile.promise,
@@ -172,26 +171,27 @@ export class MoviesService {
         );
       }
 
+      // Buscar gêneros
       let genres: Genre[] = [];
       if (genreIds?.length) {
         genres = await this.genresService.findByIds(genreIds);
       }
 
-      const newMovie = this.moviesRepository.create({
-        title,
-        originalTitle: originalTitle ?? null,
-        description: description ?? null,
-        budget: budget ?? null,
-        releaseDate: releaseDate ? new Date(releaseDate) : null,
-        duration: duration ?? null,
-        imageUrl,
-        backdropUrl,
-        rating: rating ?? null,
-        createdBy: user,
-        genres,
-      }) as Partial<Movie>;
+      // Criar nova movie usando entityLike object
+      const movie = new Movie();
+      movie.title = title;
+      movie.originalTitle = originalTitle;
+      movie.description = description;
+      movie.budget = budget;
+      movie.releaseDate = releaseDate ? new Date(releaseDate) : undefined;
+      movie.duration = duration;
+      movie.imageUrl = imageUrl;
+      movie.backdropUrl = backdropUrl;
+      movie.rating = rating;
+      movie.createdBy = user;
+      movie.genres = genres;
 
-      return await this.moviesRepository.save(newMovie);
+      return await this.moviesRepository.save(movie);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to create movie: ${message}`);
@@ -221,18 +221,15 @@ export class MoviesService {
         throw new ForbiddenException('You are not authorized to update this movie');
       }
 
-      let imageUrl = movie.imageUrl ?? null;
-      let backdropUrl = movie.backdropUrl ?? null;
+      let imageUrl = movie.imageUrl;
+      let backdropUrl = movie.backdropUrl;
 
       // Handle image file update
       if (imageFile) {
         if (movie.imageUrl) {
           await this.fileUploadService.deleteFile(movie.imageUrl);
         }
-        imageUrl = await this.fileUploadService.uploadFile(
-          imageFile.then(file => file),
-          'movies/posters',
-        );
+        imageUrl = await this.fileUploadService.uploadFile(imageFile, 'movies/posters');
       }
 
       // Handle backdrop file update
@@ -240,10 +237,7 @@ export class MoviesService {
         if (movie.backdropUrl) {
           await this.fileUploadService.deleteFile(movie.backdropUrl);
         }
-        backdropUrl = await this.fileUploadService.uploadFile(
-          backdropFile.then(file => file),
-          'movies/backdrops',
-        );
+        backdropUrl = await this.fileUploadService.uploadFile(backdropFile, 'movies/backdrops');
       }
 
       // Fetch genres if genreIds are provided, otherwise keep existing genres
@@ -252,18 +246,17 @@ export class MoviesService {
         genres = await this.genresService.findByIds(genreIds);
       }
 
-      Object.assign(movie, {
-        title: title ?? movie.title,
-        originalTitle: originalTitle ?? movie.originalTitle,
-        description: description ?? movie.description,
-        budget: budget ?? movie.budget,
-        releaseDate: releaseDate ? new Date(releaseDate) : movie.releaseDate,
-        duration: duration ?? movie.duration,
-        imageUrl,
-        backdropUrl,
-        rating: rating ?? movie.rating,
-        genres,
-      });
+      // Atualizar apenas os campos fornecidos
+      if (title !== undefined) movie.title = title;
+      if (originalTitle !== undefined) movie.originalTitle = originalTitle;
+      if (description !== undefined) movie.description = description;
+      if (budget !== undefined) movie.budget = budget;
+      if (releaseDate !== undefined) movie.releaseDate = new Date(releaseDate);
+      if (duration !== undefined) movie.duration = duration;
+      if (imageUrl !== undefined) movie.imageUrl = imageUrl;
+      if (backdropUrl !== undefined) movie.backdropUrl = backdropUrl;
+      if (rating !== undefined) movie.rating = rating;
+      if (genres) movie.genres = genres;
 
       return await this.moviesRepository.save(movie);
     } catch (error) {
@@ -288,7 +281,7 @@ export class MoviesService {
       await this.fileUploadService.deleteFile(movie.backdropUrl);
     }
 
-    await this.moviesRepository.delete(id);
+    await this.moviesRepository.remove(movie);
     return true;
   }
 

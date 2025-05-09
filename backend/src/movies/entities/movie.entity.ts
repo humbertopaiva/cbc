@@ -1,4 +1,3 @@
-// src/movies/entities/movie.entity.ts
 import { Field, ID, ObjectType, Float, Int } from '@nestjs/graphql';
 import {
   Entity,
@@ -27,35 +26,35 @@ export class Movie {
 
   @Field({ nullable: true })
   @Column({ name: 'original_title', nullable: true })
-  originalTitle?: string | null;
+  originalTitle?: string;
 
   @Field({ nullable: true })
   @Column({ type: 'text', nullable: true })
-  description?: string | null;
+  description?: string;
 
   @Field(() => Float, { nullable: true })
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
-  budget?: number | null;
+  budget?: number;
 
   @Field({ nullable: true })
   @Column({ name: 'release_date', nullable: true })
-  releaseDate?: Date | null;
+  releaseDate?: Date;
 
   @Field(() => Int, { nullable: true })
   @Column({ nullable: true })
-  duration?: number | null;
+  duration?: number;
 
   @Field({ nullable: true })
   @Column({ name: 'image_url', nullable: true })
-  imageUrl?: string | null;
+  imageUrl?: string;
 
   @Field({ nullable: true })
   @Column({ name: 'backdrop_url', nullable: true })
-  backdropUrl?: string | null;
+  backdropUrl?: string;
 
   @Field(() => Float, { nullable: true })
   @Column({ type: 'decimal', precision: 3, scale: 1, nullable: true })
-  rating?: number | null;
+  rating?: number;
 
   @Field(() => User)
   @ManyToOne(() => User, user => user.movies)

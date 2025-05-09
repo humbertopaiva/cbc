@@ -1,22 +1,18 @@
 version: "3.8"
 
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+  postgres:
+    image: postgres:15
     ports:
-      - "3000:3000"
+      - "5432:5432"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    depends_on:
-      - backend
-    networks:
-      - movies_network
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      - VITE_API_URL=http://localhost:4000/graphql
-      - NODE_ENV=development
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=cubos_movies
+    networks:
+      - app-network
 
   backend:
     build:
@@ -29,62 +25,20 @@ services:
       - /app/node_modules
     depends_on:
       - postgres
-      - mailhog
-    networks:
-      - movies_network
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/movies_challenge
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=cubos_movies
       - JWT_SECRET=your_jwt_secret_key
-      - MAIL_HOST=mailhog
-      - MAIL_PORT=1025
-      - MAIL_USER=null
-      - MAIL_PASS=null
-      - S3_BUCKET=movies-challenge
-      - S3_REGION=us-east-1
-      - S3_ACCESS_KEY=minio_access_key
-      - S3_SECRET_KEY=minio_secret_key
-      - S3_ENDPOINT=http://minio:9000
-
-  postgres:
-    image: postgres:15
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     networks:
-      - movies_challenge_network
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=movies_challenge
-
-  minio:
-    image: minio/minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio_data:/data
-    networks:
-      - movies_challenge_network
-    environment:
-      - MINIO_ACCESS_KEY=minio_access_key
-      - MINIO_SECRET_KEY=minio_secret_key
-    command: server /data --console-address ":9001"
-
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    networks:
-      - movies_challenge_network
+      - app-network
 
 networks:
-  movies_challenge_network:
+  app-network:
     driver: bridge
 
 volumes:
   postgres_data:
-  minio_data:

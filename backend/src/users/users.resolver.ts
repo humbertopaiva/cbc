@@ -1,13 +1,17 @@
-import { Resolver, Query, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
+import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
   @Query(() => User)
-  async me(@Args('id', { type: () => ID }) id: string): Promise<User> {
-    return this.usersService.findById(id);
+  @UseGuards(GqlAuthGuard)
+  me(@CurrentUser() user: User): User {
+    return user;
   }
 }

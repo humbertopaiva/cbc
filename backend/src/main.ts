@@ -2,14 +2,19 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
+import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const logger = new Logger('Bootstrap');
 
-  // Habilitar CORS
-  app.enableCors();
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
-  // Configurar validation pipe global
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -18,7 +23,6 @@ async function bootstrap() {
     }),
   );
 
-  // Configurar middleware para uploads de arquivos
   app.use(
     graphqlUploadExpress({
       maxFileSize: 10000000, // 10MB
@@ -26,10 +30,15 @@ async function bootstrap() {
     }),
   );
 
-  // Obter a porta do ambiente ou usar 4000 como padrão
-  const port = process.env.PORT || 4000;
+  const port = configService.get<string | number>('PORT') || 4000;
+  // Converter para número se for string
+  const portNumber = typeof port === 'string' ? parseInt(port, 10) : port;
 
-  await app.listen(port);
-  console.log(`🚀 Application is running on: http://localhost:${port}/graphql`);
+  await app.listen(portNumber);
+  logger.log(`🚀 Application is running on: http://localhost:${portNumber}/graphql`);
 }
-void bootstrap();
+
+bootstrap().catch(err => {
+  console.error('Failed to start application:', err);
+  process.exit(1);
+});
