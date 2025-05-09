@@ -1,14 +1,14 @@
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'react-toastify'
 import {
-  CREATE_MOVIE,
-  GET_GENRES,
-  GET_MOVIE,
-  UPDATE_MOVIE,
-} from '../graphql/movies.graphql'
+  createMovieUseCase,
+  getGenresUseCase,
+  getMovieUseCase,
+  updateMovieUseCase,
+} from '../usecases'
 import { movieFormSchema } from '../schemas/movie.schema'
 import type {
   CreateMovieInput,
@@ -22,120 +22,55 @@ import type {
 } from '../schemas/movie.schema'
 
 export class MovieFormViewModel {
-  setupForm(initialData?: Partial<Movie>) {
-    // Importante: Converter os números para strings para o formulário
-    return useForm<CreateMovieFormData>({
-      resolver: zodResolver(movieFormSchema),
-      defaultValues: {
-        title: initialData?.title || '',
-        originalTitle: initialData?.originalTitle || '',
-        description: initialData?.description || '',
-        budget: initialData?.budget,
-        releaseDate: initialData?.releaseDate,
-
-        duration: initialData?.duration,
-        genreIds: initialData?.genres?.map((g) => g.id) || [],
-        imageUrl: initialData?.imageUrl || '',
-        backdropUrl: initialData?.backdropUrl || '',
-        rating: initialData?.rating,
-      },
-    })
-  }
-
-  setupGenresQuery() {
-    const { data, loading } = useQuery<{ genres: Array<Genre> }>(GET_GENRES)
-    return {
-      genres: data?.genres || [],
-      loading,
+  async getMovie(id: string): Promise<Movie | null> {
+    try {
+      return await getMovieUseCase.execute(id)
+    } catch (error) {
+      console.error('Error fetching movie:', error)
+      toast.error('Erro ao carregar dados do filme')
+      return null
     }
   }
 
-  setupMovieQuery(id?: string) {
-    const { data, loading } = useQuery<{ movie: Movie }, { id: string }>(
-      GET_MOVIE,
-      {
-        variables: { id: id || '' },
-        skip: !id,
-      },
-    )
-
-    return {
-      movie: data?.movie,
-      loading,
+  async getGenres(): Promise<Array<Genre>> {
+    try {
+      return await getGenresUseCase.execute()
+    } catch (error) {
+      console.error('Error fetching genres:', error)
+      toast.error('Erro ao carregar gêneros')
+      return []
     }
   }
 
-  setupCreateMutation(navigate: ReturnType<typeof useNavigate>) {
-    const [createMovie, { loading }] = useMutation<
-      { createMovie: Movie },
-      { input: CreateMovieInput }
-    >(CREATE_MOVIE, {
-      onCompleted: () => {
-        toast.success('Filme criado com sucesso!')
-        navigate({ to: '/' })
-      },
-      onError: (error) => {
-        console.error('Erro ao criar filme:', error)
-        toast.error('Erro ao criar filme. Tente novamente.')
-      },
-      update: (cache, { data }) => {
-        if (data?.createMovie) {
-          // Atualizar a cache para incluir o novo filme
-          cache.modify({
-            fields: {
-              movies: (existingMovies = { edges: [] }) => {
-                const newMovieRef = cache.writeFragment({
-                  data: data.createMovie,
-                  fragment: gql`
-                    fragment NewMovie on Movie {
-                      id
-                    }
-                  `,
-                })
-                return {
-                  ...existingMovies,
-                  edges: [
-                    { cursor: data.createMovie.id, node: newMovieRef },
-                    ...existingMovies.edges,
-                  ],
-                  totalCount: existingMovies.totalCount + 1,
-                }
-              },
-            },
-          })
-        }
-      },
-    })
-
-    return {
-      createMovie,
-      isCreating: loading,
+  async createMovie(input: CreateMovieInput): Promise<Movie | null> {
+    try {
+      const result = await createMovieUseCase.execute(input)
+      toast.success('Filme criado com sucesso!')
+      return result
+    } catch (error) {
+      console.error('Error creating movie:', error)
+      toast.error('Erro ao criar filme')
+      return null
     }
   }
 
-  setupUpdateMutation(navigate: ReturnType<typeof useNavigate>) {
-    const [updateMovie, { loading }] = useMutation<
-      { updateMovie: Movie },
-      { input: UpdateMovieInput }
-    >(UPDATE_MOVIE, {
-      onCompleted: () => {
-        toast.success('Filme atualizado com sucesso!')
-        navigate({ to: '/' })
-      },
-      onError: (error) => {
-        console.error('Erro ao atualizar filme:', error)
-        toast.error('Erro ao atualizar filme. Tente novamente.')
-      },
-    })
-
-    return {
-      updateMovie,
-      isUpdating: loading,
+  async updateMovie(input: UpdateMovieInput): Promise<Movie | null> {
+    try {
+      const result = await updateMovieUseCase.execute(input)
+      toast.success('Filme atualizado com sucesso!')
+      return result
+    } catch (error) {
+      console.error('Error updating movie:', error)
+      toast.error('Erro ao atualizar filme')
+      return null
     }
   }
 }
 
 export function useCreateMovieViewModel() {
+  const [genres, setGenres] = useState<Array<Genre>>([])
+  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
   const viewModel = new MovieFormViewModel()
 
@@ -145,12 +80,27 @@ export function useCreateMovieViewModel() {
     formState: { errors },
     setValue,
     watch,
-  } = viewModel.setupForm()
+  } = useForm<CreateMovieFormData>({
+    resolver: zodResolver(movieFormSchema),
+    defaultValues: {
+      title: '',
+      originalTitle: '',
+      description: '',
+      genreIds: [],
+      imageUrl: '',
+      backdropUrl: '',
+    },
+  })
 
-  const { genres, loading: loadingGenres } = viewModel.setupGenresQuery()
-  const { createMovie, isCreating } = viewModel.setupCreateMutation(navigate)
+  const fetchGenres = async (): Promise<void> => {
+    setLoading(true)
+    const result = await viewModel.getGenres()
+    setGenres(result)
+    setLoading(false)
+  }
 
-  const onSubmit = (data: CreateMovieFormData) => {
+  const onSubmit = async (data: CreateMovieFormData): Promise<void> => {
+    setSubmitting(true)
     const input: CreateMovieInput = {
       title: data.title,
       originalTitle: data.originalTitle || undefined,
@@ -164,7 +114,12 @@ export function useCreateMovieViewModel() {
       rating: data.rating,
     }
 
-    createMovie({ variables: { input } })
+    const result = await viewModel.createMovie(input)
+    setSubmitting(false)
+
+    if (result) {
+      navigate({ to: '/' })
+    }
   }
 
   return {
@@ -174,19 +129,20 @@ export function useCreateMovieViewModel() {
     setValue,
     watch,
     genres,
-    loadingGenres,
-    isSubmitting: isCreating,
+    loading,
+    isSubmitting: submitting,
     onSubmit,
+    fetchGenres,
   }
 }
 
 export function useUpdateMovieViewModel(id: string) {
+  const [movie, setMovie] = useState<Movie | null>(null)
+  const [genres, setGenres] = useState<Array<Genre>>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
   const viewModel = new MovieFormViewModel()
-
-  const { movie, loading: loadingMovie } = viewModel.setupMovieQuery(id)
-  const { genres, loading: loadingGenres } = viewModel.setupGenresQuery()
-  const { updateMovie, isUpdating } = viewModel.setupUpdateMutation(navigate)
 
   const {
     register,
@@ -194,10 +150,51 @@ export function useUpdateMovieViewModel(id: string) {
     formState: { errors },
     setValue,
     watch,
-  } = viewModel.setupForm(movie)
+    reset,
+  } = useForm<UpdateMovieFormData>({
+    resolver: zodResolver(movieFormSchema),
+    defaultValues: {
+      title: '',
+      originalTitle: '',
+      description: '',
+      genreIds: [],
+      imageUrl: '',
+      backdropUrl: '',
+    },
+  })
 
-  const onSubmit = (data: UpdateMovieFormData) => {
-    // Converter strings para números onde necessário
+  const fetchData = async (): Promise<void> => {
+    setLoading(true)
+    const [movieData, genresData] = await Promise.all([
+      viewModel.getMovie(id),
+      viewModel.getGenres(),
+    ])
+
+    if (movieData) {
+      setMovie(movieData)
+      // Preencher o formulário com os dados do filme
+      reset({
+        title: movieData.title,
+        originalTitle: movieData.originalTitle || '',
+        description: movieData.description || '',
+        budget: movieData.budget,
+        releaseDate: movieData.releaseDate
+          ? new Date(movieData.releaseDate).toISOString().split('T')[0]
+          : undefined,
+        duration: movieData.duration,
+        genreIds: movieData.genres.map((g) => g.id),
+        imageUrl: movieData.imageUrl || '',
+        backdropUrl: movieData.backdropUrl || '',
+        rating: movieData.rating,
+      })
+    }
+
+    setGenres(genresData)
+    setLoading(false)
+  }
+
+  const onSubmit = async (data: UpdateMovieFormData): Promise<void> => {
+    setSubmitting(true)
     const input: UpdateMovieInput = {
       id,
       title: data.title,
@@ -212,7 +209,12 @@ export function useUpdateMovieViewModel(id: string) {
       rating: data.rating,
     }
 
-    updateMovie({ variables: { input } })
+    const result = await viewModel.updateMovie(input)
+    setSubmitting(false)
+
+    if (result) {
+      navigate({ to: '/' })
+    }
   }
 
   return {
@@ -221,11 +223,11 @@ export function useUpdateMovieViewModel(id: string) {
     errors,
     setValue,
     watch,
-    genres,
     movie,
-    loadingMovie,
-    loadingGenres,
-    isSubmitting: isUpdating,
+    genres,
+    loading,
+    isSubmitting: submitting,
     onSubmit,
+    fetchData,
   }
 }
