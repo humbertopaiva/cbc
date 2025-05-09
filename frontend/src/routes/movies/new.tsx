@@ -4,6 +4,7 @@ import { FiArrowLeft, FiSave } from 'react-icons/fi'
 import { AuthGuard } from '@/features/auth/guards/auth.guard'
 import { Button } from '@/components/ui/button'
 import { useCreateMovieViewModel } from '@/features/movies/viewmodel/movie-form.viewmodel'
+import { ImageUpload } from '@/features/movies/components/image-upload'
 
 export const Route = createFileRoute('/movies/new')({
   component: CreateMoviePage,
@@ -206,18 +207,12 @@ function CreateMoviePage() {
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="imageUrl"
-                        className="block text-sm font-medium mb-1"
-                      >
-                        URL da Imagem
-                      </label>
-                      <input
-                        id="imageUrl"
-                        type="text"
-                        {...register('imageUrl')}
-                        className="w-full p-2 border rounded-md bg-background"
-                        placeholder="URL da imagem de capa"
+                      <ImageUpload
+                        imageUrl={watch('imageUrl')}
+                        onImageChange={(url) => setValue('imageUrl', url)}
+                        label="Imagem de Capa"
+                        movieTitle={watch('title') || 'novo-filme'}
+                        folder="posters"
                       />
                       {errors.imageUrl && (
                         <p className="text-destructive text-sm mt-1">
@@ -227,18 +222,12 @@ function CreateMoviePage() {
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="backdropUrl"
-                        className="block text-sm font-medium mb-1"
-                      >
-                        URL do Backdrop
-                      </label>
-                      <input
-                        id="backdropUrl"
-                        type="text"
-                        {...register('backdropUrl')}
-                        className="w-full p-2 border rounded-md bg-background"
-                        placeholder="URL da imagem de fundo"
+                      <ImageUpload
+                        imageUrl={watch('backdropUrl')}
+                        onImageChange={(url) => setValue('backdropUrl', url)}
+                        label="Imagem de Fundo (Backdrop)"
+                        movieTitle={watch('title') || 'novo-filme'}
+                        folder="backdrops"
                       />
                       {errors.backdropUrl && (
                         <p className="text-destructive text-sm mt-1">
