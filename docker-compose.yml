@@ -25,7 +25,7 @@ services:
       - S3_REGION=us-east-1
       - S3_ACCESS_KEY=minio_access_key
       - S3_SECRET_KEY=minio_secret_key
-      - S3_ENDPOINT=http://minio:9000
+      - S3_ENDPOINT=http://localhost:9000
 
   frontend:
     build:
@@ -53,34 +53,23 @@ services:
       - POSTGRES_DB=cubos_movies
 
   minio:
-    image: minio/minio
+    build:
+      context: ./minio
+      dockerfile: Dockerfile
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio_data:/data
+      - ./minio/data:/data
     environment:
       - MINIO_ROOT_USER=minio_access_key
       - MINIO_ROOT_PASSWORD=minio_secret_key
-    command: server /data --console-address ":9001"
+      - BUCKET_NAME=cubos-movies
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
 
-  createbuckets:
-    image: minio/mc
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      until (/usr/bin/mc config host add myminio http://minio:9000 minio_access_key minio_secret_key) do echo 'Waiting for MinIO to be ready...' && sleep 1; done;
-      /usr/bin/mc mb myminio/cubos-movies --ignore-existing;
-      /usr/bin/mc policy set public myminio/cubos-movies;
-      exit 0;
-      "
-
 volumes:
   postgres_data:
-  minio_data:
