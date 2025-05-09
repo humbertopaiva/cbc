@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET', 'your_jwt_secret_key'),
+      secretOrKey: configService.get<string>('JWT_SECRET', 'your_jwt_secret_key'),
     });
   }
 
@@ -31,13 +31,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       !payload.userId ||
       typeof payload.userId !== 'string'
     ) {
-      throw new UnauthorizedException('Payload com token inválido');
+      throw new UnauthorizedException('Invalid token payload');
     }
 
     const user = await this.authService.validateUser(payload.userId);
 
     if (!user) {
-      throw new UnauthorizedException('Token inválido');
+      throw new UnauthorizedException('User not found or token invalid');
     }
 
     return user;
