@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { FiFilter, FiX } from 'react-icons/fi'
-import { Button } from '@/components/ui/button'
 import type { Genre, MovieFilters } from '../model/movie.model'
+import { Button } from '@/components/ui/button'
 
 interface FilterModalProps {
-  genres: Genre[]
+  genres: Array<Genre>
   currentFilters: MovieFilters
   onApplyFilters: (filters: MovieFilters) => void
 }
