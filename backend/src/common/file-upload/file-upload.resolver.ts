@@ -1,6 +1,9 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { FileUploadService } from './file-upload.service';
 
+import { PresignedUrlResponse } from './dto/presigned-url-response.dto';
+import { PresignedUrlInput } from './dto/presigned-url.dto';
+
 @Resolver()
 export class FileUploadResolver {
   constructor(private readonly fileUploadService: FileUploadService) {}
@@ -23,37 +26,4 @@ export class FileUploadResolver {
       fileUrl: this.fileUploadService.getFileUrl(result.key),
     };
   }
-}
-
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { IsString, IsNotEmpty } from 'class-validator';
-
-@InputType()
-export class PresignedUrlInput {
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  folder: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  filename: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  contentType: string;
-}
-
-@ObjectType()
-export class PresignedUrlResponse {
-  @Field()
-  presignedUrl: string;
-
-  @Field()
-  key: string;
-
-  @Field()
-  fileUrl: string;
 }

@@ -49,13 +49,8 @@ export class FileUploadService {
       await this.s3Client.send(new PutObjectCommand(uploadParams));
 
       // Construir a URL completa do arquivo
-      const endpoint = this.configService.get<string>('S3_ENDPOINT');
-      const url = `${endpoint}/${this.bucket}/${key}`;
-
-      this.logger.log(`File uploaded successfully: ${url}`);
-
-      return url;
-    } catch (error: unknown) {
+      return this.getFileUrl(key);
+    } catch (error) {
       if (error instanceof Error) {
         this.logger.error(`Error uploading file: ${error.message}`);
         throw new Error(`Could not upload file: ${error.message}`);
@@ -67,14 +62,11 @@ export class FileUploadService {
 
   async deleteFile(fileUrl: string): Promise<boolean> {
     try {
-      const urlParts = fileUrl.split('/');
-      const bucketIndex = urlParts.findIndex(part => part === this.bucket);
+      const key = this.getKeyFromUrl(fileUrl);
 
-      if (bucketIndex === -1 || bucketIndex >= urlParts.length - 1) {
-        throw new Error(`Invalid file URL: ${fileUrl}`);
+      if (!key) {
+        throw new Error(`Could not extract key from URL: ${fileUrl}`);
       }
-
-      const key = urlParts.slice(bucketIndex + 1).join('/');
 
       const deleteParams = {
         Bucket: this.bucket,
@@ -85,7 +77,7 @@ export class FileUploadService {
       this.logger.log(`File deleted successfully: ${key}`);
 
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       if (error instanceof Error) {
         this.logger.error(`Error deleting file: ${error.message}`);
       } else {
@@ -111,11 +103,16 @@ export class FileUploadService {
         ContentType: contentType,
       });
 
-      const url = await getSignedUrl(this.s3Client, command, { expiresIn });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      const signedUrl = await getSignedUrl(this.s3Client, command, { expiresIn });
 
       this.logger.log(`Generated presigned URL for uploading: ${key}`);
 
-      return { url, key };
+      return {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        url: signedUrl,
+        key,
+      };
     } catch (error) {
       if (error instanceof Error) {
         this.logger.error(`Error generating presigned URL: ${error.message}`);
@@ -129,5 +126,25 @@ export class FileUploadService {
   getFileUrl(key: string): string {
     const endpoint = this.configService.get<string>('S3_ENDPOINT');
     return `${endpoint}/${this.bucket}/${key}`;
+  }
+
+  getKeyFromUrl(url: string): string | null {
+    try {
+      const urlParts = url.split('/');
+      const bucketIndex = urlParts.findIndex(part => part === this.bucket);
+
+      if (bucketIndex === -1 || bucketIndex >= urlParts.length - 1) {
+        return null;
+      }
+
+      return urlParts.slice(bucketIndex + 1).join('/');
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Error extracting key from URL: ${error.message}`);
+      } else {
+        this.logger.error('Unknown error extracting key from URL');
+      }
+      return null;
+    }
   }
 }

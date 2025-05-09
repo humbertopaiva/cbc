@@ -95,6 +95,7 @@ input MoviesPaginationInput {
 type Mutation {
   createMovie(input: CreateMovieInput!): Movie!
   deleteMovie(id: ID!): Boolean!
+  getPresignedUploadUrl(input: PresignedUrlInput!): PresignedUrlResponse!
   login(input: LoginInput!): AuthPayload!
   signUp(input: SignUpInput!): AuthPayload!
   updateMovie(input: UpdateMovieInput!): Movie!
@@ -110,6 +111,18 @@ type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
+}
+
+input PresignedUrlInput {
+  contentType: String!
+  filename: String!
+  folder: String!
+}
+
+type PresignedUrlResponse {
+  fileUrl: String!
+  key: String!
+  presignedUrl: String!
 }
 
 type Query {
