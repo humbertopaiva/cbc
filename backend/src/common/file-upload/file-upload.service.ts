@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-
 import { randomUUID } from 'crypto';
 import { Readable } from 'stream';
 
@@ -19,25 +18,25 @@ export class FileUploadService {
   private bucket: string;
 
   constructor(private configService: ConfigService) {
-    this.bucket = this.configService.get<string>('S3_BUCKET') || 'movies_challenge';
+    this.bucket = this.configService.get<string>('S3_BUCKET', 'cubos-movies');
     this.s3Client = new S3Client({
-      region: this.configService.get<string>('S3_REGION') || 'us-east-1',
+      region: this.configService.get<string>('S3_REGION', 'us-east-1'),
       credentials: {
-        accessKeyId: this.configService.get<string>('S3_ACCESS_KEY') || '',
-        secretAccessKey: this.configService.get<string>('S3_SECRET_KEY') || '',
+        accessKeyId: this.configService.get<string>('S3_ACCESS_KEY', ''),
+        secretAccessKey: this.configService.get<string>('S3_SECRET_KEY', ''),
       },
       endpoint: this.configService.get<string>('S3_ENDPOINT'),
-      forcePathStyle: true, // Flag para o MinIO local
+      forcePathStyle: true, // Necessário para MinIO e outros serviços compatíveis com S3
     });
   }
 
-  async uploadFile(file: Promise<FileUpload>, folder: string = 'uploads'): Promise<string> {
+  async uploadFile(file: Promise<FileUpload>, folder = 'uploads'): Promise<string> {
     try {
       const { createReadStream, filename, mimetype } = await file;
       const extension = filename.split('.').pop() || '';
       const key = `${folder}/${randomUUID()}.${extension}`;
 
-      const fileStream: Readable = createReadStream();
+      const fileStream = createReadStream();
 
       const uploadParams = {
         Bucket: this.bucket,
@@ -48,19 +47,33 @@ export class FileUploadService {
 
       await this.s3Client.send(new PutObjectCommand(uploadParams));
 
+      // Construir a URL completa do arquivo
       const endpoint = this.configService.get<string>('S3_ENDPOINT');
-      return `${endpoint}/${this.bucket}/${key}`;
-    } catch (err) {
-      const error = err as Error;
-      this.logger.error(`Erro ao enviar arquivo: ${error.message}`);
-      throw new Error(`Não foi possível enviar o arquivo: ${error.message}`);
+      const url = `${endpoint}/${this.bucket}/${key}`;
+
+      this.logger.log(`File uploaded successfully: ${url}`);
+
+      return url;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.logger.error(`Error uploading file: ${error.message}`);
+        throw new Error(`Could not upload file: ${error.message}`);
+      }
+      this.logger.error('Unknown error uploading file');
+      throw new Error('Could not upload file due to an unknown error');
     }
   }
 
   async deleteFile(fileUrl: string): Promise<boolean> {
     try {
-      // Extrair o key da URL
-      const key = fileUrl.split('/').slice(-2).join('/');
+      const urlParts = fileUrl.split('/');
+      const bucketIndex = urlParts.findIndex(part => part === this.bucket);
+
+      if (bucketIndex === -1 || bucketIndex >= urlParts.length - 1) {
+        throw new Error(`Invalid file URL: ${fileUrl}`);
+      }
+
+      const key = urlParts.slice(bucketIndex + 1).join('/');
 
       const deleteParams = {
         Bucket: this.bucket,
@@ -68,10 +81,15 @@ export class FileUploadService {
       };
 
       await this.s3Client.send(new DeleteObjectCommand(deleteParams));
+      this.logger.log(`File deleted successfully: ${key}`);
+
       return true;
-    } catch (err) {
-      const error = err as Error;
-      this.logger.error(`Erro ao deletar arquivo: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.logger.error(`Error deleting file: ${error.message}`);
+      } else {
+        this.logger.error('Unknown error deleting file');
+      }
       return false;
     }
   }
