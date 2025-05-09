@@ -1,5 +1,5 @@
 import { Scalar } from '@nestjs/graphql';
-import { GraphQLError, GraphQLScalarType, ValueNode } from 'graphql';
+import { GraphQLError, GraphQLScalarType } from 'graphql';
 
 export const GraphQLUploadScalar = new GraphQLScalarType({
   name: 'Upload',
@@ -10,9 +10,7 @@ export const GraphQLUploadScalar = new GraphQLScalarType({
     }
     return value;
   },
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  parseLiteral: (ast: ValueNode) => {
+  parseLiteral: () => {
     throw new GraphQLError('Upload literal unsupported.');
   },
   serialize: () => {
