@@ -14,6 +14,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
 import { Route as IndexImport } from './routes/index'
+import { Route as MoviesNewImport } from './routes/movies/new'
+import { Route as MoviesEditImport } from './routes/movies/edit'
+import { Route as MoviesIdImport } from './routes/movies/$id'
 
 // Create/Update Routes
 
@@ -32,6 +35,24 @@ const LoginRoute = LoginImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MoviesNewRoute = MoviesNewImport.update({
+  id: '/movies/new',
+  path: '/movies/new',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MoviesEditRoute = MoviesEditImport.update({
+  id: '/movies/edit',
+  path: '/movies/edit',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MoviesIdRoute = MoviesIdImport.update({
+  id: '/movies/$id',
+  path: '/movies/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,6 +81,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterImport
       parentRoute: typeof rootRoute
     }
+    '/movies/$id': {
+      id: '/movies/$id'
+      path: '/movies/$id'
+      fullPath: '/movies/$id'
+      preLoaderRoute: typeof MoviesIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/movies/edit': {
+      id: '/movies/edit'
+      path: '/movies/edit'
+      fullPath: '/movies/edit'
+      preLoaderRoute: typeof MoviesEditImport
+      parentRoute: typeof rootRoute
+    }
+    '/movies/new': {
+      id: '/movies/new'
+      path: '/movies/new'
+      fullPath: '/movies/new'
+      preLoaderRoute: typeof MoviesNewImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -69,12 +111,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/movies/$id': typeof MoviesIdRoute
+  '/movies/edit': typeof MoviesEditRoute
+  '/movies/new': typeof MoviesNewRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/movies/$id': typeof MoviesIdRoute
+  '/movies/edit': typeof MoviesEditRoute
+  '/movies/new': typeof MoviesNewRoute
 }
 
 export interface FileRoutesById {
@@ -82,14 +130,36 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/movies/$id': typeof MoviesIdRoute
+  '/movies/edit': typeof MoviesEditRoute
+  '/movies/new': typeof MoviesNewRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/movies/$id'
+    | '/movies/edit'
+    | '/movies/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register'
-  id: '__root__' | '/' | '/login' | '/register'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/movies/$id'
+    | '/movies/edit'
+    | '/movies/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/register'
+    | '/movies/$id'
+    | '/movies/edit'
+    | '/movies/new'
   fileRoutesById: FileRoutesById
 }
 
@@ -97,12 +167,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  MoviesIdRoute: typeof MoviesIdRoute
+  MoviesEditRoute: typeof MoviesEditRoute
+  MoviesNewRoute: typeof MoviesNewRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  MoviesIdRoute: MoviesIdRoute,
+  MoviesEditRoute: MoviesEditRoute,
+  MoviesNewRoute: MoviesNewRoute,
 }
 
 export const routeTree = rootRoute
@@ -117,7 +193,10 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/login",
-        "/register"
+        "/register",
+        "/movies/$id",
+        "/movies/edit",
+        "/movies/new"
       ]
     },
     "/": {
@@ -128,6 +207,15 @@ export const routeTree = rootRoute
     },
     "/register": {
       "filePath": "register.tsx"
+    },
+    "/movies/$id": {
+      "filePath": "movies/$id.tsx"
+    },
+    "/movies/edit": {
+      "filePath": "movies/edit.tsx"
+    },
+    "/movies/new": {
+      "filePath": "movies/new.tsx"
     }
   }
 }

@@ -1,92 +1,104 @@
 import { useState } from 'react'
-import { useQuery } from '@apollo/client'
-import { GET_GENRES, GET_MOVIES } from '../graphql/movies.graphql'
+import { toast } from 'react-toastify'
+import { getGenresUseCase, getMoviesUseCase } from '../usecases'
 import type { Genre, MovieConnection, MovieFilters } from '../model/movie.model'
 
 export class MoviesListViewModel {
-  setupMoviesQuery(filters?: MovieFilters, first: number = 10, after?: string) {
-    const { data, loading, error, fetchMore, refetch } = useQuery<
-      { movies: MovieConnection },
-      { filters?: MovieFilters; pagination?: { first: number; after?: string } }
-    >(GET_MOVIES, {
-      variables: {
-        filters,
-        pagination: {
-          first,
-          after,
-        },
-      },
-      fetchPolicy: 'cache-and-network',
-      notifyOnNetworkStatusChange: true,
-    })
-
-    return {
-      movies: data?.movies,
-      loading,
-      error,
-      loadMore: (afterCursor: string) => {
-        fetchMore({
-          variables: {
-            pagination: {
-              first,
-              after: afterCursor,
-            },
-          },
-          updateQuery: (prev, { fetchMoreResult }) => {
-            return {
-              movies: {
-                ...fetchMoreResult.movies,
-                edges: [...prev.movies.edges, ...fetchMoreResult.movies.edges],
-              },
-            }
-          },
-        })
-      },
-      refetch,
+  async getMovies(
+    filters?: MovieFilters,
+    first: number = 10,
+    after?: string,
+  ): Promise<MovieConnection | null> {
+    try {
+      return await getMoviesUseCase.execute(filters, first, after)
+    } catch (error) {
+      console.error('Error fetching movies:', error)
+      toast.error('Erro ao carregar filmes')
+      return null
     }
   }
 
-  setupGenresQuery() {
-    const { data, loading } = useQuery<{ genres: Array<Genre> }>(GET_GENRES)
-    return {
-      genres: data?.genres || [],
-      loading,
+  async getGenres(): Promise<Array<Genre>> {
+    try {
+      return await getGenresUseCase.execute()
+    } catch (error) {
+      console.error('Error fetching genres:', error)
+      toast.error('Erro ao carregar gêneros')
+      return []
     }
   }
 }
 
 export function useMoviesListViewModel() {
+  const [movies, setMovies] = useState<MovieConnection | null>(null)
+  const [genres, setGenres] = useState<Array<Genre>>([])
   const [filters, setFilters] = useState<MovieFilters>({})
+  const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const viewModel = new MoviesListViewModel()
 
-  const { movies, loading, error, loadMore, refetch } =
-    viewModel.setupMoviesQuery(filters)
-  const { genres, loading: loadingGenres } = viewModel.setupGenresQuery()
+  const fetchMovies = async (
+    newFilters?: MovieFilters,
+    resetList = true,
+  ): Promise<void> => {
+    try {
+      if (resetList) setLoading(true)
+      else setLoadingMore(true)
+
+      const filtersToUse = newFilters || filters
+      const currentAfter = resetList ? undefined : movies?.pageInfo.endCursor
+
+      const result = await viewModel.getMovies(filtersToUse, 10, currentAfter)
+
+      if (result) {
+        if (resetList) {
+          setMovies(result)
+        } else {
+          setMovies({
+            ...result,
+            edges: [...(movies?.edges || []), ...result.edges],
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error in fetchMovies:', error)
+    } finally {
+      if (resetList) setLoading(false)
+      else setLoadingMore(false)
+    }
+  }
+
+  const fetchGenres = async (): Promise<void> => {
+    const result = await viewModel.getGenres()
+    setGenres(result)
+  }
 
   const handleFilterChange = (newFilters: MovieFilters) => {
     setFilters(newFilters)
-    refetch({
-      filters: newFilters,
-      pagination: {
-        first: 10,
-      },
-    })
+    fetchMovies(newFilters)
   }
 
   const handleLoadMore = () => {
-    if (movies?.pageInfo.endCursor) {
-      loadMore(movies.pageInfo.endCursor)
+    if (movies?.pageInfo.hasNextPage && !loadingMore) {
+      fetchMovies(filters, false)
     }
+  }
+
+  const initialize = async () => {
+    setLoading(true)
+    await Promise.all([fetchMovies(), fetchGenres()])
+    setLoading(false)
   }
 
   return {
     movies,
     genres,
     loading,
-    loadingGenres,
-    error,
+    loadingMore,
     filters,
+    initialize,
     handleFilterChange,
     handleLoadMore,
+    refetch: () => fetchMovies(),
   }
 }

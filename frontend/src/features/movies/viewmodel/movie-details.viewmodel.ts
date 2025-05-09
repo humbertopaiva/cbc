@@ -1,82 +1,63 @@
-import { useMutation, useQuery } from '@apollo/client'
+import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'react-toastify'
-import { DELETE_MOVIE, GET_MOVIE } from '../graphql/movies.graphql'
+import { deleteMovieUseCase, getMovieUseCase } from '../usecases'
 import type { Movie } from '../model/movie.model'
 
 export class MovieDetailsViewModel {
-  setupMovieQuery(id: string) {
-    const { data, loading, error } = useQuery<{ movie: Movie }, { id: string }>(
-      GET_MOVIE,
-      {
-        variables: { id },
-        fetchPolicy: 'cache-and-network',
-      },
-    )
-
-    return {
-      movie: data?.movie,
-      loading,
-      error,
+  async getMovie(id: string): Promise<Movie | null> {
+    try {
+      return await getMovieUseCase.execute(id)
+    } catch (error) {
+      console.error('Error fetching movie:', error)
+      toast.error('Erro ao carregar detalhes do filme')
+      return null
     }
   }
 
-  setupDeleteMutation(navigate: ReturnType<typeof useNavigate>) {
-    const [deleteMovie, { loading }] = useMutation<
-      { deleteMovie: boolean },
-      { id: string }
-    >(DELETE_MOVIE, {
-      onCompleted: () => {
-        toast.success('Filme excluído com sucesso!')
-        navigate({ to: '/' })
-      },
-      onError: (error) => {
-        console.error('Erro ao excluir filme:', error)
-        toast.error('Erro ao excluir filme. Tente novamente.')
-      },
-      update: (cache, { data }) => {
-        if (data?.deleteMovie) {
-          cache.modify({
-            fields: {
-              movies: (existingMovies = {}, { readField }) => {
-                return {
-                  ...existingMovies,
-                  edges: existingMovies.edges.filter(
-                    (edge: any) => readField('id', edge.node) !== id,
-                  ),
-                }
-              },
-            },
-          })
-        }
-      },
-    })
-
-    return {
-      deleteMovie,
-      isDeleting: loading,
+  async deleteMovie(id: string): Promise<boolean> {
+    try {
+      return await deleteMovieUseCase.execute(id)
+    } catch (error) {
+      console.error('Error deleting movie:', error)
+      toast.error('Erro ao excluir o filme')
+      return false
     }
   }
 }
 
 export function useMovieDetailsViewModel(id: string) {
+  const [movie, setMovie] = useState<Movie | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [isDeleting, setIsDeleting] = useState(false)
   const navigate = useNavigate()
   const viewModel = new MovieDetailsViewModel()
 
-  const { movie, loading, error } = viewModel.setupMovieQuery(id)
-  const { deleteMovie, isDeleting } = viewModel.setupDeleteMutation(navigate)
+  const fetchMovie = async (): Promise<void> => {
+    setLoading(true)
+    const result = await viewModel.getMovie(id)
+    setMovie(result)
+    setLoading(false)
+  }
 
-  const handleDelete = () => {
+  const handleDelete = async (): Promise<void> => {
     if (window.confirm('Tem certeza que deseja excluir este filme?')) {
-      deleteMovie({ variables: { id } })
+      setIsDeleting(true)
+      const success = await viewModel.deleteMovie(id)
+      setIsDeleting(false)
+
+      if (success) {
+        toast.success('Filme excluído com sucesso!')
+        navigate({ to: '/' })
+      }
     }
   }
 
   return {
     movie,
     loading,
-    error,
     isDeleting,
+    fetchMovie,
     handleDelete,
   }
 }
