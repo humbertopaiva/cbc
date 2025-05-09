@@ -114,7 +114,7 @@ type PageInfo {
 }
 
 input PresignedUrlInput {
-  contentType: String!
+  contentType: String
   filename: String!
   folder: String!
 }
