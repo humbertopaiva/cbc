@@ -9,20 +9,37 @@ interface SendReleaseNotificationParams {
   releaseDate: Date;
 }
 
+// Definir interface para o resultado do envio de email
+interface SendMailResult {
+  messageId: string;
+  envelope: {
+    from: string;
+    to: string[];
+  };
+  accepted: string[];
+  rejected: string[];
+  pending: string[];
+  response: string;
+}
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
+    const host = this.configService.get<string>('MAIL_HOST');
+    const port = this.configService.get<number>('MAIL_PORT');
+    const user = this.configService.get<string>('MAIL_USER');
+    const pass = this.configService.get<string>('MAIL_PASS');
+
+    this.logger.log(`Configuring email service with host ${host}:${port}`);
+
     this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>('MAIL_HOST'),
-      port: this.configService.get<number>('MAIL_PORT'),
+      host,
+      port,
       secure: false, // true para 465, false para outras portas
-      auth: {
-        user: this.configService.get<string>('MAIL_USER') || '',
-        pass: this.configService.get<string>('MAIL_PASS') || '',
-      },
+      auth: user && pass ? { user, pass } : undefined,
     });
   }
 
@@ -58,20 +75,26 @@ export class EmailService {
         </div>
       `;
 
-      await this.transporter.sendMail({
+      const mailOptions = {
         from: `"CUBOS Movies" <${this.configService.get<string>('MAIL_FROM') || 'noreply@cubosmovies.com'}>`,
         to,
         subject,
         html,
-      });
+      };
+
+      // Usar a interface SendMailResult para tipar corretamente o resultado
+      const info = (await this.transporter.sendMail(mailOptions)) as SendMailResult;
 
       this.logger.log(
-        `Email·de·notificação·de·lançamento·enviado·para·${to}·for·movie·"${movieTitle}"`,
+        `Release notification email sent to ${to} for movie "${movieTitle}": ${info.messageId}`,
       );
-    } catch (err) {
-      const error = err as Error;
-      this.logger.error(`Falha ao enviar email de notificação: ${error.message}`);
-      throw new Error(`O email de notificação nao pôde ser enviado: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.logger.error(`Failed to send release notification email: ${error.message}`);
+        throw new Error(`Could not send notification email: ${error.message}`);
+      }
+      this.logger.error('Unknown error sending notification email');
+      throw new Error('Could not send notification email due to an unknown error');
     }
   }
 }
