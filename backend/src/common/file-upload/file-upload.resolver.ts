@@ -1,6 +1,5 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { FileUploadService } from './file-upload.service';
-
 import { PresignedUrlResponse } from './dto/presigned-url-response.dto';
 import { PresignedUrlInput } from './dto/presigned-url.dto';
 
@@ -12,14 +11,12 @@ export class FileUploadResolver {
   async getPresignedUploadUrl(
     @Args('input') input: PresignedUrlInput,
   ): Promise<PresignedUrlResponse> {
-    const { folder, filename, contentType } = input;
+    const { folder, filename } = input;
 
-    const result = await this.fileUploadService.getPresignedUploadUrl(
-      folder,
-      filename,
-      contentType,
-    );
+    // Obter URL pré-assinada do serviço de upload
+    const result = await this.fileUploadService.getPresignedUploadUrl(folder, filename);
 
+    // Construir a resposta com URL pré-assinada, chave e URL final do arquivo
     return {
       presignedUrl: result.url,
       key: result.key,

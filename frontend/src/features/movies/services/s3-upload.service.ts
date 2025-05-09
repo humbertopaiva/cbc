@@ -22,7 +22,6 @@ interface PresignedUrlResponse {
 interface PresignedUrlInput {
   folder: string
   filename: string
-  contentType: string
 }
 
 class S3UploadService {
@@ -31,13 +30,19 @@ class S3UploadService {
     folder: string,
   ): Promise<{ presignedUrl: string; fileUrl: string }> {
     try {
-      const { data } = await apolloClient.mutate<PresignedUrlResponse>({
+      console.log(`Getting presigned URL for ${file.name} in folder ${folder}`)
+
+      const { data } = await apolloClient.mutate<
+        {
+          getPresignedUploadUrl: PresignedUrlResponse['getPresignedUploadUrl']
+        },
+        { input: PresignedUrlInput }
+      >({
         mutation: GET_PRESIGNED_URL,
         variables: {
           input: {
             folder,
             filename: file.name,
-            contentType: file.type,
           },
         },
       })
@@ -45,6 +50,8 @@ class S3UploadService {
       if (!data) {
         throw new Error('Failed to get presigned URL')
       }
+
+      console.log('Got presigned URL:', data.getPresignedUploadUrl.presignedUrl)
 
       return {
         presignedUrl: data.getPresignedUploadUrl.presignedUrl,
@@ -61,19 +68,24 @@ class S3UploadService {
     presignedUrl: string,
   ): Promise<void> {
     try {
+      console.log(
+        `Uploading file ${file.name} (${file.size} bytes) to ${presignedUrl}`,
+      )
+
       const response = await fetch(presignedUrl, {
         method: 'PUT',
         body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
       })
 
       if (!response.ok) {
+        const responseText = await response.text()
+        console.error('Upload failed. Response:', responseText)
         throw new Error(
           `Upload failed: ${response.status} ${response.statusText}`,
         )
       }
+
+      console.log('Upload successful!')
     } catch (error) {
       console.error('Error uploading file:', error)
       throw error
@@ -87,6 +99,8 @@ class S3UploadService {
         file,
         folder,
       )
+
+      console.log('Presigned URL:', presignedUrl) // <-- Adicione esta linha
 
       // Fazer o upload com fetch
       await this.uploadFileWithPresignedUrl(file, presignedUrl)

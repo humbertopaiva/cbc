@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 @InputType()
 export class PresignedUrlInput {
@@ -13,8 +13,8 @@ export class PresignedUrlInput {
   @IsNotEmpty()
   filename: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
-  @IsNotEmpty()
-  contentType: string;
+  @IsOptional()
+  contentType?: string;
 }
