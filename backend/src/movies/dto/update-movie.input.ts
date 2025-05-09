@@ -8,8 +8,8 @@ import {
   Max,
   IsDateString,
   IsArray,
+  IsUrl,
 } from 'class-validator';
-import { FileUpload, GraphQLUpload } from 'graphql-upload/GraphQLUpload.mjs';
 
 @InputType()
 export class UpdateMovieInput {
@@ -55,13 +55,17 @@ export class UpdateMovieInput {
   @IsOptional()
   genreIds?: string[];
 
-  @Field(() => GraphQLUpload, { nullable: true })
+  @Field({ nullable: true })
+  @IsString()
   @IsOptional()
-  imageFile?: Promise<FileUpload>;
+  @IsUrl({}, { message: 'A URL da imagem deve ser válida' })
+  imageUrl?: string;
 
-  @Field(() => GraphQLUpload, { nullable: true })
+  @Field({ nullable: true })
+  @IsString()
   @IsOptional()
-  backdropFile?: Promise<FileUpload>;
+  @IsUrl({}, { message: 'A URL do backdrop deve ser válida' })
+  backdropUrl?: string;
 
   @Field(() => Float, { nullable: true })
   @IsNumber()

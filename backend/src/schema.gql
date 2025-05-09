@@ -1,0 +1,154 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+input CreateMovieInput {
+  backdropUrl: String
+  budget: Float
+  description: String
+  duration: Int
+  genreIds: [ID!]
+  imageUrl: String
+  originalTitle: String
+  rating: Float
+  releaseDate: String
+  title: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Genre {
+  id: ID!
+  movies: [Movie!]!
+  name: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Movie {
+  backdropUrl: String
+  budget: Float
+  createdAt: DateTime!
+  createdBy: User!
+  description: String
+  duration: Int
+  genres: [Genre!]!
+  id: ID!
+  imageUrl: String
+  originalTitle: String
+  rating: Float
+  releaseDate: DateTime
+  title: String!
+  updatedAt: DateTime!
+}
+
+type MovieConnection {
+  edges: [MovieEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type MovieEdge {
+  cursor: String!
+  node: Movie!
+}
+
+input MovieFiltersInput {
+  genreIds: [ID!]
+  maxDuration: Int
+  minDuration: Int
+  releaseDateFrom: String
+  releaseDateTo: String
+  search: String
+}
+
+input MovieOrderByInput {
+  direction: OrderDirection!
+  field: MovieOrderField!
+}
+
+enum MovieOrderField {
+  CREATED_AT
+  DURATION
+  RATING
+  RELEASE_DATE
+  TITLE
+}
+
+input MoviesPaginationInput {
+  after: String
+  first: Int
+  orderBy: MovieOrderByInput
+}
+
+type Mutation {
+  createMovie(input: CreateMovieInput!): Movie!
+  deleteMovie(id: ID!): Boolean!
+  login(input: LoginInput!): AuthPayload!
+  signUp(input: SignUpInput!): AuthPayload!
+  updateMovie(input: UpdateMovieInput!): Movie!
+}
+
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type Query {
+  genre(id: ID!): Genre!
+  genres: [Genre!]!
+  me: User!
+  movie(id: ID!): Movie!
+  movies(filters: MovieFiltersInput, pagination: MoviesPaginationInput): MovieConnection!
+}
+
+input SignUpInput {
+  email: String!
+  name: String!
+  password: String!
+  passwordConfirmation: String!
+}
+
+input UpdateMovieInput {
+  backdropUrl: String
+  budget: Float
+  description: String
+  duration: Int
+  genreIds: [ID!]
+  id: ID!
+  imageUrl: String
+  originalTitle: String
+  rating: Float
+  releaseDate: String
+  title: String
+}
+
+"""File upload scalar type"""
+scalar Upload
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  movies: [Movie!]
+  name: String!
+  updatedAt: DateTime!
+}

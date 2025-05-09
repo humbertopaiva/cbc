@@ -1,6 +1,7 @@
 import { useMutation } from '@apollo/client'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'react-toastify'
 import { SIGN_UP } from '../graphql/auth.graphql'
 import { useAuth } from '../context/auth.context'
 import { signupSchema } from '../schemas/auth.schema'
@@ -13,6 +14,12 @@ export class SignupViewModel {
   setupForm() {
     return useForm<SignupFormData>({
       resolver: zodResolver(signupSchema),
+      defaultValues: {
+        name: '',
+        email: '',
+        password: '',
+        passwordConfirmation: '',
+      },
     })
   }
 
@@ -21,23 +28,18 @@ export class SignupViewModel {
       {
         signUp: {
           token: string
-          user: { id: string; name: string; email: string }
+          user: User
         }
       },
       { input: SignUpInput }
     >(SIGN_UP, {
       onCompleted: (data) => {
-        if (data.signUp) {
-          const user: User = {
-            id: data.signUp.user.id,
-            name: data.signUp.user.name,
-            email: data.signUp.user.email,
-          }
-          this.authContext.login(data.signUp.token, user)
-        }
+        this.authContext.login(data.signUp.token, data.signUp.user)
+        toast.success('Cadastro realizado com sucesso!')
       },
       onError: (error) => {
         console.error('Signup error:', error)
+        toast.error('Erro ao realizar cadastro.')
         return error
       },
     })
@@ -48,6 +50,10 @@ export class SignupViewModel {
   handleSignupError(error: Error, setError: any) {
     if (error.message.includes('Email already in use')) {
       setError('email', { message: 'Este email já está em uso' })
+    } else if (error.message.includes('Passwords do not match')) {
+      setError('passwordConfirmation', { message: 'As senhas não coincidem' })
+    } else {
+      toast.error('Ocorreu um erro durante o cadastro. Tente novamente.')
     }
   }
 }
@@ -61,6 +67,7 @@ export function useSignupViewModel() {
     handleSubmit,
     formState: { errors },
     setError,
+    reset,
   } = viewModel.setupForm()
 
   const { signupMutation, loading } = viewModel.setupMutation()
@@ -75,7 +82,9 @@ export function useSignupViewModel() {
           passwordConfirmation: data.passwordConfirmation,
         },
       },
-    }).catch((error) => viewModel.handleSignupError(error, setError))
+    }).catch((error) => {
+      viewModel.handleSignupError(error, setError)
+    })
   }
 
   return {
@@ -84,5 +93,6 @@ export function useSignupViewModel() {
     onSubmit,
     errors,
     isLoading: loading,
+    reset,
   }
 }

@@ -2,12 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
-import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
 
   app.enableCors({
@@ -30,7 +28,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = configService.get<string | number>('PORT') || 4000;
+  const port = 4000;
   // Converter para número se for string
   const portNumber = typeof port === 'string' ? parseInt(port, 10) : port;
 

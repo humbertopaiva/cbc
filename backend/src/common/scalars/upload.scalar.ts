@@ -1,15 +1,10 @@
 import { Scalar } from '@nestjs/graphql';
 import { GraphQLError, GraphQLScalarType } from 'graphql';
 
-export const GraphQLUploadScalar = new GraphQLScalarType({
+export const GraphQLUpload = new GraphQLScalarType({
   name: 'Upload',
   description: 'The `Upload` scalar type represents a file upload.',
-  parseValue: value => {
-    if (value === null || value === undefined) {
-      throw new GraphQLError('Upload value cannot be null or undefined');
-    }
-    return value;
-  },
+  parseValue: value => value,
   parseLiteral: () => {
     throw new GraphQLError('Upload literal unsupported.');
   },
@@ -23,14 +18,14 @@ export class UploadScalar {
   description = 'File upload scalar type';
 
   parseValue(value: any) {
-    return GraphQLUploadScalar.parseValue(value);
+    return GraphQLUpload.parseValue(value);
   }
 
   parseLiteral(ast: any) {
-    return GraphQLUploadScalar.parseLiteral(ast);
+    return GraphQLUpload.parseLiteral(ast);
   }
 
   serialize(value: any) {
-    return GraphQLUploadScalar.serialize(value);
+    return GraphQLUpload.serialize(value);
   }
 }
