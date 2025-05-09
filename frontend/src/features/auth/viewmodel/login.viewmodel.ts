@@ -1,6 +1,7 @@
 import { useMutation } from '@apollo/client'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'react-toastify'
 import { LOGIN } from '../graphql/auth.graphql'
 import { useAuth } from '../context/auth.context'
 import { loginSchema } from '../schemas/auth.schema'
@@ -13,6 +14,10 @@ export class LoginViewModel {
   setupForm() {
     return useForm<LoginFormData>({
       resolver: zodResolver(loginSchema),
+      defaultValues: {
+        email: '',
+        password: '',
+      },
     })
   }
 
@@ -21,23 +26,18 @@ export class LoginViewModel {
       {
         login: {
           token: string
-          user: { id: string; name: string; email: string }
+          user: User
         }
       },
       { input: LoginInput }
     >(LOGIN, {
       onCompleted: (data) => {
-        if (data.login) {
-          const user: User = {
-            id: data.login.user.id,
-            name: data.login.user.name,
-            email: data.login.user.email,
-          }
-          this.authContext.login(data.login.token, user)
-        }
+        this.authContext.login(data.login.token, data.login.user)
+        toast.success('Login realizado com sucesso!')
       },
       onError: (error) => {
         console.error('Login error:', error)
+        toast.error('Erro ao fazer login. Verifique suas credenciais.')
         return error
       },
     })
@@ -46,9 +46,14 @@ export class LoginViewModel {
   }
 
   handleLoginError(error: Error, setError: any) {
-    if (error.message.includes('credentials')) {
+    if (
+      error.message.includes('credentials') ||
+      error.message.includes('Invalid')
+    ) {
       setError('email', { message: 'Email ou senha inválidos' })
       setError('password', { message: 'Email ou senha inválidos' })
+    } else {
+      toast.error('Ocorreu um erro durante o login. Tente novamente.')
     }
   }
 }
@@ -62,6 +67,7 @@ export function useLoginViewModel() {
     handleSubmit,
     formState: { errors },
     setError,
+    reset,
   } = viewModel.setupForm()
 
   const { loginMutation, loading } = viewModel.setupMutation()
@@ -74,7 +80,9 @@ export function useLoginViewModel() {
           password: data.password,
         },
       },
-    }).catch((error) => viewModel.handleLoginError(error, setError))
+    }).catch((error) => {
+      viewModel.handleLoginError(error, setError)
+    })
   }
 
   return {
@@ -83,5 +91,6 @@ export function useLoginViewModel() {
     onSubmit,
     errors,
     isLoading: loading,
+    reset,
   }
 }

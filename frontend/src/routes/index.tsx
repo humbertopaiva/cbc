@@ -1,39 +1,36 @@
 import { createFileRoute } from '@tanstack/react-router'
-import logo from '../logo.svg'
+import { AuthGuard } from '@/features/auth/guards/auth.guard'
+import { ThemeToggle } from '@/features/theme/components/theme-toggle'
+import { useAuth } from '@/features/auth/context/auth.context'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: HomePage,
 })
 
-function App() {
+function HomePage() {
+  const { user, logout } = useAuth()
+
   return (
-    <div className="text-center">
-      <header className="min-h-screen flex flex-col items-center justify-center bg-[#282c34] text-white text-[calc(10px+2vmin)]">
-        <img
-          src={logo}
-          className="h-[40vmin] pointer-events-none animate-[spin_20s_linear_infinite]"
-          alt="logo"
-        />
-        <p>
-          Edit <code>src/routes/index.tsx</code> and save to reload.
-        </p>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://tanstack.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn TanStack
-        </a>
-      </header>
-    </div>
+    <AuthGuard>
+      <div className="min-h-screen bg-background">
+        <header className="bg-card shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 className="text-xl font-bold">CUBOS Movies</h1>
+            <div className="flex items-center space-x-4">
+              <span>Olá, {user?.name}</span>
+              <ThemeToggle />
+              <Button variant="outline" onClick={logout}>
+                Sair
+              </Button>
+            </div>
+          </div>
+        </header>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h2 className="text-2xl font-bold mb-4">Filmes</h2>
+          <p>Implemente a visualização de filmes aqui.</p>
+        </main>
+      </div>
+    </AuthGuard>
   )
 }

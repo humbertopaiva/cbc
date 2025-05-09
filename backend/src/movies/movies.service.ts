@@ -151,25 +151,10 @@ export class MoviesService {
         releaseDate,
         duration,
         genreIds,
-        imageFile,
-        backdropFile,
+        imageUrl,
+        backdropUrl,
         rating,
       } = createMovieInput;
-
-      let imageUrl: string | undefined = undefined;
-      let backdropUrl: string | undefined = undefined;
-
-      // Processar uploads de imagens
-      if (imageFile) {
-        imageUrl = await this.fileUploadService.uploadFile(imageFile.promise, 'movies/posters');
-      }
-
-      if (backdropFile) {
-        backdropUrl = await this.fileUploadService.uploadFile(
-          backdropFile.promise,
-          'movies/backdrops',
-        );
-      }
 
       // Buscar gêneros
       let genres: Genre[] = [];
@@ -177,7 +162,7 @@ export class MoviesService {
         genres = await this.genresService.findByIds(genreIds);
       }
 
-      // Criar nova movie usando entityLike object
+      // Criar nova movie
       const movie = new Movie();
       movie.title = title;
       movie.originalTitle = originalTitle;
@@ -185,8 +170,8 @@ export class MoviesService {
       movie.budget = budget;
       movie.releaseDate = releaseDate ? new Date(releaseDate) : undefined;
       movie.duration = duration;
-      movie.imageUrl = imageUrl;
-      movie.backdropUrl = backdropUrl;
+      movie.imageUrl = imageUrl || 'https://placehold.co/600x400?text=No+Image';
+      movie.backdropUrl = backdropUrl || 'https://placehold.co/1200x600?text=No+Backdrop';
       movie.rating = rating;
       movie.createdBy = user;
       movie.genres = genres;
@@ -210,8 +195,8 @@ export class MoviesService {
         releaseDate,
         duration,
         genreIds,
-        imageFile,
-        backdropFile,
+        imageUrl,
+        backdropUrl,
         rating,
       } = updateMovieInput;
 
@@ -221,26 +206,7 @@ export class MoviesService {
         throw new ForbiddenException('You are not authorized to update this movie');
       }
 
-      let imageUrl = movie.imageUrl;
-      let backdropUrl = movie.backdropUrl;
-
-      // Handle image file update
-      if (imageFile) {
-        if (movie.imageUrl) {
-          await this.fileUploadService.deleteFile(movie.imageUrl);
-        }
-        imageUrl = await this.fileUploadService.uploadFile(imageFile, 'movies/posters');
-      }
-
-      // Handle backdrop file update
-      if (backdropFile) {
-        if (movie.backdropUrl) {
-          await this.fileUploadService.deleteFile(movie.backdropUrl);
-        }
-        backdropUrl = await this.fileUploadService.uploadFile(backdropFile, 'movies/backdrops');
-      }
-
-      // Fetch genres if genreIds are provided, otherwise keep existing genres
+      // Buscar gêneros se genreIds são fornecidos, caso contrário manter os gêneros existentes
       let genres = movie.genres;
       if (genreIds?.length) {
         genres = await this.genresService.findByIds(genreIds);
@@ -273,13 +239,13 @@ export class MoviesService {
       throw new ForbiddenException('You are not authorized to delete this movie');
     }
 
-    if (movie.imageUrl) {
-      await this.fileUploadService.deleteFile(movie.imageUrl);
-    }
-
-    if (movie.backdropUrl) {
-      await this.fileUploadService.deleteFile(movie.backdropUrl);
-    }
+    // Simplificamos a exclusão de arquivos por enquanto
+    // if (movie.imageUrl) {
+    //   await this.fileUploadService.deleteFile(movie.imageUrl);
+    // }
+    // if (movie.backdropUrl) {
+    //   await this.fileUploadService.deleteFile(movie.backdropUrl);
+    // }
 
     await this.moviesRepository.remove(movie);
     return true;
