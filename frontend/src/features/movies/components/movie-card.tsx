@@ -1,9 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { FiYoutube } from 'react-icons/fi'
-import { MovieStatus } from '../model/movie.model'
+import { RatingCircle } from './rating-circle'
 import type { Movie } from '../model/movie.model'
 
 interface MovieCardProps {
@@ -11,8 +10,14 @@ interface MovieCardProps {
 }
 
 export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+  const [isHovering, setIsHovering] = useState(false)
+
   return (
-    <div className="bg-card shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02]">
+    <div
+      className="bg-card shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.02]"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       <div className="relative h-48 overflow-hidden">
         <img
           src={movie.imageUrl || 'https://placehold.co/600x400?text=No+Image'}
@@ -20,26 +25,17 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
           className="w-full h-full object-cover"
         />
         {movie.rating && (
-          <span className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-sm font-bold">
-            {movie.rating}/10
-          </span>
-        )}
-        {movie.trailerUrl && (
-          <a
-            href={movie.trailerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute bottom-2 right-2 bg-red-600 text-white p-2 rounded-full"
-            title="Assistir trailer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <FiYoutube className="w-4 h-4" />
-          </a>
-        )}
-        {movie.status === MovieStatus.IN_PRODUCTION && (
-          <span className="absolute bottom-2 left-2 bg-amber-500 text-white px-2 py-1 rounded-full text-xs">
-            Em Produção
-          </span>
+          <>
+            {isHovering ? (
+              <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm p-1 rounded-full">
+                <RatingCircle rating={movie.rating} size={40} />
+              </div>
+            ) : (
+              <span className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-sm font-bold">
+                {movie.rating}/10
+              </span>
+            )}
+          </>
         )}
       </div>
       <div className="p-4">
@@ -47,11 +43,6 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
         {movie.originalTitle && (
           <p className="text-muted-foreground text-sm italic mb-2 line-clamp-1">
             {movie.originalTitle}
-          </p>
-        )}
-        {movie.language && (
-          <p className="text-xs mb-2">
-            <span className="font-medium">Idioma:</span> {movie.language}
           </p>
         )}
         {movie.releaseDate && (
