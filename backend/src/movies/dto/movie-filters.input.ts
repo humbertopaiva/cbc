@@ -7,7 +7,9 @@ import {
   IsDateString,
   IsArray,
   Min,
+  IsEnum,
 } from 'class-validator';
+import { MovieStatus } from '../entities/movie.entity';
 
 @InputType()
 export class MovieFiltersInput {
@@ -37,6 +39,16 @@ export class MovieFiltersInput {
   @IsDateString()
   @IsOptional()
   releaseDateTo?: string;
+
+  @Field({ nullable: true })
+  @IsEnum(MovieStatus)
+  @IsOptional()
+  status?: MovieStatus;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  language?: string;
 
   @Field(() => [ID], { nullable: true })
   @IsArray()

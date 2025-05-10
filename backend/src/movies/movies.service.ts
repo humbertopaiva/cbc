@@ -14,6 +14,7 @@ import { GenresService } from '../genres/genres.service';
 import { User } from '../users/entities/user.entity';
 import { MovieOrderField, OrderDirection } from './dto/movie-order-by.input';
 import { Genre } from '../genres/entities/genre.entity';
+import { NotificationService } from './notification.service';
 
 @Injectable()
 export class MoviesService {
@@ -24,6 +25,7 @@ export class MoviesService {
     private readonly moviesRepository: Repository<Movie>,
     private readonly fileUploadService: FileUploadService,
     private readonly genresService: GenresService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async findAll(
@@ -70,6 +72,18 @@ export class MoviesService {
       if (filters.genreIds?.length) {
         queryBuilder.andWhere('genre.id IN (:...genreIds)', {
           genreIds: filters.genreIds,
+        });
+      }
+
+      if (filters.status) {
+        queryBuilder.andWhere('movie.status = :status', {
+          status: filters.status,
+        });
+      }
+
+      if (filters.language) {
+        queryBuilder.andWhere('movie.language ILIKE :language', {
+          language: `%${filters.language}%`,
         });
       }
     }
@@ -197,9 +211,18 @@ export class MoviesService {
       movie.backdropKey = backdropKey;
       movie.rating = rating;
       movie.createdBy = user;
+      movie.tagline = tagline;
       movie.genres = genres;
 
-      return await this.moviesRepository.save(movie);
+      // Salvar o filme
+      const savedMovie = await this.moviesRepository.save(movie);
+
+      // Agendar notificação se a data de lançamento estiver no futuro
+      if (savedMovie.releaseDate) {
+        await this.notificationService.scheduleReleaseNotification(savedMovie);
+      }
+
+      return savedMovie;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to create movie: ${message}`);
@@ -278,6 +301,10 @@ export class MoviesService {
         genres = await this.genresService.findByIds(genreIds);
       }
 
+      // Armazenar a data de lançamento antiga para comparação
+      const oldReleaseDate = movie.releaseDate;
+      const newReleaseDate = releaseDate ? new Date(releaseDate) : oldReleaseDate;
+
       // Atualizar apenas os campos fornecidos
       if (title !== undefined) movie.title = title;
       if (originalTitle !== undefined) movie.originalTitle = originalTitle;
@@ -297,9 +324,23 @@ export class MoviesService {
       if (backdropUrl !== undefined) movie.backdropUrl = backdropUrl;
       if (backdropKey !== undefined) movie.backdropKey = backdropKey;
       if (rating !== undefined) movie.rating = rating;
+      if (tagline !== undefined) movie.tagline = tagline;
       if (genres) movie.genres = genres;
 
-      return await this.moviesRepository.save(movie);
+      const updatedMovie = await this.moviesRepository.save(movie);
+
+      // Verificar se a data de lançamento foi alterada e se é no futuro
+      const now = new Date();
+      if (
+        newReleaseDate &&
+        (!oldReleaseDate || newReleaseDate.getTime() !== oldReleaseDate.getTime()) &&
+        newReleaseDate > now
+      ) {
+        // Se a data foi alterada, agendar uma nova notificação
+        await this.notificationService.scheduleReleaseNotification(updatedMovie);
+      }
+
+      return updatedMovie;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to update movie: ${message}`);
@@ -320,7 +361,7 @@ export class MoviesService {
         await this.fileUploadService.deleteFile(movie.imageKey, user);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        this.logger.error(`Failed to update movie: ${message}`);
+        this.logger.error(`Failed to delete movie image: ${message}`);
         throw error;
       }
     }
@@ -330,7 +371,7 @@ export class MoviesService {
         await this.fileUploadService.deleteFile(movie.backdropKey, user);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        this.logger.error(`Failed to update movie: ${message}`);
+        this.logger.error(`Failed to delete movie backdrop: ${message}`);
         throw error;
       }
     }

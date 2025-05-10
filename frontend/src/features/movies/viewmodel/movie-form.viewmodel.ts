@@ -120,6 +120,7 @@ export function useCreateMovieViewModel() {
       title: data.title,
       originalTitle: data.originalTitle || undefined,
       description: data.description || undefined,
+      tagline: data.tagline || undefined,
       budget: data.budget,
       revenue: data.revenue,
       releaseDate: data.releaseDate || undefined,
@@ -199,12 +200,12 @@ export function useUpdateMovieViewModel(id: string) {
 
     if (movieData) {
       setMovie(movieData)
-      // Preencher o formulário com os dados do filme
       reset({
         id,
         title: movieData.title,
         originalTitle: movieData.originalTitle || '',
         description: movieData.description || '',
+        tagline: movieData.tagline || '',
         budget: movieData.budget,
         revenue: movieData.revenue,
         releaseDate: movieData.releaseDate
@@ -237,6 +238,7 @@ export function useUpdateMovieViewModel(id: string) {
       title: data.title,
       originalTitle: data.originalTitle || undefined,
       description: data.description || undefined,
+      tagline: data.tagline || undefined,
       budget: data.budget,
       revenue: data.revenue,
       releaseDate: data.releaseDate || undefined,

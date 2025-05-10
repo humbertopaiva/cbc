@@ -98,6 +98,27 @@ function CreateMoviePage() {
 
                     <div>
                       <label
+                        htmlFor="tagline"
+                        className="block text-sm font-medium mb-1"
+                      >
+                        Frase de Efeito
+                      </label>
+                      <input
+                        id="tagline"
+                        type="text"
+                        {...register('tagline')}
+                        className="w-full p-2 border rounded-md bg-background"
+                        placeholder="Frase de efeito do filme (ex: 'Todo herói tem um começo')"
+                      />
+                      {errors.tagline && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.tagline.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
                         htmlFor="status"
                         className="block text-sm font-medium mb-1"
                       >

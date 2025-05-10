@@ -29,6 +29,11 @@ export class CreateMovieInput {
   @IsOptional()
   description?: string;
 
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  tagline?: string;
+
   @Field(() => Float, { nullable: true })
   @IsNumber()
   @IsOptional()

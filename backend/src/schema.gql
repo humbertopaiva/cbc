@@ -24,6 +24,7 @@ input CreateMovieInput {
   releaseDate: String
   revenue: Float
   status: String
+  tagline: String
   title: String!
   trailerUrl: String
   voteCount: Int
@@ -65,6 +66,7 @@ type Movie {
   releaseDate: DateTime
   revenue: Float
   status: String
+  tagline: String
   title: String!
   trailerUrl: String
   updatedAt: DateTime!
@@ -84,11 +86,13 @@ type MovieEdge {
 
 input MovieFiltersInput {
   genreIds: [ID!]
+  language: String
   maxDuration: Int
   minDuration: Int
   releaseDateFrom: String
   releaseDateTo: String
   search: String
+  status: String
 }
 
 input MovieOrderByInput {
@@ -119,6 +123,7 @@ type Mutation {
   requestPasswordReset(input: RequestPasswordResetInput!): RequestPasswordResetResponse!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResponse!
   signUp(input: SignUpInput!): AuthPayload!
+  testMovieNotification(id: ID!): Boolean!
   updateMovie(input: UpdateMovieInput!): Movie!
 }
 
@@ -198,6 +203,7 @@ input UpdateMovieInput {
   releaseDate: String
   revenue: Float
   status: String
+  tagline: String
   title: String
   trailerUrl: String
   voteCount: Int
