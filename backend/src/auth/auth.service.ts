@@ -106,7 +106,6 @@ export class AuthService {
     try {
       const user = await this.usersService.findByEmail(email);
       if (!user) {
-        // Não revelamos se o email existe ou não por segurança
         return {
           success: true,
           message:
@@ -129,7 +128,8 @@ export class AuthService {
       });
       await this.passwordResetTokenRepository.save(passwordResetToken);
 
-      // Enviar email de recuperação
+      // Enviar email de recuperação com mais informações de log
+      this.logger.log(`Attempting to send password reset email to ${user.email}`);
       const emailSent = await this.emailService.sendPasswordResetEmail({
         to: user.email,
         resetToken: token,
@@ -144,6 +144,7 @@ export class AuthService {
         };
       }
 
+      this.logger.log(`Password reset email successfully sent to: ${user.email}`);
       return {
         success: true,
         message:
@@ -152,6 +153,7 @@ export class AuthService {
     } catch (error) {
       this.logger.error(
         `Error during password reset request: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
       );
       return {
         success: false,

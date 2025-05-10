@@ -40,7 +40,9 @@ export class EmailService {
   async sendEmail({ to, subject, html }: SendEmailParams): Promise<boolean> {
     try {
       if (this.resend) {
-        const fromEmail = this.configService.get<string>('MAIL_FROM') || 'noreply@cubosmovies.com';
+        const fromEmail = this.configService.get<string>('MAIL_FROM') || 'contato@admin.limei.app';
+
+        this.logger.log(`Attempting to send email from ${fromEmail} to ${to}`);
 
         // Usando o formato que a documentação mostra
         const { data, error } = await this.resend.emails.send({
