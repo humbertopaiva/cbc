@@ -28,8 +28,7 @@ type ButtonProps = Omit<
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', ...props }, ref) => {
     const variantClasses = {
-      primary:
-        'bg-[var(--color-primary)] text-primary-foreground hover:bg-primary/90',
+      primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
       secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
       success: 'bg-green-600 text-white hover:bg-green-700',
       warning: 'bg-amber-500 text-white hover:bg-amber-600',
