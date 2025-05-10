@@ -1,25 +1,37 @@
-import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MINIO_CONNECTION } from 'nestjs-minio';
-import { Client as MinioClient } from 'minio';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  HeadBucketCommand,
+  CreateBucketCommand,
+  PutBucketPolicyCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
 
 @Injectable()
-export class FileUploadService implements OnModuleInit {
+export class FileUploadService {
   private readonly logger = new Logger(FileUploadService.name);
+  private s3Client: S3Client;
   private bucket: string;
 
-  constructor(
-    @Inject(MINIO_CONNECTION) private readonly minioClient: MinioClient,
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.bucket = this.configService.get<string>('S3_BUCKET', 'cubos-movies');
 
-    const endPoint = this.configService.get<string>('S3_HOST', 'minio');
-    const port = this.configService.get<string>('S3_PORT', '9000');
+    // Configurar o cliente AWS S3
+    this.s3Client = new S3Client({
+      region: this.configService.get<string>('AWS_REGION', 'us-east-1'),
+      credentials: {
+        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY', ''),
+        secretAccessKey: this.configService.get<string>('AWS_SECRET_KEY', ''),
+      },
+      endpoint: this.configService.get<string>('AWS_ENDPOINT'), // Optional: apenas para S3 compatível ou LocalStack
+      forcePathStyle: this.configService.get<boolean>('S3_FORCE_PATH_STYLE', false), // true para MinIO/LocalStack
+    });
 
-    this.logger.log(`MinIO Client initialized for bucket: ${this.bucket}`);
-    this.logger.log(`EndPoint: ${endPoint}, Port: ${port}`);
+    this.logger.log(`S3 Client initialized for bucket: ${this.bucket}`);
   }
 
   async onModuleInit() {
@@ -29,12 +41,18 @@ export class FileUploadService implements OnModuleInit {
   async createBucketIfNotExists(): Promise<void> {
     try {
       // Verificar se o bucket existe
-      const exists = await this.minioClient.bucketExists(this.bucket);
-
-      if (!exists) {
-        // Criar o bucket se não existir
-        await this.minioClient.makeBucket(this.bucket, '');
-        this.logger.log(`Bucket "${this.bucket}" created successfully`);
+      try {
+        await this.s3Client.send(new HeadBucketCommand({ Bucket: this.bucket }));
+        this.logger.log(`Bucket "${this.bucket}" already exists`);
+      } catch (error) {
+        // Se o bucket não existir, criar
+        this.logger.log(`Creating bucket "${this.bucket}"...`);
+        await this.s3Client.send(
+          new CreateBucketCommand({
+            Bucket: this.bucket,
+            // Se estiver usando um bucket público, adicione as configurações de CORS aqui
+          }),
+        );
 
         // Definir política de acesso público para o bucket
         const policy = {
@@ -49,12 +67,18 @@ export class FileUploadService implements OnModuleInit {
           ],
         };
 
-        await this.minioClient.setBucketPolicy(this.bucket, JSON.stringify(policy));
-        this.logger.log(`Public policy set for bucket "${this.bucket}"`);
+        await this.s3Client.send(
+          new PutBucketPolicyCommand({
+            Bucket: this.bucket,
+            Policy: JSON.stringify(policy),
+          }),
+        );
+
+        this.logger.log(`Bucket "${this.bucket}" created successfully with public read policy`);
       }
     } catch (error) {
       this.logger.error(
-        `Error creating bucket: ${error instanceof Error ? error.message : String(error)}`,
+        `Error managing bucket: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -67,11 +91,15 @@ export class FileUploadService implements OnModuleInit {
       const extension = filename.split('.').pop() || '';
       const key = `${folder}/${randomUUID()}.${extension}`;
 
-      // Gerar URL pré-assinado com expiração de 1 hora (3600 segundos)
-      let url = await this.minioClient.presignedPutObject(this.bucket, key, 3600);
+      // Criar o comando de upload
+      const command = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        ContentType: `image/${extension}`, // Ajuste conforme necessário
+      });
 
-      // Substituir 'minio' por 'localhost' na URL
-      url = url.replace(/http:\/\/minio/g, 'http://localhost');
+      // Gerar URL pré-assinado com expiração de 1 hora (3600 segundos)
+      const url = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
 
       this.logger.log(`Generated presigned URL for ${key}: ${url}`);
 
@@ -90,12 +118,35 @@ export class FileUploadService implements OnModuleInit {
   }
 
   getFileUrl(key: string): string {
-    // Sempre use 'localhost' para o host externo
-    const endPoint = 'localhost';
-    const port = this.configService.get<string>('S3_PORT', '9000');
-    const useSSL = false; // Altere conforme sua configuração
+    // Para Amazon S3 padrão
+    const region = this.configService.get<string>('AWS_REGION', 'us-east-1');
 
-    const protocol = useSSL ? 'https' : 'http';
-    return `${protocol}://${endPoint}:${port}/${this.bucket}/${key}`;
+    // Se estiver usando um endpoint personalizado
+    const customEndpoint = this.configService.get<string>('AWS_PUBLIC_ENDPOINT');
+    if (customEndpoint) {
+      return `${customEndpoint}/${this.bucket}/${key}`;
+    }
+
+    // URL padrão para Amazon S3
+    return `https://${this.bucket}.s3.${region}.amazonaws.com/${key}`;
+  }
+
+  async deleteFile(key: string): Promise<boolean> {
+    try {
+      await this.s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
+
+      this.logger.log(`Successfully deleted file: ${key}`);
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Error deleting file: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return false;
+    }
   }
 }

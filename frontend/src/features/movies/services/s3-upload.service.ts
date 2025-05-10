@@ -22,6 +22,7 @@ interface PresignedUrlResponse {
 interface PresignedUrlInput {
   folder: string
   filename: string
+  contentType?: string
 }
 
 class S3UploadService {
@@ -43,6 +44,7 @@ class S3UploadService {
           input: {
             folder,
             filename: file.name,
+            contentType: file.type,
           },
         },
       })
@@ -75,6 +77,9 @@ class S3UploadService {
       const response = await fetch(presignedUrl, {
         method: 'PUT',
         body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
       })
 
       if (!response.ok) {
@@ -99,8 +104,6 @@ class S3UploadService {
         file,
         folder,
       )
-
-      console.log('Presigned URL:', presignedUrl) // <-- Adicione esta linha
 
       // Fazer o upload com fetch
       await this.uploadFileWithPresignedUrl(file, presignedUrl)
