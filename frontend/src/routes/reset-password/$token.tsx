@@ -6,8 +6,9 @@ import {
 } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { useResetPasswordViewModel } from '@/features/auth/viewmodel/reset-password.viewmodel'
+
 import { useAuth } from '@/features/auth/context/auth.context'
+import { useResetPasswordViewModel } from '@/features/auth/viewmodel/reset-password.viewmodel'
 
 export const Route = createFileRoute('/reset-password/$token')({
   component: ResetPasswordPage,
