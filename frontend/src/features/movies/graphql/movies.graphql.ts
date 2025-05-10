@@ -6,6 +6,7 @@ export const MOVIE_FRAGMENT = gql`
     title
     originalTitle
     description
+    tagline
     budget
     revenue
     profit

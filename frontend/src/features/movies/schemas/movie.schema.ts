@@ -18,6 +18,7 @@ export const createMovieSchema = z.object({
   title: z.string().min(1, 'O título é obrigatório'),
   originalTitle: z.string().optional(),
   description: z.string().optional(),
+  tagline: z.string().optional(),
   budget: z
     .number()
     .positive('O orçamento deve ser um valor positivo')
@@ -68,6 +69,7 @@ export const movieFormSchema = z.object({
   title: z.string().min(1, 'O título é obrigatório'),
   originalTitle: z.string().optional(),
   description: z.string().optional(),
+  tagline: z.string().optional(),
   budget: z
     .string()
     .optional()

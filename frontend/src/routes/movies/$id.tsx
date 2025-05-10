@@ -98,9 +98,23 @@ function MovieDetailsPage() {
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 rounded-b-lg">
               <h1 className="text-white text-3xl font-bold">{movie.title}</h1>
+
               {movie.originalTitle && (
                 <p className="text-white/90 text-lg italic">
                   {movie.originalTitle}
+                </p>
+              )}
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 rounded-b-lg">
+              <h1 className="text-white text-3xl font-bold">{movie.title}</h1>
+              {movie.originalTitle && (
+                <p className="text-white/90 text-lg italic">
+                  {movie.originalTitle}
+                </p>
+              )}
+              {movie.tagline && (
+                <p className="text-white/80 mt-1 font-medium italic">
+                  "{movie.tagline}"
                 </p>
               )}
             </div>
