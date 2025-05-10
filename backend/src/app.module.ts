@@ -13,6 +13,7 @@ import { Movie } from './movies/entities/movie.entity';
 import { Genre } from './genres/entities/genre.entity';
 import { PendingNotification } from './movies/entities/pending-notification.entity';
 import { EmailModule } from './common/email/email.module';
+import { PasswordResetToken } from './auth/entities/password-reset-token.entity';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { EmailModule } from './common/email/email.module';
         username: configService.get('DB_USERNAME', 'postgres'),
         password: configService.get('DB_PASSWORD', 'postgres'),
         database: configService.get('DB_DATABASE', 'cubos_movies'),
-        entities: [User, Movie, Genre, PendingNotification],
+        entities: [User, Movie, Genre, PendingNotification, PasswordResetToken],
         synchronize: configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') !== 'production',
       }),

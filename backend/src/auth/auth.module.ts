@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
-import { EmailModule } from '../common/email/email.module'; // Importamos o EmailModule
+import { EmailModule } from '../common/email/email.module';
 
 @Module({
   imports: [
@@ -21,8 +21,8 @@ import { EmailModule } from '../common/email/email.module'; // Importamos o Emai
         signOptions: { expiresIn: '1d' },
       }),
     }),
-    UsersModule,
     TypeOrmModule.forFeature([PasswordResetToken]),
+    UsersModule,
     EmailModule,
   ],
   providers: [AuthService, AuthResolver, JwtStrategy],
