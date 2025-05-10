@@ -9,7 +9,9 @@ import {
   IsDateString,
   IsArray,
   IsUrl,
+  IsEnum,
 } from 'class-validator';
+import { MovieStatus } from '../entities/movie.entity';
 
 @InputType()
 export class CreateMovieInput {
@@ -33,6 +35,17 @@ export class CreateMovieInput {
   @Min(0)
   budget?: number;
 
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  revenue?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  profit?: number;
+
   @Field({ nullable: true })
   @IsDateString()
   @IsOptional()
@@ -43,6 +56,34 @@ export class CreateMovieInput {
   @IsOptional()
   @Min(1)
   duration?: number;
+
+  @Field({ nullable: true })
+  @IsEnum(MovieStatus)
+  @IsOptional()
+  status?: MovieStatus;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  language?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  @IsUrl()
+  trailerUrl?: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  popularity?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  voteCount?: number;
 
   @Field(() => [ID], { nullable: true })
   @IsArray()
