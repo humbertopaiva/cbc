@@ -148,13 +148,27 @@ export class MoviesService {
         originalTitle,
         description,
         budget,
+        revenue,
         releaseDate,
         duration,
         genreIds,
         imageUrl,
+        imageKey,
         backdropUrl,
+        backdropKey,
         rating,
+        status,
+        language,
+        trailerUrl,
+        popularity,
+        voteCount,
       } = createMovieInput;
+
+      // Calcular lucro se orçamento e receita estiverem disponíveis
+      let profit: number | undefined = undefined;
+      if (budget !== undefined && revenue !== undefined) {
+        profit = revenue - budget;
+      }
 
       // Buscar gêneros
       let genres: Genre[] = [];
@@ -168,10 +182,19 @@ export class MoviesService {
       movie.originalTitle = originalTitle;
       movie.description = description;
       movie.budget = budget;
+      movie.revenue = revenue;
+      movie.profit = profit;
       movie.releaseDate = releaseDate ? new Date(releaseDate) : undefined;
       movie.duration = duration;
+      movie.status = status;
+      movie.language = language;
+      movie.trailerUrl = trailerUrl;
+      movie.popularity = popularity;
+      movie.voteCount = voteCount;
       movie.imageUrl = imageUrl || 'https://placehold.co/600x400?text=No+Image';
+      movie.imageKey = imageKey;
       movie.backdropUrl = backdropUrl || 'https://placehold.co/1200x600?text=No+Backdrop';
+      movie.backdropKey = backdropKey;
       movie.rating = rating;
       movie.createdBy = user;
       movie.genres = genres;
@@ -192,6 +215,7 @@ export class MoviesService {
         originalTitle,
         description,
         budget,
+        revenue,
         releaseDate,
         duration,
         genreIds,
@@ -200,12 +224,27 @@ export class MoviesService {
         backdropUrl,
         backdropKey,
         rating,
+        status,
+        language,
+        trailerUrl,
+        popularity,
+        voteCount,
       } = updateMovieInput;
 
       const movie = await this.findById(id);
 
       if (movie.createdBy.id !== user.id) {
         throw new ForbiddenException('You are not authorized to update this movie');
+      }
+
+      // Calcular lucro se orçamento e receita estiverem disponíveis
+      let profit: number | undefined = undefined;
+      if (budget !== undefined && revenue !== undefined) {
+        profit = revenue - budget;
+      } else if (budget !== undefined && movie.revenue !== undefined) {
+        profit = movie.revenue - budget;
+      } else if (revenue !== undefined && movie.budget !== undefined) {
+        profit = revenue - movie.budget;
       }
 
       // Verificar se as imagens foram alteradas e excluir as antigas se necessário
@@ -244,8 +283,15 @@ export class MoviesService {
       if (originalTitle !== undefined) movie.originalTitle = originalTitle;
       if (description !== undefined) movie.description = description;
       if (budget !== undefined) movie.budget = budget;
+      if (revenue !== undefined) movie.revenue = revenue;
+      if (profit !== undefined) movie.profit = profit;
       if (releaseDate !== undefined) movie.releaseDate = new Date(releaseDate);
       if (duration !== undefined) movie.duration = duration;
+      if (status !== undefined) movie.status = status;
+      if (language !== undefined) movie.language = language;
+      if (trailerUrl !== undefined) movie.trailerUrl = trailerUrl;
+      if (popularity !== undefined) movie.popularity = popularity;
+      if (voteCount !== undefined) movie.voteCount = voteCount;
       if (imageUrl !== undefined) movie.imageUrl = imageUrl;
       if (imageKey !== undefined) movie.imageKey = imageKey;
       if (backdropUrl !== undefined) movie.backdropUrl = backdropUrl;

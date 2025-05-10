@@ -3,14 +3,26 @@ export interface Genre {
   name: string
 }
 
+export enum MovieStatus {
+  RELEASED = 'released',
+  IN_PRODUCTION = 'in_production',
+}
+
 export interface Movie {
   id: string
   title: string
   originalTitle?: string
   description?: string
   budget?: number
+  revenue?: number
+  profit?: number
   releaseDate?: string
   duration?: number
+  status?: MovieStatus
+  language?: string
+  trailerUrl?: string
+  popularity?: number
+  voteCount?: number
   imageUrl?: string
   imageKey?: string
   backdropUrl?: string
@@ -49,6 +61,8 @@ export interface MovieFilters {
   maxDuration?: number
   releaseDateFrom?: string
   releaseDateTo?: string
+  status?: MovieStatus
+  language?: string
   genreIds?: Array<string>
 }
 
@@ -57,8 +71,15 @@ export interface CreateMovieInput {
   originalTitle?: string
   description?: string
   budget?: number
+  revenue?: number
+  profit?: number
   releaseDate?: string
   duration?: number
+  status?: MovieStatus
+  language?: string
+  trailerUrl?: string
+  popularity?: number
+  voteCount?: number
   genreIds?: Array<string>
   imageUrl?: string
   imageKey?: string
@@ -73,8 +94,15 @@ export interface UpdateMovieInput {
   originalTitle?: string
   description?: string
   budget?: number
+  revenue?: number
+  profit?: number
   releaseDate?: string
   duration?: number
+  status?: MovieStatus
+  language?: string
+  trailerUrl?: string
+  popularity?: number
+  voteCount?: number
   genreIds?: Array<string>
   imageUrl?: string
   imageKey?: string

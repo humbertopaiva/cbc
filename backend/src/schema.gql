@@ -16,10 +16,17 @@ input CreateMovieInput {
   genreIds: [ID!]
   imageKey: String
   imageUrl: String
+  language: String
   originalTitle: String
+  popularity: Int
+  profit: Float
   rating: Float
   releaseDate: String
+  revenue: Float
+  status: String
   title: String!
+  trailerUrl: String
+  voteCount: Int
 }
 
 """
@@ -50,11 +57,18 @@ type Movie {
   id: ID!
   imageKey: String
   imageUrl: String
+  language: String
   originalTitle: String
+  popularity: Int
+  profit: Float
   rating: Float
   releaseDate: DateTime
+  revenue: Float
+  status: String
   title: String!
+  trailerUrl: String
   updatedAt: DateTime!
+  voteCount: Int
 }
 
 type MovieConnection {
@@ -155,10 +169,17 @@ input UpdateMovieInput {
   id: ID!
   imageKey: String
   imageUrl: String
+  language: String
   originalTitle: String
+  popularity: Int
+  profit: Float
   rating: Float
   releaseDate: String
+  revenue: Float
+  status: String
   title: String
+  trailerUrl: String
+  voteCount: Int
 }
 
 """File upload scalar type"""

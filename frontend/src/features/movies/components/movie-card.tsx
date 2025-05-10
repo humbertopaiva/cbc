@@ -2,6 +2,8 @@ import React from 'react'
 import { Link } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { FiYoutube } from 'react-icons/fi'
+import { MovieStatus } from '../model/movie.model'
 import type { Movie } from '../model/movie.model'
 
 interface MovieCardProps {
@@ -22,12 +24,34 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
             {movie.rating}/10
           </span>
         )}
+        {movie.trailerUrl && (
+          <a
+            href={movie.trailerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-2 right-2 bg-red-600 text-white p-2 rounded-full"
+            title="Assistir trailer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FiYoutube className="w-4 h-4" />
+          </a>
+        )}
+        {movie.status === MovieStatus.IN_PRODUCTION && (
+          <span className="absolute bottom-2 left-2 bg-amber-500 text-white px-2 py-1 rounded-full text-xs">
+            Em Produção
+          </span>
+        )}
       </div>
       <div className="p-4">
         <h3 className="font-bold text-lg mb-1 line-clamp-1">{movie.title}</h3>
         {movie.originalTitle && (
           <p className="text-muted-foreground text-sm italic mb-2 line-clamp-1">
             {movie.originalTitle}
+          </p>
+        )}
+        {movie.language && (
+          <p className="text-xs mb-2">
+            <span className="font-medium">Idioma:</span> {movie.language}
           </p>
         )}
         {movie.releaseDate && (

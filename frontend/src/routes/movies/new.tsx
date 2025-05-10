@@ -5,6 +5,7 @@ import { AuthGuard } from '@/features/auth/guards/auth.guard'
 import { Button } from '@/components/ui/button'
 import { useCreateMovieViewModel } from '@/features/movies/viewmodel/movie-form.viewmodel'
 import { ImageUpload } from '@/features/movies/components/image-upload'
+import { MovieStatus } from '@/features/movies/model/movie.model'
 
 export const Route = createFileRoute('/movies/new')({
   component: CreateMoviePage,
@@ -97,6 +98,52 @@ function CreateMoviePage() {
 
                     <div>
                       <label
+                        htmlFor="status"
+                        className="block text-sm font-medium mb-1"
+                      >
+                        Situação
+                      </label>
+                      <select
+                        id="status"
+                        {...register('status')}
+                        className="w-full p-2 border rounded-md bg-background"
+                      >
+                        <option value="">Selecione a situação</option>
+                        <option value={MovieStatus.RELEASED}>Lançado</option>
+                        <option value={MovieStatus.IN_PRODUCTION}>
+                          Em Produção
+                        </option>
+                      </select>
+                      {errors.status && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.status.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="language"
+                        className="block text-sm font-medium mb-1"
+                      >
+                        Idioma
+                      </label>
+                      <input
+                        id="language"
+                        type="text"
+                        {...register('language')}
+                        className="w-full p-2 border rounded-md bg-background"
+                        placeholder="Idioma principal do filme"
+                      />
+                      {errors.language && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.language.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
                         htmlFor="releaseDate"
                         className="block text-sm font-medium mb-1"
                       >
@@ -139,6 +186,29 @@ function CreateMoviePage() {
 
                     <div>
                       <label
+                        htmlFor="trailerUrl"
+                        className="block text-sm font-medium mb-1"
+                      >
+                        URL do Trailer
+                      </label>
+                      <input
+                        id="trailerUrl"
+                        type="url"
+                        {...register('trailerUrl')}
+                        className="w-full p-2 border rounded-md bg-background"
+                        placeholder="URL do trailer no YouTube"
+                      />
+                      {errors.trailerUrl && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.trailerUrl.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label
                         htmlFor="budget"
                         className="block text-sm font-medium mb-1"
                       >
@@ -162,10 +232,77 @@ function CreateMoviePage() {
 
                     <div>
                       <label
+                        htmlFor="revenue"
+                        className="block text-sm font-medium mb-1"
+                      >
+                        Receita (USD)
+                      </label>
+                      <input
+                        id="revenue"
+                        type="number"
+                        {...register('revenue')}
+                        className="w-full p-2 border rounded-md bg-background"
+                        placeholder="Receita em dólares"
+                        min="0"
+                        step="0.01"
+                      />
+                      {errors.revenue && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.revenue.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="popularity"
+                        className="block text-sm font-medium mb-1"
+                      >
+                        Popularidade
+                      </label>
+                      <input
+                        id="popularity"
+                        type="number"
+                        {...register('popularity')}
+                        className="w-full p-2 border rounded-md bg-background"
+                        placeholder="Nível de popularidade"
+                        min="0"
+                      />
+                      {errors.popularity && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.popularity.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="voteCount"
+                        className="block text-sm font-medium mb-1"
+                      >
+                        Contagem de Votos
+                      </label>
+                      <input
+                        id="voteCount"
+                        type="number"
+                        {...register('voteCount')}
+                        className="w-full p-2 border rounded-md bg-background"
+                        placeholder="Número total de votos"
+                        min="0"
+                      />
+                      {errors.voteCount && (
+                        <p className="text-destructive text-sm mt-1">
+                          {errors.voteCount.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
                         htmlFor="rating"
                         className="block text-sm font-medium mb-1"
                       >
-                        Avaliação (0-10)
+                        Nota (0-10)
                       </label>
                       <input
                         id="rating"
@@ -183,9 +320,7 @@ function CreateMoviePage() {
                         </p>
                       )}
                     </div>
-                  </div>
 
-                  <div className="space-y-4">
                     <div>
                       <label
                         htmlFor="description"
@@ -202,42 +337,6 @@ function CreateMoviePage() {
                       {errors.description && (
                         <p className="text-destructive text-sm mt-1">
                           {errors.description.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <ImageUpload
-                        imageUrl={watch('imageUrl')}
-                        imageKey={watch('imageKey')}
-                        onImageChange={(url, key) => {
-                          setValue('imageUrl', url)
-                          setValue('imageKey', key)
-                        }}
-                        label="Imagem de Capa"
-                        folder="posters"
-                      />
-                      {errors.imageUrl && (
-                        <p className="text-destructive text-sm mt-1">
-                          {errors.imageUrl.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <ImageUpload
-                        imageUrl={watch('backdropUrl')}
-                        imageKey={watch('backdropKey')}
-                        onImageChange={(url, key) => {
-                          setValue('backdropUrl', url)
-                          setValue('backdropKey', key)
-                        }}
-                        label="Imagem de Fundo (Backdrop)"
-                        folder="backdrops"
-                      />
-                      {errors.backdropUrl && (
-                        <p className="text-destructive text-sm mt-1">
-                          {errors.backdropUrl.message}
                         </p>
                       )}
                     </div>
@@ -270,6 +369,44 @@ function CreateMoviePage() {
                         Use Ctrl+Clique para selecionar múltiplos gêneros
                       </p>
                     </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                  <div>
+                    <ImageUpload
+                      imageUrl={watch('imageUrl')}
+                      imageKey={watch('imageKey')}
+                      onImageChange={(url, key) => {
+                        setValue('imageUrl', url)
+                        setValue('imageKey', key)
+                      }}
+                      label="Imagem de Capa"
+                      folder="posters"
+                    />
+                    {errors.imageUrl && (
+                      <p className="text-destructive text-sm mt-1">
+                        {errors.imageUrl.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <ImageUpload
+                      imageUrl={watch('backdropUrl')}
+                      imageKey={watch('backdropKey')}
+                      onImageChange={(url, key) => {
+                        setValue('backdropUrl', url)
+                        setValue('backdropKey', key)
+                      }}
+                      label="Imagem de Fundo (Backdrop)"
+                      folder="backdrops"
+                    />
+                    {errors.backdropUrl && (
+                      <p className="text-destructive text-sm mt-1">
+                        {errors.backdropUrl.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
