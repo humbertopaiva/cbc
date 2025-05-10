@@ -37,6 +37,10 @@ export class Movie {
   @Column({ type: 'text', nullable: true })
   description?: string;
 
+  @Field({ nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'tagline' })
+  tagline?: string;
+
   @Field(() => Float, { nullable: true })
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   budget?: number;
