@@ -203,6 +203,7 @@ input UpdateMovieInput {
   releaseDate: String
   revenue: Float
   status: String
+  tagline: String
   title: String
   trailerUrl: String
   voteCount: Int

@@ -13,6 +13,7 @@ export interface Movie {
   title: string
   originalTitle?: string
   description?: string
+  tagline?: string
   budget?: number
   revenue?: number
   profit?: number
@@ -70,6 +71,7 @@ export interface CreateMovieInput {
   title: string
   originalTitle?: string
   description?: string
+  tagline?: string
   budget?: number
   revenue?: number
   profit?: number
@@ -93,6 +95,7 @@ export interface UpdateMovieInput {
   title?: string
   originalTitle?: string
   description?: string
+  tagline?: string
   budget?: number
   revenue?: number
   profit?: number

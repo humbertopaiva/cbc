@@ -211,6 +211,7 @@ export class MoviesService {
       movie.backdropKey = backdropKey;
       movie.rating = rating;
       movie.createdBy = user;
+      movie.tagline = tagline;
       movie.genres = genres;
 
       // Salvar o filme
@@ -323,6 +324,7 @@ export class MoviesService {
       if (backdropUrl !== undefined) movie.backdropUrl = backdropUrl;
       if (backdropKey !== undefined) movie.backdropKey = backdropKey;
       if (rating !== undefined) movie.rating = rating;
+      if (tagline !== undefined) movie.tagline = tagline;
       if (genres) movie.genres = genres;
 
       const updatedMovie = await this.moviesRepository.save(movie);
