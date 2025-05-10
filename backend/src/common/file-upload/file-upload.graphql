@@ -1,0 +1,16 @@
+type Mutation {
+  getPresignedUploadUrl(input: PresignedUrlInput!): PresignedUrlResponse!
+  deleteFile(key: String!): Boolean!
+}
+
+input PresignedUrlInput {
+  folder: String!
+  filename: String!
+  contentType: String
+}
+
+type PresignedUrlResponse {
+  presignedUrl: String!
+  key: String!
+  fileUrl: String!
+}

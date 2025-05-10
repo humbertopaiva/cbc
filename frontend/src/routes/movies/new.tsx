@@ -209,9 +209,12 @@ function CreateMoviePage() {
                     <div>
                       <ImageUpload
                         imageUrl={watch('imageUrl')}
-                        onImageChange={(url) => setValue('imageUrl', url)}
+                        imageKey={watch('imageKey')}
+                        onImageChange={(url, key) => {
+                          setValue('imageUrl', url)
+                          setValue('imageKey', key)
+                        }}
                         label="Imagem de Capa"
-                        movieTitle={watch('title') || 'novo-filme'}
                         folder="posters"
                       />
                       {errors.imageUrl && (
@@ -224,9 +227,12 @@ function CreateMoviePage() {
                     <div>
                       <ImageUpload
                         imageUrl={watch('backdropUrl')}
-                        onImageChange={(url) => setValue('backdropUrl', url)}
+                        imageKey={watch('backdropKey')}
+                        onImageChange={(url, key) => {
+                          setValue('backdropUrl', url)
+                          setValue('backdropKey', key)
+                        }}
                         label="Imagem de Fundo (Backdrop)"
-                        movieTitle={watch('title') || 'novo-filme'}
                         folder="backdrops"
                       />
                       {errors.backdropUrl && (

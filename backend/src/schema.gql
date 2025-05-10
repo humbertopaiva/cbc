@@ -8,11 +8,13 @@ type AuthPayload {
 }
 
 input CreateMovieInput {
+  backdropKey: String
   backdropUrl: String
   budget: Float
   description: String
   duration: Int
   genreIds: [ID!]
+  imageKey: String
   imageUrl: String
   originalTitle: String
   rating: Float
@@ -37,6 +39,7 @@ input LoginInput {
 }
 
 type Movie {
+  backdropKey: String
   backdropUrl: String
   budget: Float
   createdAt: DateTime!
@@ -45,6 +48,7 @@ type Movie {
   duration: Int
   genres: [Genre!]!
   id: ID!
+  imageKey: String
   imageUrl: String
   originalTitle: String
   rating: Float
@@ -94,6 +98,7 @@ input MoviesPaginationInput {
 
 type Mutation {
   createMovie(input: CreateMovieInput!): Movie!
+  deleteFile(key: String!): Boolean!
   deleteMovie(id: ID!): Boolean!
   getPresignedUploadUrl(input: PresignedUrlInput!): PresignedUrlResponse!
   login(input: LoginInput!): AuthPayload!
@@ -141,12 +146,14 @@ input SignUpInput {
 }
 
 input UpdateMovieInput {
+  backdropKey: String
   backdropUrl: String
   budget: Float
   description: String
   duration: Int
   genreIds: [ID!]
   id: ID!
+  imageKey: String
   imageUrl: String
   originalTitle: String
   rating: Float

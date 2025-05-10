@@ -1,15 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  HeadBucketCommand,
-  CreateBucketCommand,
-  PutBucketPolicyCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
+import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class FileUploadService {
@@ -18,7 +12,8 @@ export class FileUploadService {
   private bucket: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.bucket = this.configService.get<string>('S3_BUCKET', 'cubos-movies');
+    // Usar o bucket específico fornecido
+    this.bucket = this.configService.get<string>('S3_BUCKET', 'cubos-movies-humberto');
 
     // Configurar o cliente AWS S3
     this.s3Client = new S3Client({
@@ -27,79 +22,42 @@ export class FileUploadService {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY', ''),
         secretAccessKey: this.configService.get<string>('AWS_SECRET_KEY', ''),
       },
-      endpoint: this.configService.get<string>('AWS_ENDPOINT'), // Optional: apenas para S3 compatível ou LocalStack
+      endpoint: this.configService.get<string>('AWS_ENDPOINT'), // Optional: apenas para S3 compatível
       forcePathStyle: this.configService.get<boolean>('S3_FORCE_PATH_STYLE', false), // true para MinIO/LocalStack
     });
 
     this.logger.log(`S3 Client initialized for bucket: ${this.bucket}`);
   }
 
-  async onModuleInit() {
-    await this.createBucketIfNotExists();
-  }
-
-  async createBucketIfNotExists(): Promise<void> {
-    try {
-      // Verificar se o bucket existe
-      try {
-        await this.s3Client.send(new HeadBucketCommand({ Bucket: this.bucket }));
-        this.logger.log(`Bucket "${this.bucket}" already exists`);
-      } catch (error) {
-        // Se o bucket não existir, criar
-        this.logger.log(`Creating bucket "${this.bucket}"...`);
-        await this.s3Client.send(
-          new CreateBucketCommand({
-            Bucket: this.bucket,
-            // Se estiver usando um bucket público, adicione as configurações de CORS aqui
-          }),
-        );
-
-        // Definir política de acesso público para o bucket
-        const policy = {
-          Version: '2012-10-17',
-          Statement: [
-            {
-              Effect: 'Allow',
-              Principal: { AWS: ['*'] },
-              Action: ['s3:GetObject'],
-              Resource: [`arn:aws:s3:::${this.bucket}/*`],
-            },
-          ],
-        };
-
-        await this.s3Client.send(
-          new PutBucketPolicyCommand({
-            Bucket: this.bucket,
-            Policy: JSON.stringify(policy),
-          }),
-        );
-
-        this.logger.log(`Bucket "${this.bucket}" created successfully with public read policy`);
-      }
-    } catch (error) {
-      this.logger.error(
-        `Error managing bucket: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+  // Gerar uma chave única para upload
+  private generateKey(folder: string, userId: string, filename: string): string {
+    const extension = filename.split('.').pop() || '';
+    // Incluir o ID do usuário na estrutura de pastas para garantir isolamento
+    // Começar com 'imagens/', depois folder, userId e o nome do arquivo com UUID
+    return `imagens/${folder}/${userId}/${randomUUID()}.${extension}`;
   }
 
   async getPresignedUploadUrl(
     folder: string,
     filename: string,
+    user: User,
   ): Promise<{ url: string; key: string }> {
     try {
-      const extension = filename.split('.').pop() || '';
-      const key = `${folder}/${randomUUID()}.${extension}`;
+      // Gerar uma chave que inclui o caminho imagens/, o folder, e o ID do usuário para isolamento
+      const key = this.generateKey(folder, user.id, filename);
 
       // Criar o comando de upload
       const command = new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
-        ContentType: `image/${extension}`, // Ajuste conforme necessário
+        ContentType: `image/${filename.split('.').pop()}`, // Ajuste conforme necessário
+        Metadata: {
+          'user-id': user.id, // Adicionar metadata com ID do usuário para rastreabilidade
+        },
       });
 
-      // Gerar URL pré-assinado com expiração de 1 hora (3600 segundos)
-      const url = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+      // Gerar URL pré-assinado com expiração de 5 minutos (300 segundos)
+      const url = await getSignedUrl(this.s3Client, command, { expiresIn: 300 });
 
       this.logger.log(`Generated presigned URL for ${key}: ${url}`);
 
@@ -131,8 +89,20 @@ export class FileUploadService {
     return `https://${this.bucket}.s3.${region}.amazonaws.com/${key}`;
   }
 
-  async deleteFile(key: string): Promise<boolean> {
+  // Verificar se o usuário tem permissão para excluir o arquivo
+  private canDeleteFile(key: string, userId: string): boolean {
+    // Verificar se o caminho do arquivo contém o ID do usuário
+    return key.includes(`/${userId}/`);
+  }
+
+  async deleteFile(key: string, user: User): Promise<boolean> {
     try {
+      // Verificar se o usuário tem permissão para excluir este arquivo
+      if (!this.canDeleteFile(key, user.id)) {
+        this.logger.warn(`Unauthorized delete attempt by user ${user.id} for file ${key}`);
+        throw new ForbiddenException('You do not have permission to delete this file');
+      }
+
       await this.s3Client.send(
         new DeleteObjectCommand({
           Bucket: this.bucket,

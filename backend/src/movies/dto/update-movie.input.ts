@@ -64,8 +64,18 @@ export class UpdateMovieInput {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
+  imageKey?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   @IsUrl({}, { message: 'A URL do backdrop deve ser válida' })
   backdropUrl?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  backdropKey?: string;
 
   @Field(() => Float, { nullable: true })
   @IsNumber()

@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 
 interface ImageUploadProps {
   imageUrl: string | undefined
-  onImageChange: (url: string) => void
+  imageKey?: string | undefined
+  onImageChange: (url: string, key?: string) => void
   label: string
   movieTitle?: string
   folder?: string
@@ -14,6 +15,7 @@ interface ImageUploadProps {
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
   imageUrl,
+  imageKey,
   onImageChange,
   label,
   folder = 'images',
@@ -29,14 +31,14 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       setError(null)
 
       try {
-        // Upload simples para demonstração
         setUploadProgress(10)
 
         // Upload do arquivo para o S3
-        const fileUrl = await s3UploadService.uploadFile(file, folder)
+        const { url, key } = await s3UploadService.uploadFile(file, folder)
 
         setUploadProgress(100)
-        onImageChange(fileUrl)
+        // Agora passamos a URL e a chave para permitir exclusão posterior
+        onImageChange(url, key)
       } catch (error) {
         console.error('Error uploading image:', error)
         setError(
@@ -68,9 +70,15 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     }
   }, [onImageChange])
 
-  const handleRemoveImage = useCallback(() => {
-    onImageChange('')
-  }, [onImageChange])
+  const handleRemoveImage = useCallback(async () => {
+    // Se temos a chave do arquivo, tentamos excluí-lo do S3
+    if (imageKey) {
+      await s3UploadService.deleteFile(imageKey)
+    }
+
+    // Limpamos a imagem independentemente do resultado da exclusão
+    onImageChange('', undefined)
+  }, [onImageChange, imageKey])
 
   return (
     <div className="space-y-2">

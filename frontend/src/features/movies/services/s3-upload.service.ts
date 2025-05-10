@@ -11,6 +11,12 @@ const GET_PRESIGNED_URL = gql`
   }
 `
 
+const DELETE_FILE = gql`
+  mutation DeleteFile($key: String!) {
+    deleteFile(key: $key)
+  }
+`
+
 interface PresignedUrlResponse {
   getPresignedUploadUrl: {
     presignedUrl: string
@@ -29,7 +35,7 @@ class S3UploadService {
   async getPresignedUploadUrl(
     file: File,
     folder: string,
-  ): Promise<{ presignedUrl: string; fileUrl: string }> {
+  ): Promise<{ presignedUrl: string; key: string; fileUrl: string }> {
     try {
       console.log(`Getting presigned URL for ${file.name} in folder ${folder}`)
 
@@ -53,10 +59,9 @@ class S3UploadService {
         throw new Error('Failed to get presigned URL')
       }
 
-      console.log('Got presigned URL:', data.getPresignedUploadUrl.presignedUrl)
-
       return {
         presignedUrl: data.getPresignedUploadUrl.presignedUrl,
+        key: data.getPresignedUploadUrl.key,
         fileUrl: data.getPresignedUploadUrl.fileUrl,
       }
     } catch (error) {
@@ -97,10 +102,13 @@ class S3UploadService {
     }
   }
 
-  async uploadFile(file: File, folder: string): Promise<string> {
+  async uploadFile(
+    file: File,
+    folder: string,
+  ): Promise<{ url: string; key: string }> {
     try {
       // Obter URL pré-assinada
-      const { presignedUrl, fileUrl } = await this.getPresignedUploadUrl(
+      const { presignedUrl, key, fileUrl } = await this.getPresignedUploadUrl(
         file,
         folder,
       )
@@ -108,11 +116,25 @@ class S3UploadService {
       // Fazer o upload com fetch
       await this.uploadFileWithPresignedUrl(file, presignedUrl)
 
-      // Retornar a URL final da imagem
-      return fileUrl
+      // Retornar a URL final da imagem e a chave para referência futura
+      return { url: fileUrl, key }
     } catch (error) {
       console.error('Error uploading file:', error)
       throw error
+    }
+  }
+
+  async deleteFile(key: string): Promise<boolean> {
+    try {
+      const { data } = await apolloClient.mutate<{ deleteFile: boolean }>({
+        mutation: DELETE_FILE,
+        variables: { key },
+      })
+
+      return data?.deleteFile || false
+    } catch (error) {
+      console.error('Error deleting file:', error)
+      return false
     }
   }
 }

@@ -27,7 +27,9 @@ export const createMovieSchema = z.object({
     .optional(),
   genreIds: z.array(z.string().uuid()).optional(),
   imageUrl: z.string().url('A URL da imagem deve ser válida').optional(),
+  imageKey: z.string().optional(),
   backdropUrl: z.string().url('A URL do backdrop deve ser válida').optional(),
+  backdropKey: z.string().optional(),
   rating: z
     .number()
     .min(0, 'A avaliação mínima é 0')
@@ -56,7 +58,9 @@ export const movieFormSchema = z.object({
     .transform((val) => (val ? parseInt(val) : undefined)),
   genreIds: z.array(z.string().uuid()).optional(),
   imageUrl: z.string().url('A URL da imagem deve ser válida').optional(),
+  imageKey: z.string().optional(),
   backdropUrl: z.string().url('A URL do backdrop deve ser válida').optional(),
+  backdropKey: z.string().optional(),
   rating: z
     .string()
     .optional()

@@ -110,7 +110,9 @@ export function useCreateMovieViewModel() {
       duration: data.duration,
       genreIds: data.genreIds || undefined,
       imageUrl: data.imageUrl || undefined,
+      imageKey: data.imageKey || undefined,
       backdropUrl: data.backdropUrl || undefined,
+      backdropKey: data.backdropKey || undefined,
       rating: data.rating,
     }
 
@@ -205,7 +207,9 @@ export function useUpdateMovieViewModel(id: string) {
       duration: data.duration,
       genreIds: data.genreIds || undefined,
       imageUrl: data.imageUrl || undefined,
+      imageKey: data.imageKey || undefined,
       backdropUrl: data.backdropUrl || undefined,
+      backdropKey: data.backdropKey || undefined,
       rating: data.rating,
     }
 

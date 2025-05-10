@@ -196,7 +196,9 @@ export class MoviesService {
         duration,
         genreIds,
         imageUrl,
+        imageKey,
         backdropUrl,
+        backdropKey,
         rating,
       } = updateMovieInput;
 
@@ -204,6 +206,31 @@ export class MoviesService {
 
       if (movie.createdBy.id !== user.id) {
         throw new ForbiddenException('You are not authorized to update this movie');
+      }
+
+      // Verificar se as imagens foram alteradas e excluir as antigas se necessário
+      if (imageUrl !== undefined && imageUrl !== movie.imageUrl && movie.imageKey) {
+        try {
+          // Só tenta excluir se a imagem antiga for do próprio usuário
+          if (movie.imageKey.includes(`/${user.id}/`)) {
+            await this.fileUploadService.deleteFile(movie.imageKey, user);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.warn(`Failed to delete old image: ${errorMessage}`);
+        }
+      }
+
+      if (backdropUrl !== undefined && backdropUrl !== movie.backdropUrl && movie.backdropKey) {
+        try {
+          // Só tenta excluir se o backdrop antigo for do próprio usuário
+          if (movie.backdropKey.includes(`/${user.id}/`)) {
+            await this.fileUploadService.deleteFile(movie.backdropKey, user);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.warn(`Failed to delete old image: ${errorMessage}`);
+        }
       }
 
       // Buscar gêneros se genreIds são fornecidos, caso contrário manter os gêneros existentes
@@ -220,7 +247,9 @@ export class MoviesService {
       if (releaseDate !== undefined) movie.releaseDate = new Date(releaseDate);
       if (duration !== undefined) movie.duration = duration;
       if (imageUrl !== undefined) movie.imageUrl = imageUrl;
+      if (imageKey !== undefined) movie.imageKey = imageKey;
       if (backdropUrl !== undefined) movie.backdropUrl = backdropUrl;
+      if (backdropKey !== undefined) movie.backdropKey = backdropKey;
       if (rating !== undefined) movie.rating = rating;
       if (genres) movie.genres = genres;
 
@@ -239,13 +268,26 @@ export class MoviesService {
       throw new ForbiddenException('You are not authorized to delete this movie');
     }
 
-    // Simplificamos a exclusão de arquivos por enquanto
-    // if (movie.imageUrl) {
-    //   await this.fileUploadService.deleteFile(movie.imageUrl);
-    // }
-    // if (movie.backdropUrl) {
-    //   await this.fileUploadService.deleteFile(movie.backdropUrl);
-    // }
+    // Excluir imagens associadas, se houver
+    if (movie.imageKey) {
+      try {
+        await this.fileUploadService.deleteFile(movie.imageKey, user);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Failed to update movie: ${message}`);
+        throw error;
+      }
+    }
+
+    if (movie.backdropKey) {
+      try {
+        await this.fileUploadService.deleteFile(movie.backdropKey, user);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Failed to update movie: ${message}`);
+        throw error;
+      }
+    }
 
     await this.moviesRepository.remove(movie);
     return true;
