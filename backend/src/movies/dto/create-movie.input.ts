@@ -8,9 +8,10 @@ import {
   Max,
   IsDateString,
   IsArray,
+  IsUrl,
+  IsEnum,
 } from 'class-validator';
-import { Upload } from '../scalars/upload.scalar';
-import { GraphQLUpload } from 'graphql-upload/GraphQLUpload.mjs';
+import { MovieStatus } from '../entities/movie.entity';
 
 @InputType()
 export class CreateMovieInput {
@@ -34,6 +35,17 @@ export class CreateMovieInput {
   @Min(0)
   budget?: number;
 
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  revenue?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  profit?: number;
+
   @Field({ nullable: true })
   @IsDateString()
   @IsOptional()
@@ -45,19 +57,61 @@ export class CreateMovieInput {
   @Min(1)
   duration?: number;
 
+  @Field({ nullable: true })
+  @IsEnum(MovieStatus)
+  @IsOptional()
+  status?: MovieStatus;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  language?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  @IsUrl()
+  trailerUrl?: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  popularity?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  voteCount?: number;
+
   @Field(() => [ID], { nullable: true })
   @IsArray()
   @IsUUID('4', { each: true })
   @IsOptional()
   genreIds?: string[];
 
-  @Field(() => GraphQLUpload, { nullable: true })
+  @Field({ nullable: true })
+  @IsString()
   @IsOptional()
-  imageFile?: Upload;
+  @IsUrl({}, { message: 'A URL da imagem deve ser válida' })
+  imageUrl?: string;
 
-  @Field(() => GraphQLUpload, { nullable: true })
+  @Field({ nullable: true })
+  @IsString()
   @IsOptional()
-  backdropFile?: Upload;
+  imageKey?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  @IsUrl({}, { message: 'A URL do backdrop deve ser válida' })
+  backdropUrl?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  backdropKey?: string;
 
   @Field(() => Float, { nullable: true })
   @IsNumber()

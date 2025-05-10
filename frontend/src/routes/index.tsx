@@ -1,39 +1,128 @@
-import { createFileRoute } from '@tanstack/react-router'
-import logo from '../logo.svg'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useEffect } from 'react'
+import { FiFilm, FiPlus, FiSearch } from 'react-icons/fi'
+import { Button } from '@/components/ui/button'
+import { useMoviesListViewModel } from '@/features/movies/viewmodel/movies-list.viewmodel'
+import { MovieCard } from '@/features/movies/components/movie-card'
+import { FilterModal } from '@/features/movies/components/filter-modal'
+import { Layout } from '@/components/layout/layout'
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: HomePage,
 })
 
-function App() {
+function HomePage() {
+  const {
+    movies,
+    genres,
+    loading,
+    loadingMore,
+    filters,
+    initialize,
+    handleFilterChange,
+    handleLoadMore,
+  } = useMoviesListViewModel()
+
+  useEffect(() => {
+    initialize()
+  }, [])
+
   return (
-    <div className="text-center">
-      <header className="min-h-screen flex flex-col items-center justify-center bg-[#282c34] text-white text-[calc(10px+2vmin)]">
-        <img
-          src={logo}
-          className="h-[40vmin] pointer-events-none animate-[spin_20s_linear_infinite]"
-          alt="logo"
-        />
-        <p>
-          Edit <code>src/routes/index.tsx</code> and save to reload.
-        </p>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <a
-          className="text-[#61dafb] hover:underline"
-          href="https://tanstack.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn TanStack
-        </a>
-      </header>
-    </div>
+    <Layout>
+      <div className="min-h-screen bg-background">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+            <h2 className="text-2xl font-bold">Filmes</h2>
+            <div className="flex flex-col md:flex-row gap-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Pesquisar filme..."
+                  className="w-full md:w-64 pl-10 pr-4 py-2 rounded-md border bg-background"
+                  value={filters.search || ''}
+                  onChange={(e) =>
+                    handleFilterChange({ ...filters, search: e.target.value })
+                  }
+                />
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              </div>
+              <div className="flex gap-2">
+                <FilterModal
+                  genres={genres}
+                  currentFilters={filters}
+                  onApplyFilters={handleFilterChange}
+                />
+                <Link to="/movies/new">
+                  <Button className="flex items-center gap-2">
+                    <FiPlus className="w-4 h-4" />
+                    <span>Novo Filme</span>
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {loading && !movies ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-pulse flex flex-col items-center">
+                <div className="h-12 w-12 border-4 border-t-primary rounded-full animate-spin mb-4"></div>
+                <p>Carregando filmes...</p>
+              </div>
+            </div>
+          ) : movies?.edges.length === 0 ? (
+            <div className="text-center py-16 bg-card rounded-lg shadow">
+              <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <FiFilm className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">
+                Nenhum filme encontrado
+              </h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                Não encontramos nenhum filme com os filtros atuais. Tente
+                ajustar os filtros ou adicione um novo filme.
+              </p>
+              <Link to="/movies/new">
+                <Button className="flex items-center gap-2">
+                  <FiPlus className="w-4 h-4" />
+                  Adicionar Filme
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {movies?.edges.map(({ node }) => (
+                  <MovieCard key={node.id} movie={node} />
+                ))}
+              </div>
+
+              {movies?.pageInfo.hasNextPage && (
+                <div className="flex justify-center mt-8">
+                  <Button
+                    variant="outline"
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="min-w-40"
+                  >
+                    {loadingMore ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 border-2 border-t-current rounded-full animate-spin"></div>
+                        <span>Carregando...</span>
+                      </div>
+                    ) : (
+                      'Carregar mais'
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              <div className="mt-6 text-center text-sm text-muted-foreground">
+                Exibindo {movies?.edges.length} de {movies?.totalCount} filmes
+              </div>
+            </>
+          )}
+        </main>
+      </div>
+    </Layout>
   )
 }

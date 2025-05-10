@@ -1,31 +1,31 @@
 import { Scalar } from '@nestjs/graphql';
-import { GraphQLError } from 'graphql';
-import { FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
+import { GraphQLError, GraphQLScalarType } from 'graphql';
 
-// Interface para o tipo de upload que usamos internamente
-export interface Upload {
-  promise: Promise<FileUpload>;
-}
+export const GraphQLUpload = new GraphQLScalarType({
+  name: 'Upload',
+  description: 'The `Upload` scalar type represents a file upload.',
+  parseValue: value => value,
+  parseLiteral: () => {
+    throw new GraphQLError('Upload literal unsupported.');
+  },
+  serialize: () => {
+    throw new GraphQLError('Upload serialization unsupported.');
+  },
+});
 
 @Scalar('Upload')
 export class UploadScalar {
   description = 'File upload scalar type';
 
-  parseValue(value: unknown): Upload {
-    if (value === null || value === undefined) {
-      throw new GraphQLError('Upload value cannot be null or undefined');
-    }
-
-    // Validamos que temos uma Promise
-    if (!(value instanceof Promise)) {
-      throw new GraphQLError(`Upload value must be a Promise, received: ${typeof value}`);
-    }
-
-    // Tipamos explicitamente como Upload
-    return { promise: value as Promise<FileUpload> };
+  parseValue(value: any) {
+    return GraphQLUpload.parseValue(value);
   }
 
-  serialize(): never {
-    throw new GraphQLError('Upload serialization unsupported.');
+  parseLiteral(ast: any) {
+    return GraphQLUpload.parseLiteral(ast);
+  }
+
+  serialize(value: any) {
+    return GraphQLUpload.serialize(value);
   }
 }

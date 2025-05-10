@@ -148,27 +148,26 @@ export class MoviesService {
         originalTitle,
         description,
         budget,
+        revenue,
         releaseDate,
         duration,
         genreIds,
-        imageFile,
-        backdropFile,
+        imageUrl,
+        imageKey,
+        backdropUrl,
+        backdropKey,
         rating,
+        status,
+        language,
+        trailerUrl,
+        popularity,
+        voteCount,
       } = createMovieInput;
 
-      let imageUrl: string | undefined = undefined;
-      let backdropUrl: string | undefined = undefined;
-
-      // Processar uploads de imagens
-      if (imageFile) {
-        imageUrl = await this.fileUploadService.uploadFile(imageFile.promise, 'movies/posters');
-      }
-
-      if (backdropFile) {
-        backdropUrl = await this.fileUploadService.uploadFile(
-          backdropFile.promise,
-          'movies/backdrops',
-        );
+      // Calcular lucro se orçamento e receita estiverem disponíveis
+      let profit: number | undefined = undefined;
+      if (budget !== undefined && revenue !== undefined) {
+        profit = revenue - budget;
       }
 
       // Buscar gêneros
@@ -177,16 +176,25 @@ export class MoviesService {
         genres = await this.genresService.findByIds(genreIds);
       }
 
-      // Criar nova movie usando entityLike object
+      // Criar nova movie
       const movie = new Movie();
       movie.title = title;
       movie.originalTitle = originalTitle;
       movie.description = description;
       movie.budget = budget;
+      movie.revenue = revenue;
+      movie.profit = profit;
       movie.releaseDate = releaseDate ? new Date(releaseDate) : undefined;
       movie.duration = duration;
-      movie.imageUrl = imageUrl;
-      movie.backdropUrl = backdropUrl;
+      movie.status = status;
+      movie.language = language;
+      movie.trailerUrl = trailerUrl;
+      movie.popularity = popularity;
+      movie.voteCount = voteCount;
+      movie.imageUrl = imageUrl || 'https://placehold.co/600x400?text=No+Image';
+      movie.imageKey = imageKey;
+      movie.backdropUrl = backdropUrl || 'https://placehold.co/1200x600?text=No+Backdrop';
+      movie.backdropKey = backdropKey;
       movie.rating = rating;
       movie.createdBy = user;
       movie.genres = genres;
@@ -207,12 +215,20 @@ export class MoviesService {
         originalTitle,
         description,
         budget,
+        revenue,
         releaseDate,
         duration,
         genreIds,
-        imageFile,
-        backdropFile,
+        imageUrl,
+        imageKey,
+        backdropUrl,
+        backdropKey,
         rating,
+        status,
+        language,
+        trailerUrl,
+        popularity,
+        voteCount,
       } = updateMovieInput;
 
       const movie = await this.findById(id);
@@ -221,26 +237,42 @@ export class MoviesService {
         throw new ForbiddenException('You are not authorized to update this movie');
       }
 
-      let imageUrl = movie.imageUrl;
-      let backdropUrl = movie.backdropUrl;
-
-      // Handle image file update
-      if (imageFile) {
-        if (movie.imageUrl) {
-          await this.fileUploadService.deleteFile(movie.imageUrl);
-        }
-        imageUrl = await this.fileUploadService.uploadFile(imageFile, 'movies/posters');
+      // Calcular lucro se orçamento e receita estiverem disponíveis
+      let profit: number | undefined = undefined;
+      if (budget !== undefined && revenue !== undefined) {
+        profit = revenue - budget;
+      } else if (budget !== undefined && movie.revenue !== undefined) {
+        profit = movie.revenue - budget;
+      } else if (revenue !== undefined && movie.budget !== undefined) {
+        profit = revenue - movie.budget;
       }
 
-      // Handle backdrop file update
-      if (backdropFile) {
-        if (movie.backdropUrl) {
-          await this.fileUploadService.deleteFile(movie.backdropUrl);
+      // Verificar se as imagens foram alteradas e excluir as antigas se necessário
+      if (imageUrl !== undefined && imageUrl !== movie.imageUrl && movie.imageKey) {
+        try {
+          // Só tenta excluir se a imagem antiga for do próprio usuário
+          if (movie.imageKey.includes(`/${user.id}/`)) {
+            await this.fileUploadService.deleteFile(movie.imageKey, user);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.warn(`Failed to delete old image: ${errorMessage}`);
         }
-        backdropUrl = await this.fileUploadService.uploadFile(backdropFile, 'movies/backdrops');
       }
 
-      // Fetch genres if genreIds are provided, otherwise keep existing genres
+      if (backdropUrl !== undefined && backdropUrl !== movie.backdropUrl && movie.backdropKey) {
+        try {
+          // Só tenta excluir se o backdrop antigo for do próprio usuário
+          if (movie.backdropKey.includes(`/${user.id}/`)) {
+            await this.fileUploadService.deleteFile(movie.backdropKey, user);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.warn(`Failed to delete old image: ${errorMessage}`);
+        }
+      }
+
+      // Buscar gêneros se genreIds são fornecidos, caso contrário manter os gêneros existentes
       let genres = movie.genres;
       if (genreIds?.length) {
         genres = await this.genresService.findByIds(genreIds);
@@ -251,10 +283,19 @@ export class MoviesService {
       if (originalTitle !== undefined) movie.originalTitle = originalTitle;
       if (description !== undefined) movie.description = description;
       if (budget !== undefined) movie.budget = budget;
+      if (revenue !== undefined) movie.revenue = revenue;
+      if (profit !== undefined) movie.profit = profit;
       if (releaseDate !== undefined) movie.releaseDate = new Date(releaseDate);
       if (duration !== undefined) movie.duration = duration;
+      if (status !== undefined) movie.status = status;
+      if (language !== undefined) movie.language = language;
+      if (trailerUrl !== undefined) movie.trailerUrl = trailerUrl;
+      if (popularity !== undefined) movie.popularity = popularity;
+      if (voteCount !== undefined) movie.voteCount = voteCount;
       if (imageUrl !== undefined) movie.imageUrl = imageUrl;
+      if (imageKey !== undefined) movie.imageKey = imageKey;
       if (backdropUrl !== undefined) movie.backdropUrl = backdropUrl;
+      if (backdropKey !== undefined) movie.backdropKey = backdropKey;
       if (rating !== undefined) movie.rating = rating;
       if (genres) movie.genres = genres;
 
@@ -273,12 +314,25 @@ export class MoviesService {
       throw new ForbiddenException('You are not authorized to delete this movie');
     }
 
-    if (movie.imageUrl) {
-      await this.fileUploadService.deleteFile(movie.imageUrl);
+    // Excluir imagens associadas, se houver
+    if (movie.imageKey) {
+      try {
+        await this.fileUploadService.deleteFile(movie.imageKey, user);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Failed to update movie: ${message}`);
+        throw error;
+      }
     }
 
-    if (movie.backdropUrl) {
-      await this.fileUploadService.deleteFile(movie.backdropUrl);
+    if (movie.backdropKey) {
+      try {
+        await this.fileUploadService.deleteFile(movie.backdropKey, user);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Failed to update movie: ${message}`);
+        throw error;
+      }
     }
 
     await this.moviesRepository.remove(movie);

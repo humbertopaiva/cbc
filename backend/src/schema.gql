@@ -1,0 +1,195 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+input CreateMovieInput {
+  backdropKey: String
+  backdropUrl: String
+  budget: Float
+  description: String
+  duration: Int
+  genreIds: [ID!]
+  imageKey: String
+  imageUrl: String
+  language: String
+  originalTitle: String
+  popularity: Int
+  profit: Float
+  rating: Float
+  releaseDate: String
+  revenue: Float
+  status: String
+  title: String!
+  trailerUrl: String
+  voteCount: Int
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Genre {
+  id: ID!
+  movies: [Movie!]!
+  name: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Movie {
+  backdropKey: String
+  backdropUrl: String
+  budget: Float
+  createdAt: DateTime!
+  createdBy: User!
+  description: String
+  duration: Int
+  genres: [Genre!]!
+  id: ID!
+  imageKey: String
+  imageUrl: String
+  language: String
+  originalTitle: String
+  popularity: Int
+  profit: Float
+  rating: Float
+  releaseDate: DateTime
+  revenue: Float
+  status: String
+  title: String!
+  trailerUrl: String
+  updatedAt: DateTime!
+  voteCount: Int
+}
+
+type MovieConnection {
+  edges: [MovieEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type MovieEdge {
+  cursor: String!
+  node: Movie!
+}
+
+input MovieFiltersInput {
+  genreIds: [ID!]
+  maxDuration: Int
+  minDuration: Int
+  releaseDateFrom: String
+  releaseDateTo: String
+  search: String
+}
+
+input MovieOrderByInput {
+  direction: OrderDirection!
+  field: MovieOrderField!
+}
+
+enum MovieOrderField {
+  CREATED_AT
+  DURATION
+  RATING
+  RELEASE_DATE
+  TITLE
+}
+
+input MoviesPaginationInput {
+  after: String
+  first: Int
+  orderBy: MovieOrderByInput
+}
+
+type Mutation {
+  createMovie(input: CreateMovieInput!): Movie!
+  deleteFile(key: String!): Boolean!
+  deleteMovie(id: ID!): Boolean!
+  getPresignedUploadUrl(input: PresignedUrlInput!): PresignedUrlResponse!
+  login(input: LoginInput!): AuthPayload!
+  signUp(input: SignUpInput!): AuthPayload!
+  updateMovie(input: UpdateMovieInput!): Movie!
+}
+
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+input PresignedUrlInput {
+  contentType: String
+  filename: String!
+  folder: String!
+}
+
+type PresignedUrlResponse {
+  fileUrl: String!
+  key: String!
+  presignedUrl: String!
+}
+
+type Query {
+  genre(id: ID!): Genre!
+  genres: [Genre!]!
+  me: User!
+  movie(id: ID!): Movie!
+  movies(filters: MovieFiltersInput, pagination: MoviesPaginationInput): MovieConnection!
+}
+
+input SignUpInput {
+  email: String!
+  name: String!
+  password: String!
+  passwordConfirmation: String!
+}
+
+input UpdateMovieInput {
+  backdropKey: String
+  backdropUrl: String
+  budget: Float
+  description: String
+  duration: Int
+  genreIds: [ID!]
+  id: ID!
+  imageKey: String
+  imageUrl: String
+  language: String
+  originalTitle: String
+  popularity: Int
+  profit: Float
+  rating: Float
+  releaseDate: String
+  revenue: Float
+  status: String
+  title: String
+  trailerUrl: String
+  voteCount: Int
+}
+
+"""File upload scalar type"""
+scalar Upload
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  movies: [Movie!]
+  name: String!
+  updatedAt: DateTime!
+}

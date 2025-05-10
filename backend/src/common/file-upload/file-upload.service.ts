@@ -1,15 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
-import { Readable } from 'stream';
-
-interface FileUpload {
-  createReadStream: () => Readable;
-  filename: string;
-  mimetype: string;
-  encoding: string;
-}
+import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class FileUploadService {
@@ -17,79 +11,111 @@ export class FileUploadService {
   private s3Client: S3Client;
   private bucket: string;
 
-  constructor(private configService: ConfigService) {
-    this.bucket = this.configService.get<string>('S3_BUCKET', 'cubos-movies');
+  constructor(private readonly configService: ConfigService) {
+    // Usar o bucket específico fornecido
+    this.bucket = this.configService.get<string>('S3_BUCKET', 'cubos-movies-humberto');
+
+    // Configurar o cliente AWS S3
     this.s3Client = new S3Client({
-      region: this.configService.get<string>('S3_REGION', 'us-east-1'),
+      region: this.configService.get<string>('AWS_REGION', 'us-east-1'),
       credentials: {
-        accessKeyId: this.configService.get<string>('S3_ACCESS_KEY', ''),
-        secretAccessKey: this.configService.get<string>('S3_SECRET_KEY', ''),
+        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY', ''),
+        secretAccessKey: this.configService.get<string>('AWS_SECRET_KEY', ''),
       },
-      endpoint: this.configService.get<string>('S3_ENDPOINT'),
-      forcePathStyle: true, // Necessário para MinIO e outros serviços compatíveis com S3
+      endpoint: this.configService.get<string>('AWS_ENDPOINT'), // Optional: apenas para S3 compatível
+      forcePathStyle: this.configService.get<boolean>('S3_FORCE_PATH_STYLE', false), // true para MinIO/LocalStack
     });
+
+    this.logger.log(`S3 Client initialized for bucket: ${this.bucket}`);
   }
 
-  async uploadFile(file: Promise<FileUpload>, folder = 'uploads'): Promise<string> {
+  // Gerar uma chave única para upload
+  private generateKey(folder: string, userId: string, filename: string): string {
+    const extension = filename.split('.').pop() || '';
+    // Incluir o ID do usuário na estrutura de pastas para garantir isolamento
+    // Começar com 'imagens/', depois folder, userId e o nome do arquivo com UUID
+    return `imagens/${folder}/${userId}/${randomUUID()}.${extension}`;
+  }
+
+  async getPresignedUploadUrl(
+    folder: string,
+    filename: string,
+    user: User,
+  ): Promise<{ url: string; key: string }> {
     try {
-      const { createReadStream, filename, mimetype } = await file;
-      const extension = filename.split('.').pop() || '';
-      const key = `${folder}/${randomUUID()}.${extension}`;
+      // Gerar uma chave que inclui o caminho imagens/, o folder, e o ID do usuário para isolamento
+      const key = this.generateKey(folder, user.id, filename);
 
-      const fileStream = createReadStream();
-
-      const uploadParams = {
+      // Criar o comando de upload
+      const command = new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
-        Body: fileStream,
-        ContentType: mimetype,
+        ContentType: `image/${filename.split('.').pop()}`, // Ajuste conforme necessário
+        Metadata: {
+          'user-id': user.id, // Adicionar metadata com ID do usuário para rastreabilidade
+        },
+      });
+
+      // Gerar URL pré-assinado com expiração de 5 minutos (300 segundos)
+      const url = await getSignedUrl(this.s3Client, command, { expiresIn: 300 });
+
+      this.logger.log(`Generated presigned URL for ${key}: ${url}`);
+
+      return {
+        url,
+        key,
       };
-
-      await this.s3Client.send(new PutObjectCommand(uploadParams));
-
-      // Construir a URL completa do arquivo
-      const endpoint = this.configService.get<string>('S3_ENDPOINT');
-      const url = `${endpoint}/${this.bucket}/${key}`;
-
-      this.logger.log(`File uploaded successfully: ${url}`);
-
-      return url;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        this.logger.error(`Error uploading file: ${error.message}`);
-        throw new Error(`Could not upload file: ${error.message}`);
-      }
-      this.logger.error('Unknown error uploading file');
-      throw new Error('Could not upload file due to an unknown error');
+    } catch (error) {
+      this.logger.error(
+        `Error generating presigned URL: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new Error(
+        `Could not generate presigned URL: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
-  async deleteFile(fileUrl: string): Promise<boolean> {
+  getFileUrl(key: string): string {
+    // Para Amazon S3 padrão
+    const region = this.configService.get<string>('AWS_REGION', 'us-east-1');
+
+    // Se estiver usando um endpoint personalizado
+    const customEndpoint = this.configService.get<string>('AWS_PUBLIC_ENDPOINT');
+    if (customEndpoint) {
+      return `${customEndpoint}/${this.bucket}/${key}`;
+    }
+
+    // URL padrão para Amazon S3
+    return `https://${this.bucket}.s3.${region}.amazonaws.com/${key}`;
+  }
+
+  // Verificar se o usuário tem permissão para excluir o arquivo
+  private canDeleteFile(key: string, userId: string): boolean {
+    // Verificar se o caminho do arquivo contém o ID do usuário
+    return key.includes(`/${userId}/`);
+  }
+
+  async deleteFile(key: string, user: User): Promise<boolean> {
     try {
-      const urlParts = fileUrl.split('/');
-      const bucketIndex = urlParts.findIndex(part => part === this.bucket);
-
-      if (bucketIndex === -1 || bucketIndex >= urlParts.length - 1) {
-        throw new Error(`Invalid file URL: ${fileUrl}`);
+      // Verificar se o usuário tem permissão para excluir este arquivo
+      if (!this.canDeleteFile(key, user.id)) {
+        this.logger.warn(`Unauthorized delete attempt by user ${user.id} for file ${key}`);
+        throw new ForbiddenException('You do not have permission to delete this file');
       }
 
-      const key = urlParts.slice(bucketIndex + 1).join('/');
+      await this.s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
 
-      const deleteParams = {
-        Bucket: this.bucket,
-        Key: key,
-      };
-
-      await this.s3Client.send(new DeleteObjectCommand(deleteParams));
-      this.logger.log(`File deleted successfully: ${key}`);
-
+      this.logger.log(`Successfully deleted file: ${key}`);
       return true;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        this.logger.error(`Error deleting file: ${error.message}`);
-      } else {
-        this.logger.error('Unknown error deleting file');
-      }
+    } catch (error) {
+      this.logger.error(
+        `Error deleting file: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return false;
     }
   }
