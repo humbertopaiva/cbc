@@ -69,7 +69,11 @@ function LoginPage() {
               Esqueci minha senha
             </Link>
 
-            <Button type="submit" className="ml-auto" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="ml-auto bg-purple-800"
+              disabled={isLoading}
+            >
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </div>
