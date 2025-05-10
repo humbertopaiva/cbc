@@ -49,8 +49,16 @@ export class Movie {
   imageUrl?: string;
 
   @Field({ nullable: true })
+  @Column({ name: 'image_key', nullable: true })
+  imageKey?: string;
+
+  @Field({ nullable: true })
   @Column({ name: 'backdrop_url', nullable: true })
   backdropUrl?: string;
+
+  @Field({ nullable: true })
+  @Column({ name: 'backdrop_key', nullable: true })
+  backdropKey?: string;
 
   @Field(() => Float, { nullable: true })
   @Column({ type: 'decimal', precision: 3, scale: 1, nullable: true })

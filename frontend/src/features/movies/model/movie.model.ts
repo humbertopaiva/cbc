@@ -12,7 +12,9 @@ export interface Movie {
   releaseDate?: string
   duration?: number
   imageUrl?: string
+  imageKey?: string
   backdropUrl?: string
+  backdropKey?: string
   rating?: number
   createdBy: {
     id: string
@@ -59,7 +61,9 @@ export interface CreateMovieInput {
   duration?: number
   genreIds?: Array<string>
   imageUrl?: string
+  imageKey?: string
   backdropUrl?: string
+  backdropKey?: string
   rating?: number
 }
 
@@ -73,6 +77,8 @@ export interface UpdateMovieInput {
   duration?: number
   genreIds?: Array<string>
   imageUrl?: string
+  imageKey?: string
   backdropUrl?: string
+  backdropKey?: string
   rating?: number
 }

@@ -10,7 +10,9 @@ export const MOVIE_FRAGMENT = gql`
     releaseDate
     duration
     imageUrl
+    imageKey
     backdropUrl
+    backdropKey
     rating
     createdAt
     updatedAt
