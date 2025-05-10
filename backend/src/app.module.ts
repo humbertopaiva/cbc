@@ -12,6 +12,7 @@ import { User } from './users/entities/user.entity';
 import { Movie } from './movies/entities/movie.entity';
 import { Genre } from './genres/entities/genre.entity';
 import { PendingNotification } from './movies/entities/pending-notification.entity';
+import { EmailModule } from './common/email/email.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { PendingNotification } from './movies/entities/pending-notification.enti
     MoviesModule,
     GenresModule,
     CommonModule,
+    EmailModule,
   ],
 })
 export class AppModule {}
