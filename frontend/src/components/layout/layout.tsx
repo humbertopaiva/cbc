@@ -1,6 +1,7 @@
 import React from 'react'
 import { Header } from './header'
-import { AuthGuard } from '@/features/auth/guards/auth.guard'
+import { Main } from './main'
+import { Footer } from './footer'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -8,13 +9,10 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children}
-        </main>
-      </div>
-    </AuthGuard>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <Main>{children}</Main>
+      <Footer />
+    </div>
   )
 }

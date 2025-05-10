@@ -1,32 +1,43 @@
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
-import { useLoginViewModel } from '@/features/auth/viewmodel/login.viewmodel'
+import React from 'react'
+import { Link } from '@tanstack/react-router'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/features/auth/context/auth.context'
 
-export const Route = createFileRoute('/login')({
-  component: LoginPage,
+// Definindo o esquema de validação com Zod
+const loginSchema = z.object({
+  email: z.string().email('Digite um email válido'),
+  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
 })
 
-function LoginPage() {
-  const { register, handleSubmit, onSubmit, errors, isLoading } =
-    useLoginViewModel()
-  const { isAuthenticated } = useAuth()
-  const navigate = useNavigate()
+type LoginFormData = z.infer<typeof loginSchema>
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate({ to: '/' })
-    }
-  }, [isAuthenticated, navigate])
+interface LoginFormProps {
+  onSubmit: (data: LoginFormData) => void
+  isLoading?: boolean
+}
+
+export const LoginForm: React.FC<LoginFormProps> = ({
+  onSubmit,
+  isLoading = false,
+}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  })
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full p-8 bg-card rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6">CUBOS Movies</h1>
-        <h2 className="text-xl font-semibold text-center mb-6">Login</h2>
+    <div className="w-full max-w-md mx-auto">
+      <div className="bg-card shadow-md rounded-lg p-6 sm:p-8">
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Acesse sua conta
+        </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="email" className="block text-sm font-medium">
               Email
@@ -34,9 +45,9 @@ function LoginPage() {
             <input
               id="email"
               type="email"
-              {...register('email')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Digite seu email"
+              className="w-full p-2 border rounded-md bg-background"
+              {...register('email')}
             />
             {errors.email && (
               <p className="text-destructive text-sm">{errors.email.message}</p>
@@ -50,9 +61,9 @@ function LoginPage() {
             <input
               id="password"
               type="password"
-              {...register('password')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Digite sua senha"
+              className="w-full p-2 border rounded-md bg-background"
+              {...register('password')}
             />
             {errors.password && (
               <p className="text-destructive text-sm">
@@ -61,7 +72,7 @@ function LoginPage() {
             )}
           </div>
 
-          <div className="flex justify-between items-center pt-2">
+          <div className="flex justify-between items-center">
             <Link
               to="/forgot-password"
               className="text-primary text-sm hover:underline"
@@ -69,14 +80,14 @@ function LoginPage() {
               Esqueci minha senha
             </Link>
 
-            <Button type="submit" className="ml-auto" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading}>
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </div>
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-sm">
+          <p className="text-sm text-muted-foreground">
             Não tem uma conta?{' '}
             <Link to="/register" className="text-primary hover:underline">
               Registre-se
