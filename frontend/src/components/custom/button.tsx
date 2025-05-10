@@ -3,41 +3,71 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-// Aqui estamos pegando os props do botão original
-type ButtonProps = ComponentPropsWithoutRef<typeof ShadcnButton> & {
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'info' | 'danger'
+// Adicionamos um tipo específico para nossas variantes customizadas
+export type CustomButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'info'
+  | 'danger'
+  | 'default'
+  | 'destructive'
+  | 'outline'
+  | 'ghost'
+  | 'link'
+
+// Aqui removemos a restrição de tipo para o variant
+type ButtonProps = Omit<
+  ComponentPropsWithoutRef<typeof ShadcnButton>,
+  'variant'
+> & {
+  variant?: CustomButtonVariant
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, ...props }, ref) => {
+  ({ className, variant = 'default', ...props }, ref) => {
     const variantClasses = {
-      primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+      primary:
+        'bg-[var(--color-primary)] text-primary-foreground hover:bg-primary/90',
       secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
       success: 'bg-green-600 text-white hover:bg-green-700',
       warning: 'bg-amber-500 text-white hover:bg-amber-600',
       info: 'bg-sky-500 text-white hover:bg-sky-600',
       danger:
         'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+      default: '', // Deixe vazio para usar a variante padrão do shadcn
+      destructive: '',
+      outline: '',
+      ghost: '',
+      link: '',
     }
 
-    const buttonVariant = variantClasses[variant as keyof typeof variantClasses]
-      ? undefined
-      : variant
+    // Determine se devemos usar nossas classes personalizadas ou passar a variante para o Button original
+    const useCustomClass = [
+      'primary',
+      'secondary',
+      'success',
+      'warning',
+      'info',
+      'danger',
+    ].includes(variant)
 
+    // Ajusta a combinação de classes
     const combinedClassName = cn(
       'rounded-none',
-      variantClasses[variant as keyof typeof variantClasses],
+      useCustomClass ? variantClasses[variant] : '',
       className,
     )
 
-    return (
-      <ShadcnButton
-        ref={ref}
-        className={combinedClassName}
-        variant={buttonVariant}
-        {...props}
-      />
-    )
+    // Passa a variante original apenas se não for uma das nossas customizadas
+    const buttonProps = {
+      ...props,
+      className: combinedClassName,
+      variant: useCustomClass ? undefined : (variant as any),
+    }
+
+    return <ShadcnButton ref={ref} {...buttonProps} />
   },
 )
 

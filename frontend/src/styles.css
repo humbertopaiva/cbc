@@ -3,32 +3,52 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --color-mint-500: oklch(0.72 0.11 178);
+@layer base {
+  :root {
+    --background: 30 20% 96%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 14 90% 54%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 265 100% 47%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --font-dela-gothic: 'Dela Gothic One', cursive;
+  }
 
-  --color-primary-50: oklch(0.98 0.02 255);
-  --color-primary-100: oklch(0.97 0.03 262);
-  --color-primary-200: oklch(0.94 0.06 265);
-  --color-primary-300: oklch(0.9 0.09 267);
-  --color-primary-400: oklch(0.83 0.13 268);
-  --color-primary-500: oklch(0.76 0.17 270);
-  --color-primary-600: oklch(0.7 0.19 271);
-  --color-primary-700: oklch(0.64 0.21 273);
-  --color-primary-800: oklch(0.58 0.22 274);
-  --color-primary-900: oklch(0.52 0.22 276);
-  --color-primary-950: oklch(0.45 0.21 277);
-
-  --color-secondary-50: oklch(0.98 0.02 0);
-  --color-secondary-100: oklch(0.97 0.03 5);
-  --color-secondary-200: oklch(0.94 0.06 10);
-  --color-secondary-300: oklch(0.9 0.11 10);
-  --color-secondary-400: oklch(0.83 0.17 10);
-  --color-secondary-500: oklch(0.76 0.22 10);
-  --color-secondary-600: oklch(0.7 0.25 10);
-  --color-secondary-700: oklch(0.64 0.25 9);
-  --color-secondary-800: oklch(0.58 0.23 8);
-  --color-secondary-900: oklch(0.52 0.21 7);
-  --color-secondary-950: oklch(0.45 0.18 7);
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 14 90% 54%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 265 100% 47%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
 }
 
 body {
