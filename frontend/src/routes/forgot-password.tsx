@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/context/auth.context'
@@ -72,9 +72,7 @@ function ForgotPasswordPage() {
                 )}
               </div>
 
-              {message && !success && (
-                <p className="text-destructive text-sm">{message}</p>
-              )}
+              {message && <p className="text-destructive text-sm">{message}</p>}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Enviando...' : 'Recuperar Senha'}

@@ -3,10 +3,11 @@ import { AuthService } from './auth.service';
 import { SignUpInput } from './dto/signup.input';
 import { LoginInput } from './dto/login.input';
 import { AuthPayload } from './dto/auth-payload';
+
+import { ResetPasswordResponse } from './dto/reset-password-response';
+import { RequestPasswordResetResponse } from './dto/request-password-reset-response';
 import { RequestPasswordResetInput } from './dto/request-password-reset.input';
 import { ResetPasswordInput } from './dto/reset-password.input';
-import { RequestPasswordResetResponse } from './dto/request-password-reset-response';
-import { ResetPasswordResponse } from './dto/reset-password-response';
 
 @Resolver()
 export class AuthResolver {
