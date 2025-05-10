@@ -1,7 +1,7 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useLoginViewModel } from '@/features/auth/viewmodel/login.viewmodel'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/custom/button'
 import { useAuth } from '@/features/auth/context/auth.context'
 
 export const Route = createFileRoute('/login')({
@@ -21,11 +21,14 @@ function LoginPage() {
   }, [isAuthenticated, navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full p-8 bg-card rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6">CUBOS Movies</h1>
-        <h2 className="text-xl font-semibold text-center mb-6">Login</h2>
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: 'url(/bg-cubos-movies.png)' }}
+    >
+      {/* Overlay escuro/claro que se ajusta ao tema */}
+      <div className="absolute inset-0 bg-black/50 dark:bg-black/70"></div>
 
+      <div className="relative z-10 max-w-md w-full p-8 bg-card/90 backdrop-blur-sm rounded-lg shadow-xl border border-border">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="block text-sm font-medium">
@@ -35,7 +38,7 @@ function LoginPage() {
               id="email"
               type="email"
               {...register('email')}
-              className="w-full p-2 border rounded-md bg-background"
+              className="w-full p-3 border rounded-md bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite seu email"
             />
             {errors.email && (
@@ -51,7 +54,7 @@ function LoginPage() {
               id="password"
               type="password"
               {...register('password')}
-              className="w-full p-2 border rounded-md bg-background"
+              className="w-full p-3 border rounded-md bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite sua senha"
             />
             {errors.password && (
@@ -69,7 +72,12 @@ function LoginPage() {
               Esqueci minha senha
             </Link>
 
-            <Button type="submit" className="ml-auto" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="ml-auto"
+              disabled={isLoading}
+              variant="primary"
+            >
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </div>

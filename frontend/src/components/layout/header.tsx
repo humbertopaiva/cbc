@@ -9,7 +9,7 @@ export const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth()
 
   return (
-    <header className="bg-card shadow-sm">
+    <header className="bg-card  shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
           {/* Logo à esquerda */}
