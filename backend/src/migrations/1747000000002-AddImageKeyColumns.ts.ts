@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddImageKeyColumns1747000000001 implements MigrationInterface {
+export class AddImageKeyColumns1747000000002 implements MigrationInterface {
+  name = 'AddImageKeyColumns1747000000002';
+
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       ALTER TABLE "movies" 
