@@ -176,6 +176,7 @@ export class MoviesService {
         trailerUrl,
         popularity,
         voteCount,
+        tagline, // Adicionando a desestruturação da tagline aqui
       } = createMovieInput;
 
       // Calcular lucro se orçamento e receita estiverem disponíveis
@@ -252,6 +253,7 @@ export class MoviesService {
         trailerUrl,
         popularity,
         voteCount,
+        tagline, // Adicionando a desestruturação da tagline aqui
       } = updateMovieInput;
 
       const movie = await this.findById(id);
