@@ -6,6 +6,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { AuthResolver } from './auth.resolver';
       }),
     }),
     UsersModule,
+    TypeOrmModule.forFeature([PasswordResetToken]),
   ],
   providers: [AuthService, AuthResolver, JwtStrategy],
   exports: [JwtStrategy, PassportModule, AuthService],

@@ -182,7 +182,9 @@ input UpdateMovieInput {
   voteCount: Int
 }
 
-"""File upload scalar type"""
+"""
+File upload scalar type
+"""
 scalar Upload
 
 type User {

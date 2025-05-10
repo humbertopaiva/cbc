@@ -13,7 +13,9 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
+import { Route as ForgotPasswordImport } from './routes/forgot-password'
 import { Route as IndexImport } from './routes/index'
+import { Route as ResetPasswordTokenImport } from './routes/reset-password/$token'
 import { Route as MoviesNewImport } from './routes/movies/new'
 import { Route as MoviesEditImport } from './routes/movies/edit'
 import { Route as MoviesIdImport } from './routes/movies/$id'
@@ -32,9 +34,21 @@ const LoginRoute = LoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ForgotPasswordRoute = ForgotPasswordImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ResetPasswordTokenRoute = ResetPasswordTokenImport.update({
+  id: '/reset-password/$token',
+  path: '/reset-password/$token',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -65,6 +79,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordImport
       parentRoute: typeof rootRoute
     }
     '/login': {
@@ -102,6 +123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MoviesNewImport
       parentRoute: typeof rootRoute
     }
+    '/reset-password/$token': {
+      id: '/reset-password/$token'
+      path: '/reset-password/$token'
+      fullPath: '/reset-password/$token'
+      preLoaderRoute: typeof ResetPasswordTokenImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -109,76 +137,92 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/movies/$id': typeof MoviesIdRoute
   '/movies/edit': typeof MoviesEditRoute
   '/movies/new': typeof MoviesNewRoute
+  '/reset-password/$token': typeof ResetPasswordTokenRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/movies/$id': typeof MoviesIdRoute
   '/movies/edit': typeof MoviesEditRoute
   '/movies/new': typeof MoviesNewRoute
+  '/reset-password/$token': typeof ResetPasswordTokenRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/movies/$id': typeof MoviesIdRoute
   '/movies/edit': typeof MoviesEditRoute
   '/movies/new': typeof MoviesNewRoute
+  '/reset-password/$token': typeof ResetPasswordTokenRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot-password'
     | '/login'
     | '/register'
     | '/movies/$id'
     | '/movies/edit'
     | '/movies/new'
+    | '/reset-password/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/forgot-password'
     | '/login'
     | '/register'
     | '/movies/$id'
     | '/movies/edit'
     | '/movies/new'
+    | '/reset-password/$token'
   id:
     | '__root__'
     | '/'
+    | '/forgot-password'
     | '/login'
     | '/register'
     | '/movies/$id'
     | '/movies/edit'
     | '/movies/new'
+    | '/reset-password/$token'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   MoviesIdRoute: typeof MoviesIdRoute
   MoviesEditRoute: typeof MoviesEditRoute
   MoviesNewRoute: typeof MoviesNewRoute
+  ResetPasswordTokenRoute: typeof ResetPasswordTokenRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   MoviesIdRoute: MoviesIdRoute,
   MoviesEditRoute: MoviesEditRoute,
   MoviesNewRoute: MoviesNewRoute,
+  ResetPasswordTokenRoute: ResetPasswordTokenRoute,
 }
 
 export const routeTree = rootRoute
@@ -192,15 +236,20 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/forgot-password",
         "/login",
         "/register",
         "/movies/$id",
         "/movies/edit",
-        "/movies/new"
+        "/movies/new",
+        "/reset-password/$token"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/forgot-password": {
+      "filePath": "forgot-password.tsx"
     },
     "/login": {
       "filePath": "login.tsx"
@@ -216,6 +265,9 @@ export const routeTree = rootRoute
     },
     "/movies/new": {
       "filePath": "movies/new.tsx"
+    },
+    "/reset-password/$token": {
+      "filePath": "reset-password/$token.tsx"
     }
   }
 }

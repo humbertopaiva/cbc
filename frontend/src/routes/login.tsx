@@ -59,6 +59,22 @@ function LoginPage() {
                 {errors.password.message}
               </p>
             )}
+            <div className="mt-4 text-center space-y-2">
+              <p className="text-sm">
+                Não tem uma conta?{' '}
+                <Link to="/register" className="text-primary hover:underline">
+                  Registre-se
+                </Link>
+              </p>
+              <p className="text-sm">
+                <Link
+                  to="/forgot-password"
+                  className="text-primary hover:underline"
+                >
+                  Esqueceu sua senha?
+                </Link>
+              </p>
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
