@@ -116,6 +116,8 @@ type Mutation {
   deleteMovie(id: ID!): Boolean!
   getPresignedUploadUrl(input: PresignedUrlInput!): PresignedUrlResponse!
   login(input: LoginInput!): AuthPayload!
+  requestPasswordReset(input: RequestPasswordResetInput!): RequestPasswordResetResponse!
+  resetPassword(input: ResetPasswordInput!): ResetPasswordResponse!
   signUp(input: SignUpInput!): AuthPayload!
   updateMovie(input: UpdateMovieInput!): Movie!
 }
@@ -152,6 +154,25 @@ type Query {
   movies(filters: MovieFiltersInput, pagination: MoviesPaginationInput): MovieConnection!
 }
 
+input RequestPasswordResetInput {
+  email: String!
+}
+
+type RequestPasswordResetResponse {
+  message: String!
+  success: Boolean!
+}
+
+input ResetPasswordInput {
+  newPassword: String!
+  token: String!
+}
+
+type ResetPasswordResponse {
+  message: String!
+  success: Boolean!
+}
+
 input SignUpInput {
   email: String!
   name: String!
@@ -182,9 +203,7 @@ input UpdateMovieInput {
   voteCount: Int
 }
 
-"""
-File upload scalar type
-"""
+"""File upload scalar type"""
 scalar Upload
 
 type User {

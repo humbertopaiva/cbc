@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Resend from 'resend';
+import { Resend } from 'resend';
 
 interface SendEmailParams {
   to: string;
@@ -14,16 +14,23 @@ interface SendPasswordResetParams {
   userName: string;
 }
 
+interface SendReleaseNotificationParams {
+  to: string;
+  subject: string;
+  movieTitle: string;
+  releaseDate: Date;
+}
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private resend = null;
+  private resend: Resend | null = null;
 
   constructor(private configService: ConfigService) {
     const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
 
     if (resendApiKey) {
-      this.resend = Resend(resendApiKey);
+      this.resend = new Resend(resendApiKey);
       this.logger.log('Resend email service initialized');
     } else {
       this.logger.warn('RESEND_API_KEY not found, falling back to console logging');
@@ -34,14 +41,21 @@ export class EmailService {
     try {
       if (this.resend) {
         const fromEmail = this.configService.get<string>('MAIL_FROM') || 'noreply@cubosmovies.com';
-        const result = await this.resend.emails.send({
+
+        // Usando o formato que a documentação mostra
+        const { data, error } = await this.resend.emails.send({
           from: `CUBOS Movies <${fromEmail}>`,
-          to,
+          to: [to], // A API espera um array de destinatários
           subject,
           html,
         });
 
-        this.logger.log(`Email sent to ${to}: ${result.id}`);
+        if (error) {
+          this.logger.error(`Failed to send email: ${error.message}`);
+          return false;
+        }
+
+        this.logger.log(`Email sent to ${to}: ${data?.id}`);
         return true;
       } else {
         // Fallback para ambiente de desenvolvimento sem API key do Resend
@@ -99,6 +113,44 @@ export class EmailService {
     return this.sendEmail({
       to,
       subject: 'Recuperação de Senha - CUBOS Movies',
+      html,
+    });
+  }
+
+  async sendReleaseNotification({
+    to,
+    subject,
+    movieTitle,
+    releaseDate,
+  }: SendReleaseNotificationParams): Promise<void> {
+    const formattedDate = new Date(releaseDate).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #6200ea; text-align: center;">Lançamento de Filme Hoje! 🎬</h1>
+        <div style="background-color: #f5f5f5; border-radius: 8px; padding: 20px; margin-top: 20px;">
+          <h2 style="color: #333;">${movieTitle}</h2>
+          <p style="font-size: 16px; color: #555;">
+            O filme <strong>${movieTitle}</strong> está sendo lançado hoje, ${formattedDate}!
+          </p>
+          <p style="font-size: 16px; color: #555;">
+            Não se esqueça de conferir este lançamento que você adicionou à nossa plataforma.
+          </p>
+        </div>
+        <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+          Este é um email automático da plataforma CUBOS Movies.
+          Por favor, não responda a este email.
+        </p>
+      </div>
+    `;
+
+    await this.sendEmail({
+      to,
+      subject,
       html,
     });
   }
