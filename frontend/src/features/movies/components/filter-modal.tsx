@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { FiFilter, FiX } from 'react-icons/fi'
+import { MovieStatus } from '../model/movie.model'
 import type { Genre, MovieFilters } from '../model/movie.model'
 import { Button } from '@/components/ui/button'
 
@@ -33,6 +34,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
         (option) => option.value,
       )
       setFilters((prev) => ({ ...prev, genreIds: selectedOptions }))
+    } else if (name === 'status') {
+      setFilters((prev) => ({
+        ...prev,
+        status: value ? (value as MovieStatus) : undefined,
+      }))
     } else {
       setFilters((prev) => ({
         ...prev,
@@ -93,6 +99,44 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   onChange={handleChange}
                   className="w-full p-2 border rounded-md bg-background"
                   placeholder="Título, título original ou descrição"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="status"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Situação
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={filters.status || ''}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded-md bg-background"
+                >
+                  <option value="">Todas as situações</option>
+                  <option value={MovieStatus.RELEASED}>Lançado</option>
+                  <option value={MovieStatus.IN_PRODUCTION}>Em Produção</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="language"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Idioma
+                </label>
+                <input
+                  id="language"
+                  name="language"
+                  type="text"
+                  value={filters.language || ''}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded-md bg-background"
+                  placeholder="Filtrar por idioma"
                 />
               </div>
 

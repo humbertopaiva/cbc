@@ -10,6 +10,7 @@ import {
   updateMovieUseCase,
 } from '../usecases'
 import { movieFormSchema } from '../schemas/movie.schema'
+import { MovieStatus } from '../model/movie.model'
 import type {
   CreateMovieInput,
   Genre,
@@ -44,6 +45,11 @@ export class MovieFormViewModel {
 
   async createMovie(input: CreateMovieInput): Promise<Movie | null> {
     try {
+      // Calcular o lucro se orçamento e receita estiverem disponíveis
+      if (input.budget !== undefined && input.revenue !== undefined) {
+        input.profit = input.revenue - input.budget
+      }
+
       const result = await createMovieUseCase.execute(input)
       toast.success('Filme criado com sucesso!')
       return result
@@ -56,6 +62,11 @@ export class MovieFormViewModel {
 
   async updateMovie(input: UpdateMovieInput): Promise<Movie | null> {
     try {
+      // Calcular o lucro se orçamento e receita estiverem disponíveis
+      if (input.budget !== undefined && input.revenue !== undefined) {
+        input.profit = input.revenue - input.budget
+      }
+
       const result = await updateMovieUseCase.execute(input)
       toast.success('Filme atualizado com sucesso!')
       return result
@@ -86,6 +97,9 @@ export function useCreateMovieViewModel() {
       title: '',
       originalTitle: '',
       description: '',
+      status: MovieStatus.IN_PRODUCTION,
+      language: '',
+      trailerUrl: '',
       genreIds: [],
       imageUrl: '',
       backdropUrl: '',
@@ -101,13 +115,20 @@ export function useCreateMovieViewModel() {
 
   const onSubmit = async (data: CreateMovieFormData): Promise<void> => {
     setSubmitting(true)
+
     const input: CreateMovieInput = {
       title: data.title,
       originalTitle: data.originalTitle || undefined,
       description: data.description || undefined,
       budget: data.budget,
+      revenue: data.revenue,
       releaseDate: data.releaseDate || undefined,
       duration: data.duration,
+      status: data.status,
+      language: data.language || undefined,
+      trailerUrl: data.trailerUrl || undefined,
+      popularity: data.popularity,
+      voteCount: data.voteCount,
       genreIds: data.genreIds || undefined,
       imageUrl: data.imageUrl || undefined,
       imageKey: data.imageKey || undefined,
@@ -156,9 +177,13 @@ export function useUpdateMovieViewModel(id: string) {
   } = useForm<UpdateMovieFormData>({
     resolver: zodResolver(movieFormSchema),
     defaultValues: {
+      id,
       title: '',
       originalTitle: '',
       description: '',
+      status: MovieStatus.IN_PRODUCTION,
+      language: '',
+      trailerUrl: '',
       genreIds: [],
       imageUrl: '',
       backdropUrl: '',
@@ -176,17 +201,26 @@ export function useUpdateMovieViewModel(id: string) {
       setMovie(movieData)
       // Preencher o formulário com os dados do filme
       reset({
+        id,
         title: movieData.title,
         originalTitle: movieData.originalTitle || '',
         description: movieData.description || '',
         budget: movieData.budget,
+        revenue: movieData.revenue,
         releaseDate: movieData.releaseDate
           ? new Date(movieData.releaseDate).toISOString().split('T')[0]
           : undefined,
         duration: movieData.duration,
+        status: movieData.status || MovieStatus.IN_PRODUCTION,
+        language: movieData.language || '',
+        trailerUrl: movieData.trailerUrl || '',
+        popularity: movieData.popularity,
+        voteCount: movieData.voteCount,
         genreIds: movieData.genres.map((g) => g.id),
         imageUrl: movieData.imageUrl || '',
+        imageKey: movieData.imageKey || '',
         backdropUrl: movieData.backdropUrl || '',
+        backdropKey: movieData.backdropKey || '',
         rating: movieData.rating,
       })
     }
@@ -197,14 +231,21 @@ export function useUpdateMovieViewModel(id: string) {
 
   const onSubmit = async (data: UpdateMovieFormData): Promise<void> => {
     setSubmitting(true)
+
     const input: UpdateMovieInput = {
       id,
       title: data.title,
       originalTitle: data.originalTitle || undefined,
       description: data.description || undefined,
       budget: data.budget,
+      revenue: data.revenue,
       releaseDate: data.releaseDate || undefined,
       duration: data.duration,
+      status: data.status,
+      language: data.language || undefined,
+      trailerUrl: data.trailerUrl || undefined,
+      popularity: data.popularity,
+      voteCount: data.voteCount,
       genreIds: data.genreIds || undefined,
       imageUrl: data.imageUrl || undefined,
       imageKey: data.imageKey || undefined,
@@ -217,7 +258,7 @@ export function useUpdateMovieViewModel(id: string) {
     setSubmitting(false)
 
     if (result) {
-      navigate({ to: '/' })
+      navigate({ to: `/movies/${id}` })
     }
   }
 

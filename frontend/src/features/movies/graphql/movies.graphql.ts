@@ -7,8 +7,15 @@ export const MOVIE_FRAGMENT = gql`
     originalTitle
     description
     budget
+    revenue
+    profit
     releaseDate
     duration
+    status
+    language
+    trailerUrl
+    popularity
+    voteCount
     imageUrl
     imageKey
     backdropUrl

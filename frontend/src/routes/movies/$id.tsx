@@ -1,11 +1,12 @@
 import { Link, createFileRoute, useParams } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { FiArrowLeft, FiEdit, FiTrash2 } from 'react-icons/fi'
+import { FiArrowLeft, FiEdit, FiTrash2, FiYoutube } from 'react-icons/fi'
 import { AuthGuard } from '@/features/auth/guards/auth.guard'
 import { Button } from '@/components/ui/button'
 import { useMovieDetailsViewModel } from '@/features/movies/viewmodel/movie-details.viewmodel'
+import { MovieStatus } from '@/features/movies/model/movie.model'
 
 export const Route = createFileRoute('/movies/$id')({
   component: MovieDetailsPage,
@@ -15,6 +16,18 @@ function MovieDetailsPage() {
   const { id } = useParams({ from: '/movies/$id' })
   const { movie, loading, isDeleting, fetchMovie, handleDelete } =
     useMovieDetailsViewModel(id)
+  const [showTrailer, setShowTrailer] = useState(false)
+
+  // Função para extrair o ID do vídeo do YouTube da URL
+  const getYoutubeVideoId = (url: string) => {
+    if (!url) return null
+
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+    const match = url.match(regExp)
+
+    return match && match[2].length === 11 ? match[2] : null
+  }
 
   useEffect(() => {
     fetchMovie()
@@ -56,6 +69,10 @@ function MovieDetailsPage() {
       </AuthGuard>
     )
   }
+
+  const youtubeVideoId = movie.trailerUrl
+    ? getYoutubeVideoId(movie.trailerUrl)
+    : null
 
   return (
     <AuthGuard>
@@ -109,6 +126,19 @@ function MovieDetailsPage() {
                 )}
               </div>
 
+              {youtubeVideoId && (
+                <div className="mt-4">
+                  <Button
+                    variant="outline"
+                    className="w-full flex items-center justify-center gap-2"
+                    onClick={() => setShowTrailer(true)}
+                  >
+                    <FiYoutube className="w-5 h-5 text-red-500" />
+                    Assistir Trailer
+                  </Button>
+                </div>
+              )}
+
               <div className="mt-4 space-y-2">
                 <Button
                   as={Link}
@@ -159,6 +189,28 @@ function MovieDetailsPage() {
                       </div>
                     )}
 
+                    {movie.status && (
+                      <div>
+                        <h3 className="font-medium text-muted-foreground">
+                          Situação
+                        </h3>
+                        <p className="mt-1">
+                          {movie.status === MovieStatus.RELEASED
+                            ? 'Lançado'
+                            : 'Em Produção'}
+                        </p>
+                      </div>
+                    )}
+
+                    {movie.language && (
+                      <div>
+                        <h3 className="font-medium text-muted-foreground">
+                          Idioma
+                        </h3>
+                        <p className="mt-1">{movie.language}</p>
+                      </div>
+                    )}
+
                     {movie.duration && (
                       <div>
                         <h3 className="font-medium text-muted-foreground">
@@ -168,7 +220,7 @@ function MovieDetailsPage() {
                       </div>
                     )}
 
-                    {movie.budget && (
+                    {movie.budget !== undefined && (
                       <div>
                         <h3 className="font-medium text-muted-foreground">
                           Orçamento
@@ -179,6 +231,54 @@ function MovieDetailsPage() {
                             currency: 'USD',
                           }).format(movie.budget)}
                         </p>
+                      </div>
+                    )}
+
+                    {movie.revenue !== undefined && (
+                      <div>
+                        <h3 className="font-medium text-muted-foreground">
+                          Receita
+                        </h3>
+                        <p className="mt-1">
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'USD',
+                          }).format(movie.revenue)}
+                        </p>
+                      </div>
+                    )}
+
+                    {movie.profit !== undefined && (
+                      <div>
+                        <h3 className="font-medium text-muted-foreground">
+                          Lucro
+                        </h3>
+                        <p
+                          className={`mt-1 ${movie.profit < 0 ? 'text-red-500' : 'text-green-500'}`}
+                        >
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'USD',
+                          }).format(movie.profit)}
+                        </p>
+                      </div>
+                    )}
+
+                    {movie.popularity !== undefined && (
+                      <div>
+                        <h3 className="font-medium text-muted-foreground">
+                          Popularidade
+                        </h3>
+                        <p className="mt-1">{movie.popularity}</p>
+                      </div>
+                    )}
+
+                    {movie.voteCount !== undefined && (
+                      <div>
+                        <h3 className="font-medium text-muted-foreground">
+                          Número de Votos
+                        </h3>
+                        <p className="mt-1">{movie.voteCount}</p>
                       </div>
                     )}
 
@@ -235,6 +335,30 @@ function MovieDetailsPage() {
               </div>
             </div>
           </div>
+
+          {showTrailer && youtubeVideoId && (
+            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+              <div className="relative w-full max-w-3xl">
+                <button
+                  className="absolute -top-8 right-0 text-white"
+                  onClick={() => setShowTrailer(false)}
+                >
+                  Fechar
+                </button>
+                <div className="aspect-video">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </AuthGuard>

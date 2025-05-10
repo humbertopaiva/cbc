@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { MovieStatus } from '../model/movie.model'
 
 // Esquema para validar os filtros
 export const movieFiltersSchema = z.object({
@@ -7,6 +8,8 @@ export const movieFiltersSchema = z.object({
   maxDuration: z.number().int().positive().optional(),
   releaseDateFrom: z.string().optional(),
   releaseDateTo: z.string().optional(),
+  status: z.nativeEnum(MovieStatus).optional(),
+  language: z.string().optional(),
   genreIds: z.array(z.string().uuid()).optional(),
 })
 
@@ -19,11 +22,29 @@ export const createMovieSchema = z.object({
     .number()
     .positive('O orçamento deve ser um valor positivo')
     .optional(),
+  revenue: z
+    .number()
+    .positive('A receita deve ser um valor positivo')
+    .optional(),
+  profit: z.number().optional(),
   releaseDate: z.string().optional(),
   duration: z
     .number()
     .int()
     .positive('A duração deve ser um valor inteiro positivo')
+    .optional(),
+  status: z.nativeEnum(MovieStatus).optional(),
+  language: z.string().optional(),
+  trailerUrl: z.string().url('O URL do trailer deve ser válido').optional(),
+  popularity: z
+    .number()
+    .int()
+    .nonnegative('A popularidade deve ser um número inteiro não negativo')
+    .optional(),
+  voteCount: z
+    .number()
+    .int()
+    .nonnegative('A contagem de votos deve ser um número inteiro não negativo')
     .optional(),
   genreIds: z.array(z.string().uuid()).optional(),
   imageUrl: z.string().url('A URL da imagem deve ser válida').optional(),
@@ -51,8 +72,31 @@ export const movieFormSchema = z.object({
     .string()
     .optional()
     .transform((val) => (val ? parseFloat(val) : undefined)),
+  revenue: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseFloat(val) : undefined)),
+  profit: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseFloat(val) : undefined)),
   releaseDate: z.string().optional(),
   duration: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val) : undefined)),
+  status: z.nativeEnum(MovieStatus).optional(),
+  language: z.string().optional(),
+  trailerUrl: z
+    .string()
+    .url('O URL do trailer deve ser válido')
+    .optional()
+    .or(z.literal('')),
+  popularity: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val) : undefined)),
+  voteCount: z
     .string()
     .optional()
     .transform((val) => (val ? parseInt(val) : undefined)),
