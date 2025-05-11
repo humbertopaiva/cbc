@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FiFilter, FiX } from 'react-icons/fi'
 import { MovieStatus } from '../model/movie.model'
 import type { Genre, MovieFilters } from '../model/movie.model'
@@ -58,6 +58,16 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     onApplyFilters(emptyFilters)
     handleClose()
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
+  }, [isOpen])
 
   return (
     <>

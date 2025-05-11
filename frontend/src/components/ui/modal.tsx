@@ -11,6 +11,7 @@ interface ModalProps {
   className?: string
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
   showCloseButton?: boolean
+  position?: 'center' | 'right' // Nova propriedade para controlar a posição
 }
 
 export function Modal({
@@ -22,6 +23,7 @@ export function Modal({
   className,
   maxWidth = 'md',
   showCloseButton = true,
+  position = 'right', // Valor padrão é centralizado
 }: ModalProps) {
   // Fechar o modal ao pressionar Escape
   const handleKeyDown = useCallback(
@@ -37,13 +39,11 @@ export function Modal({
   useEffect(() => {
     if (open) {
       document.addEventListener('keydown', handleKeyDown)
-      // Prevenir scroll no body quando o modal estiver aberto
       document.body.style.overflow = 'hidden'
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
-      // Restaurar scroll quando o modal fechar
       document.body.style.overflow = 'auto'
     }
   }, [open, handleKeyDown])
@@ -59,24 +59,38 @@ export function Modal({
     full: 'max-w-full',
   }[maxWidth]
 
+  // Classes condicionais para posicionamento
+  const containerPositionClass =
+    position === 'right'
+      ? 'justify-end items-stretch' // Alinhar à direita
+      : 'justify-center items-center' // Centralizado (comportamento padrão)
+
+  const modalPositionClass =
+    position === 'right'
+      ? 'h-full ml-auto' // Altura completa e arredondamento apenas à esquerda
+      : 'h-full' // Comportamento padrão
+
   return (
     <Fragment>
       {/* Backdrop com blur */}
       <div
-        className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-foreground/20 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal Container */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+      <div className={`fixed inset-0 z-50 flex p-0 ${containerPositionClass}`}>
         <div
           className={cn(
-            'h-full w-full',
+            modalPositionClass,
+            'w-full',
             maxWidthClass,
             'bg-card shadow-lg overflow-hidden',
             'flex flex-col',
-            'animate-in fade-in-0 zoom-in-95 duration-300',
+            position === 'right'
+              ? 'animate-in slide-in-from-right duration-300'
+              : 'animate-in fade-in-0 zoom-in-95 duration-300',
             className,
           )}
           onClick={(e) => e.stopPropagation()}
