@@ -112,7 +112,7 @@ export const MoviePagination: React.FC<MoviePaginationProps> = ({
 
   return (
     <Pagination className="my-8">
-      <PaginationContent>
+      <PaginationContent className="gap-2">
         <PaginationItem>
           <PaginationPrevious
             href="#"
