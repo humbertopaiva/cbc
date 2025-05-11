@@ -1,13 +1,39 @@
 import React from 'react'
+import { cn } from '@/lib/utils'
 
 interface MainProps {
   children: React.ReactNode
+  className?: string
+  withBackground?: boolean
 }
 
-export const Main: React.FC<MainProps> = ({ children }) => {
+export const Main: React.FC<MainProps> = ({
+  children,
+  className,
+  withBackground = true,
+}) => {
   return (
-    <main className="flex-1 w-full bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
+    <main
+      className={cn(
+        'flex-1 w-full relative',
+        withBackground && 'bg-cover bg-center',
+        className,
+      )}
+      style={
+        withBackground
+          ? { backgroundImage: 'url(/bg-cubos-movies.png)' }
+          : undefined
+      }
+    >
+      {withBackground && (
+        <div className="absolute inset-0 bg-black/50 dark:bg-black/70 z-0"></div>
+      )}
+      <div
+        className={cn(
+          'relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10',
+          withBackground && 'text-white',
+        )}
+      >
         {children}
       </div>
     </main>

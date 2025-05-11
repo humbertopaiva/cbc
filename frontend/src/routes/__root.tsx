@@ -7,13 +7,16 @@ import { ThemeProvider } from '@/features/theme/context/theme.context'
 import { apolloClient } from '@/core/lib/apollo'
 import 'react-toastify/dist/ReactToastify.css'
 import '@/styles.css'
+import { Layout } from '@/components/layout'
 
 export const Route = createRootRoute({
   component: () => (
     <ApolloProvider client={apolloClient}>
       <ThemeProvider>
         <AuthProvider>
-          <Outlet />
+          <Layout>
+            <Outlet />
+          </Layout>
           <ToastContainer position="top-right" autoClose={3000} />
           <TanStackRouterDevtools />
         </AuthProvider>
