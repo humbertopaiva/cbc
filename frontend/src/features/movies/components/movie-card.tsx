@@ -42,7 +42,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
           {/* Rating Circle que aparece no centro apenas quando hover */}
           {isHovering && movie.rating && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <RatingCircle rating={movie.rating} size={60} />
+              <RatingCircle rating={movie.rating} size={96} />
             </div>
           )}
         </div>
