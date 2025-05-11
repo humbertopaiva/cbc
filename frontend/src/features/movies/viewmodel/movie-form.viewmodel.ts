@@ -169,10 +169,7 @@ export function useCreateMovieViewModel() {
     }
   }
 
-  // Manter fetchGenres para compatibilidade, embora o React Query já faça isso automaticamente
   const fetchGenres = useCallback(async (): Promise<void> => {
-    // O React Query já está buscando os gêneros, então esta função é apenas um wrapper
-    // mas mantemos para compatibilidade com o código existente
     await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GENRES] })
   }, [queryClient])
 
@@ -193,7 +190,6 @@ export function useCreateMovieViewModel() {
 
 export function useUpdateMovieViewModel(id: string) {
   const [submitting, setSubmitting] = useState(false)
-  const navigate = useNavigate()
   const viewModel = new MovieFormViewModel()
   const queryClient = useQueryClient()
 

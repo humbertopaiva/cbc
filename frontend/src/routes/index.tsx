@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { FiFilm, FiPlus, FiSearch } from 'react-icons/fi'
 import { Button } from '@/components/ui/button'
