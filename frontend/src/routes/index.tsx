@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useMoviesListViewModel } from '@/features/movies/viewmodel/movies-list.viewmodel'
 import { MovieCard } from '@/features/movies/components/movie-card'
 import { FilterModal } from '@/features/movies/components/filter-modal'
-import { Layout } from '@/components/layout/layout'
+import { MoviePagination } from '@/features/movies/components/movie-pagination'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -16,11 +16,12 @@ function HomePage() {
     movies,
     genres,
     loading,
-    loadingMore,
     filters,
+    currentPage,
+    totalPages,
     initialize,
     handleFilterChange,
-    handleLoadMore,
+    handlePageChange,
   } = useMoviesListViewModel()
 
   useEffect(() => {
@@ -28,7 +29,7 @@ function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-8">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
           <div className="flex flex-col md:flex-row gap-2">
@@ -96,45 +97,12 @@ function HomePage() {
               ))}
             </div>
 
-            {movies?.pageInfo.hasNextPage && (
-              <div className="flex justify-center mt-8">
-                <Button
-                  variant="outline"
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                  className="min-w-40"
-                >
-                  {loadingMore ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-t-current rounded-full animate-spin"></div>
-                      <span>Carregando...</span>
-                    </div>
-                  ) : (
-                    'Carregar mais'
-                  )}
-                </Button>
-              </div>
-            )}
-
-            {movies?.pageInfo.hasNextPage && (
-              <div className="flex justify-center mt-8">
-                <Button
-                  variant="outline"
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                  className="min-w-40"
-                >
-                  {loadingMore ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-t-current rounded-full animate-spin"></div>
-                      <span>Carregando...</span>
-                    </div>
-                  ) : (
-                    'Carregar mais'
-                  )}
-                </Button>
-              </div>
-            )}
+            <MoviePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              loading={loading}
+              onPageChange={handlePageChange}
+            />
           </>
         )}
       </main>

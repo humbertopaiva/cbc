@@ -6,12 +6,15 @@ import type { Genre, MovieConnection, MovieFilters } from '../model/movie.model'
 export class MoviesListViewModel {
   async getMovies(
     filters?: MovieFilters,
-    first: number = 10,
-    after?: string,
-    orderBy?: { field: string; direction: 'ASC' | 'DESC' },
+    pagination?: {
+      page?: number
+      pageSize?: number
+      after?: string
+      orderBy?: { field: string; direction: 'ASC' | 'DESC' }
+    },
   ): Promise<MovieConnection | null> {
     try {
-      return await getMoviesUseCase.execute(filters, first, after, orderBy)
+      return await getMoviesUseCase.execute(filters, pagination)
     } catch (error) {
       console.error('Error fetching movies:', error)
       toast.error('Erro ao carregar filmes')
@@ -42,45 +45,51 @@ export function useMoviesListViewModel() {
     direction: 'DESC',
   })
   const [loading, setLoading] = useState(false)
-  const [loadingMore, setLoadingMore] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [cursorMap, setCursorMap] = useState<Record<number, string>>({})
+  const pageSize = 10
   const viewModel = new MoviesListViewModel()
 
   const fetchMovies = async (
     newFilters?: MovieFilters,
     newOrderBy?: { field: string; direction: 'ASC' | 'DESC' },
-    resetList = true,
+    pageToFetch: number = 1,
   ): Promise<void> => {
     try {
-      if (resetList) setLoading(true)
-      else setLoadingMore(true)
+      setLoading(true)
 
       const filtersToUse = newFilters || filters
       const orderByToUse = newOrderBy || orderBy
-      const currentAfter = resetList ? undefined : movies?.pageInfo.endCursor
 
-      const result = await viewModel.getMovies(
-        filtersToUse,
-        10,
-        currentAfter,
-        orderByToUse,
-      )
+      // Se estiver na primeira página, não usar cursor
+      // Se estiver em páginas posteriores, usar o cursor mapeado
+      const after = pageToFetch > 1 ? cursorMap[pageToFetch - 1] : undefined
+
+      const result = await viewModel.getMovies(filtersToUse, {
+        pageSize,
+        after,
+        orderBy: orderByToUse,
+      })
 
       if (result) {
-        if (resetList) {
-          setMovies(result)
-        } else {
-          setMovies({
-            ...result,
-            edges: [...(movies?.edges || []), ...result.edges],
-            pageInfo: result.pageInfo,
-          })
+        setMovies(result)
+
+        // Armazenar o cursor para a próxima página
+        if (result.edges.length > 0 && result.pageInfo.hasNextPage) {
+          setCursorMap((prev) => ({
+            ...prev,
+            [pageToFetch]:
+              result.pageInfo.endCursor ||
+              result.edges[result.edges.length - 1].cursor,
+          }))
         }
+
+        setCurrentPage(pageToFetch)
       }
     } catch (error) {
       console.error('Error in fetchMovies:', error)
     } finally {
-      if (resetList) setLoading(false)
-      else setLoadingMore(false)
+      setLoading(false)
     }
   }
 
@@ -91,7 +100,8 @@ export function useMoviesListViewModel() {
 
   const handleFilterChange = (newFilters: MovieFilters) => {
     setFilters(newFilters)
-    fetchMovies(newFilters, orderBy)
+    setCursorMap({}) // Resetar cursores quando mudam os filtros
+    fetchMovies(newFilters, orderBy, 1)
   }
 
   const handleOrderChange = (newOrderBy: {
@@ -99,13 +109,31 @@ export function useMoviesListViewModel() {
     direction: 'ASC' | 'DESC'
   }) => {
     setOrderBy(newOrderBy)
-    fetchMovies(filters, newOrderBy)
+    setCursorMap({}) // Resetar cursores quando muda a ordenação
+    fetchMovies(filters, newOrderBy, 1)
   }
 
-  const handleLoadMore = () => {
-    if (movies?.pageInfo.hasNextPage && !loadingMore) {
-      fetchMovies(filters, orderBy, false)
+  const handlePageChange = (page: number) => {
+    if (page < 1) return
+
+    // Se estamos tentando ir para uma página que ainda não temos cursor
+    // e não é a primeira página, precisamos construir os cursores intermediários
+    if (
+      page > 1 &&
+      !cursorMap[page - 1] &&
+      page > Object.keys(cursorMap).length + 1
+    ) {
+      // Por enquanto, simplesmente voltar para a página 1 se tentarmos pular muitas páginas
+      fetchMovies(filters, orderBy, 1)
+      return
     }
+
+    fetchMovies(filters, orderBy, page)
+  }
+
+  const calculateTotalPages = (): number => {
+    if (!movies) return 1
+    return Math.ceil(movies.totalCount / pageSize)
   }
 
   const initialize = async () => {
@@ -118,13 +146,15 @@ export function useMoviesListViewModel() {
     movies,
     genres,
     loading,
-    loadingMore,
     filters,
     orderBy,
+    currentPage,
+    totalPages: calculateTotalPages(),
+    pageSize,
     initialize,
     handleFilterChange,
     handleOrderChange,
-    handleLoadMore,
+    handlePageChange,
     refetch: () => fetchMovies(),
   }
 }
