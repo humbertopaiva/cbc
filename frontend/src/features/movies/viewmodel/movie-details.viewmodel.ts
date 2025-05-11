@@ -1,7 +1,8 @@
-import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'react-toastify'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { deleteMovieUseCase, getMovieUseCase } from '../usecases'
+import { QUERY_KEYS } from './movie-form.viewmodel'
 import type { Movie } from '../model/movie.model'
 
 export class MovieDetailsViewModel {
@@ -17,7 +18,11 @@ export class MovieDetailsViewModel {
 
   async deleteMovie(id: string): Promise<boolean> {
     try {
-      return await deleteMovieUseCase.execute(id)
+      const result = await deleteMovieUseCase.execute(id)
+      if (result) {
+        toast.success('Filme excluído com sucesso!')
+      }
+      return result
     } catch (error) {
       console.error('Error deleting movie:', error)
       toast.error('Erro ao excluir o filme')
@@ -27,36 +32,42 @@ export class MovieDetailsViewModel {
 }
 
 export function useMovieDetailsViewModel(id: string) {
-  const [movie, setMovie] = useState<Movie | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [isDeleting, setIsDeleting] = useState(false)
   const navigate = useNavigate()
   const viewModel = new MovieDetailsViewModel()
+  const queryClient = useQueryClient()
 
-  const fetchMovie = async (): Promise<void> => {
-    setLoading(true)
-    const result = await viewModel.getMovie(id)
-    setMovie(result)
-    setLoading(false)
-  }
+  // Buscar filme com React Query
+  const {
+    data: movie,
+    isLoading: loading,
+    refetch: fetchMovie,
+  } = useQuery({
+    queryKey: [QUERY_KEYS.MOVIE(id)],
+    queryFn: () => viewModel.getMovie(id),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  })
+
+  // Mutation para excluir filme
+  const deleteMutation = useMutation({
+    mutationFn: (movieId: string) => viewModel.deleteMovie(movieId),
+    onSuccess: () => {
+      // Invalidar queries relacionadas a filmes quando um filme for excluído
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MOVIES] })
+      // Navegar para a página inicial
+      navigate({ to: '/' })
+    },
+  })
 
   const handleDelete = async (): Promise<void> => {
     if (window.confirm('Tem certeza que deseja excluir este filme?')) {
-      setIsDeleting(true)
-      const success = await viewModel.deleteMovie(id)
-      setIsDeleting(false)
-
-      if (success) {
-        toast.success('Filme excluído com sucesso!')
-        navigate({ to: '/' })
-      }
+      await deleteMutation.mutateAsync(id)
     }
   }
 
   return {
     movie,
     loading,
-    isDeleting,
+    isDeleting: deleteMutation.isPending,
     fetchMovie,
     handleDelete,
   }
