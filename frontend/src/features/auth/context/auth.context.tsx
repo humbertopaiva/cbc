@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useApolloClient } from '@apollo/client'
+import { useQueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import type { User } from '../model/auth.model'
 
@@ -64,6 +66,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const navigate = useNavigate()
   const authService = new AuthService()
 
+  // Adicionando o Apollo Client e Query Client
+  const apolloClient = useApolloClient()
+  const queryClient = useQueryClient()
+
   useEffect(() => {
     const checkAuth = () => {
       const savedUser = authService.getSavedUser()
@@ -84,8 +90,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const logout = () => {
+    // 1. Limpar o estado local
     authService.clearAuth()
     setUser(null)
+
+    // 2. Limpar o cache do Apollo Client
+    apolloClient.resetStore()
+
+    // 3. Limpar o cache do React Query
+    queryClient.clear()
+
+    // 4. Redirecionar para a página de login
     navigate({ to: '/login' })
   }
 
