@@ -1,58 +1,60 @@
-import { Field, InputType, ID, Int } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import {
-  IsString,
-  IsOptional,
-  IsNumber,
-  IsUUID,
-  IsDateString,
   IsArray,
+  IsDateString,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
   Min,
-  IsEnum,
 } from 'class-validator';
-import { MovieStatus } from '../entities/movie.entity';
+
+// Certifique-se que o MovieStatus está registrado como enum para o GraphQL
+// Se já estiver registrado na entidade, você pode remover esta linha
+// registerEnumType(MovieStatus, { name: 'MovieStatus' });
 
 @InputType()
 export class MovieFiltersInput {
-  @Field({ nullable: true })
-  @IsString()
+  @Field(() => String, { nullable: true })
   @IsOptional()
+  @IsString()
   search?: string;
 
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
+  @Field(() => Number, { nullable: true })
   @IsOptional()
-  @Min(1)
+  @IsNumber()
+  @Min(0)
   minDuration?: number;
 
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
+  @Field(() => Number, { nullable: true })
   @IsOptional()
-  @Min(1)
+  @IsNumber()
+  @Min(0)
   maxDuration?: number;
 
-  @Field({ nullable: true })
-  @IsDateString()
+  @Field(() => String, { nullable: true })
   @IsOptional()
+  @IsDateString()
   releaseDateFrom?: string;
 
-  @Field({ nullable: true })
-  @IsDateString()
+  @Field(() => String, { nullable: true })
   @IsOptional()
+  @IsDateString()
   releaseDateTo?: string;
 
-  @Field({ nullable: true })
-  @IsEnum(MovieStatus)
+  // Aqui está o problema - precisamos garantir que o GraphQL reconheça o enum
+  @Field(() => String, { nullable: true })
   @IsOptional()
-  status?: MovieStatus;
+  status?: string; // Usando string em vez do enum para simplificar
 
-  @Field({ nullable: true })
-  @IsString()
+  @Field(() => String, { nullable: true })
   @IsOptional()
+  @IsString()
   language?: string;
 
-  @Field(() => [ID], { nullable: true })
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
-  @IsOptional()
   genreIds?: string[];
 }

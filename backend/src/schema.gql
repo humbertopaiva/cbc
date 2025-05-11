@@ -85,10 +85,10 @@ type MovieEdge {
 }
 
 input MovieFiltersInput {
-  genreIds: [ID!]
+  genreIds: [String!]
   language: String
-  maxDuration: Int
-  minDuration: Int
+  maxDuration: Float
+  minDuration: Float
   releaseDateFrom: String
   releaseDateTo: String
   search: String
@@ -110,7 +110,7 @@ enum MovieOrderField {
 
 input MoviesPaginationInput {
   after: String
-  first: Int
+  first: Float
   orderBy: MovieOrderByInput
 }
 
@@ -123,7 +123,6 @@ type Mutation {
   requestPasswordReset(input: RequestPasswordResetInput!): RequestPasswordResetResponse!
   resetPassword(input: ResetPasswordInput!): ResetPasswordResponse!
   signUp(input: SignUpInput!): AuthPayload!
-  testMovieNotification(id: ID!): Boolean!
   updateMovie(input: UpdateMovieInput!): Movie!
 }
 

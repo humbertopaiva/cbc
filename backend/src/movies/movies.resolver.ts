@@ -1,8 +1,7 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { UseGuards, ForbiddenException } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { Movie } from './entities/movie.entity';
 import { MoviesService } from './movies.service';
-import { NotificationService } from './notification.service';
 import { CreateMovieInput } from './dto/create-movie.input';
 import { UpdateMovieInput } from './dto/update-movie.input';
 import { MovieFiltersInput } from './dto/movie-filters.input';
@@ -14,10 +13,7 @@ import { User } from '../users/entities/user.entity';
 
 @Resolver(() => Movie)
 export class MoviesResolver {
-  constructor(
-    private readonly moviesService: MoviesService,
-    private readonly notificationService: NotificationService,
-  ) {}
+  constructor(private readonly moviesService: MoviesService) {}
 
   @Query(() => Movie)
   @UseGuards(GqlAuthGuard)
@@ -59,21 +55,5 @@ export class MoviesResolver {
     @CurrentUser() user: User,
   ): Promise<boolean> {
     return this.moviesService.delete(id, user);
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard)
-  async testMovieNotification(
-    @Args('id', { type: () => ID }) id: string,
-    @CurrentUser() user: User,
-  ): Promise<boolean> {
-    const movie = await this.moviesService.findById(id);
-
-    // Verificar se o usuário é o criador do filme
-    if (movie.createdBy.id !== user.id) {
-      throw new ForbiddenException('You are not authorized to test notifications for this movie');
-    }
-
-    return this.notificationService.forceNotificationsForTestingPurposes(id);
   }
 }

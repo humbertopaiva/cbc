@@ -8,9 +8,10 @@ export class MoviesListViewModel {
     filters?: MovieFilters,
     first: number = 10,
     after?: string,
+    orderBy?: { field: string; direction: 'ASC' | 'DESC' },
   ): Promise<MovieConnection | null> {
     try {
-      return await getMoviesUseCase.execute(filters, first, after)
+      return await getMoviesUseCase.execute(filters, first, after, orderBy)
     } catch (error) {
       console.error('Error fetching movies:', error)
       toast.error('Erro ao carregar filmes')
@@ -33,12 +34,20 @@ export function useMoviesListViewModel() {
   const [movies, setMovies] = useState<MovieConnection | null>(null)
   const [genres, setGenres] = useState<Array<Genre>>([])
   const [filters, setFilters] = useState<MovieFilters>({})
+  const [orderBy, setOrderBy] = useState<{
+    field: string
+    direction: 'ASC' | 'DESC'
+  }>({
+    field: 'CREATED_AT',
+    direction: 'DESC',
+  })
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const viewModel = new MoviesListViewModel()
 
   const fetchMovies = async (
     newFilters?: MovieFilters,
+    newOrderBy?: { field: string; direction: 'ASC' | 'DESC' },
     resetList = true,
   ): Promise<void> => {
     try {
@@ -46,9 +55,15 @@ export function useMoviesListViewModel() {
       else setLoadingMore(true)
 
       const filtersToUse = newFilters || filters
+      const orderByToUse = newOrderBy || orderBy
       const currentAfter = resetList ? undefined : movies?.pageInfo.endCursor
 
-      const result = await viewModel.getMovies(filtersToUse, 10, currentAfter)
+      const result = await viewModel.getMovies(
+        filtersToUse,
+        10,
+        currentAfter,
+        orderByToUse,
+      )
 
       if (result) {
         if (resetList) {
@@ -57,6 +72,7 @@ export function useMoviesListViewModel() {
           setMovies({
             ...result,
             edges: [...(movies?.edges || []), ...result.edges],
+            pageInfo: result.pageInfo,
           })
         }
       }
@@ -75,12 +91,20 @@ export function useMoviesListViewModel() {
 
   const handleFilterChange = (newFilters: MovieFilters) => {
     setFilters(newFilters)
-    fetchMovies(newFilters)
+    fetchMovies(newFilters, orderBy)
+  }
+
+  const handleOrderChange = (newOrderBy: {
+    field: string
+    direction: 'ASC' | 'DESC'
+  }) => {
+    setOrderBy(newOrderBy)
+    fetchMovies(filters, newOrderBy)
   }
 
   const handleLoadMore = () => {
     if (movies?.pageInfo.hasNextPage && !loadingMore) {
-      fetchMovies(filters, false)
+      fetchMovies(filters, orderBy, false)
     }
   }
 
@@ -96,8 +120,10 @@ export function useMoviesListViewModel() {
     loading,
     loadingMore,
     filters,
+    orderBy,
     initialize,
     handleFilterChange,
+    handleOrderChange,
     handleLoadMore,
     refetch: () => fetchMovies(),
   }
