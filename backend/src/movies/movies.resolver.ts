@@ -24,10 +24,11 @@ export class MoviesResolver {
   @Query(() => MovieConnection)
   @UseGuards(GqlAuthGuard)
   async movies(
+    @CurrentUser() user: User,
     @Args('filters', { nullable: true }) filters?: MovieFiltersInput,
     @Args('pagination', { nullable: true }) pagination?: MoviesPaginationInput,
   ): Promise<MovieConnection> {
-    return this.moviesService.findAll(filters, pagination);
+    return this.moviesService.findAll(filters, pagination, user);
   }
 
   @Mutation(() => Movie)

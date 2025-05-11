@@ -5,7 +5,11 @@ import { Movie } from './entities/movie.entity';
 import { CreateMovieInput } from './dto/create-movie.input';
 import { UpdateMovieInput } from './dto/update-movie.input';
 import { MovieFiltersInput } from './dto/movie-filters.input';
-import { MoviesPaginationInput } from './dto/movies-pagination.input';
+import {
+  MoviesPaginationInput,
+  MovieOrderField,
+  OrderDirection,
+} from './dto/movies-pagination.input';
 import { MovieConnection } from './dto/movie-connection';
 import { FileUploadService } from '../common/file-upload/file-upload.service';
 import { GenresService } from '../genres/genres.service';
@@ -23,11 +27,17 @@ export class MoviesService {
   async findAll(
     filters?: MovieFiltersInput,
     pagination?: MoviesPaginationInput,
+    user?: User,
   ): Promise<MovieConnection> {
     const qb = this.moviesRepository
       .createQueryBuilder('movie')
       .leftJoinAndSelect('movie.genres', 'genre')
       .leftJoinAndSelect('movie.createdBy', 'user');
+
+    // Filtrar apenas os filmes do usuário logado
+    if (user) {
+      qb.andWhere('movie.createdBy = :userId', { userId: user.id });
+    }
 
     // Aplicar filtros
     if (filters?.search) {
@@ -89,51 +99,12 @@ export class MoviesService {
       try {
         const lastMovie = await this.findById(pagination.after);
         if (lastMovie) {
-          // Implementação de cursor-based paging
-          // Precisamos ajustar o WHERE baseado no campo de ordenação
-          const orderField = pagination?.orderBy?.field || 'CREATED_AT';
-          const orderDir = pagination?.orderBy?.direction || 'DESC';
+          // Obter os valores de ordenação
+          const fieldValue = pagination?.orderBy?.field || MovieOrderField.CREATED_AT;
+          const directionValue = pagination?.orderBy?.direction || OrderDirection.DESC;
 
-          switch (orderField) {
-            case 'TITLE':
-              if (orderDir === 'ASC') {
-                qb.andWhere('movie.title > :title', { title: lastMovie.title });
-              } else {
-                qb.andWhere('movie.title < :title', { title: lastMovie.title });
-              }
-              break;
-            case 'RELEASE_DATE':
-              if (orderDir === 'ASC') {
-                qb.andWhere('movie.releaseDate > :releaseDate', {
-                  releaseDate: lastMovie.releaseDate,
-                });
-              } else {
-                qb.andWhere('movie.releaseDate < :releaseDate', {
-                  releaseDate: lastMovie.releaseDate,
-                });
-              }
-              break;
-            case 'DURATION':
-              if (orderDir === 'ASC') {
-                qb.andWhere('movie.duration > :duration', { duration: lastMovie.duration });
-              } else {
-                qb.andWhere('movie.duration < :duration', { duration: lastMovie.duration });
-              }
-              break;
-            case 'RATING':
-              if (orderDir === 'ASC') {
-                qb.andWhere('movie.rating > :rating', { rating: lastMovie.rating });
-              } else {
-                qb.andWhere('movie.rating < :rating', { rating: lastMovie.rating });
-              }
-              break;
-            default: // CREATED_AT
-              if (orderDir === 'ASC') {
-                qb.andWhere('movie.createdAt > :createdAt', { createdAt: lastMovie.createdAt });
-              } else {
-                qb.andWhere('movie.createdAt < :createdAt', { createdAt: lastMovie.createdAt });
-              }
-          }
+          // Aplicar a condição de paginação apropriada
+          this.applyPaginationCondition(qb, fieldValue, directionValue, lastMovie);
         }
       } catch (error) {
         console.error('Error applying cursor pagination:', error);
@@ -152,13 +123,59 @@ export class MoviesService {
         cursor: movie.id,
       })),
       pageInfo: {
-        hasNextPage,
+        hasNextPage: hasNextPage,
         hasPreviousPage: !!pagination?.after,
-        startCursor: movies[0]?.id,
-        endCursor: movies[movies.length - 1]?.id,
+        startCursor: movies.length > 0 ? movies[0]?.id : null,
+        endCursor: movies.length > 0 ? movies[movies.length - 1]?.id : null,
       },
-      totalCount,
+      totalCount: totalCount,
     };
+  }
+
+  // Método auxiliar para aplicar a condição de paginação
+  private applyPaginationCondition(
+    qb: any,
+    field: MovieOrderField,
+    direction: OrderDirection,
+    lastMovie: Movie,
+  ): void {
+    // Usa strings literais para evitar problemas de enum
+    if (field === 'TITLE') {
+      if (direction === 'ASC') {
+        qb.andWhere('movie.title > :title', { title: lastMovie.title });
+      } else {
+        qb.andWhere('movie.title < :title', { title: lastMovie.title });
+      }
+    } else if (field === 'RELEASE_DATE') {
+      if (direction === 'ASC') {
+        qb.andWhere('movie.releaseDate > :releaseDate', {
+          releaseDate: lastMovie.releaseDate,
+        });
+      } else {
+        qb.andWhere('movie.releaseDate < :releaseDate', {
+          releaseDate: lastMovie.releaseDate,
+        });
+      }
+    } else if (field === 'DURATION') {
+      if (direction === 'ASC') {
+        qb.andWhere('movie.duration > :duration', { duration: lastMovie.duration });
+      } else {
+        qb.andWhere('movie.duration < :duration', { duration: lastMovie.duration });
+      }
+    } else if (field === 'RATING') {
+      if (direction === 'ASC') {
+        qb.andWhere('movie.rating > :rating', { rating: lastMovie.rating });
+      } else {
+        qb.andWhere('movie.rating < :rating', { rating: lastMovie.rating });
+      }
+    } else {
+      // CREATED_AT é o padrão
+      if (direction === 'ASC') {
+        qb.andWhere('movie.createdAt > :createdAt', { createdAt: lastMovie.createdAt });
+      } else {
+        qb.andWhere('movie.createdAt < :createdAt', { createdAt: lastMovie.createdAt });
+      }
+    }
   }
 
   async findById(id: string): Promise<Movie> {
