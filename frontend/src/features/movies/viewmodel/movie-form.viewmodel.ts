@@ -230,18 +230,20 @@ export function useUpdateMovieViewModel(id: string) {
     setLoading(false)
   }
 
-  const onSubmit = async (data: UpdateMovieFormData): Promise<void> => {
+  const onSubmit = async (data: CreateMovieFormData): Promise<void> => {
     setSubmitting(true)
 
-    const input: UpdateMovieInput = {
-      id,
+    const input: CreateMovieInput = {
       title: data.title,
       originalTitle: data.originalTitle || undefined,
       description: data.description || undefined,
       tagline: data.tagline || undefined,
       budget: data.budget,
       revenue: data.revenue,
-      releaseDate: data.releaseDate || undefined,
+
+      releaseDate: data.releaseDate
+        ? new Date(data.releaseDate).toISOString()
+        : undefined,
       duration: data.duration,
       status: data.status,
       language: data.language || undefined,
@@ -256,11 +258,11 @@ export function useUpdateMovieViewModel(id: string) {
       rating: data.rating,
     }
 
-    const result = await viewModel.updateMovie(input)
+    const result = await viewModel.createMovie(input)
     setSubmitting(false)
 
     if (result) {
-      navigate({ to: `/movies/${id}` })
+      navigate({ to: '/' })
     }
   }
 

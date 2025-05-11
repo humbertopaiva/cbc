@@ -54,7 +54,7 @@ export class Movie {
   profit?: number;
 
   @Field({ nullable: true })
-  @Column({ name: 'release_date', nullable: true })
+  @Column({ name: 'release_date', type: 'date', nullable: true })
   releaseDate?: Date;
 
   @Field(() => Int, { nullable: true })
