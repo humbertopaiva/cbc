@@ -1,6 +1,12 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { getGenresUseCase, getMoviesUseCase } from '../usecases'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  deleteMovieUseCase,
+  getGenresUseCase,
+  getMoviesUseCase,
+} from '../usecases'
+import { QUERY_KEYS } from './movie-form.viewmodel'
 import type { Genre, MovieConnection, MovieFilters } from '../model/movie.model'
 
 export class MoviesListViewModel {
@@ -31,11 +37,23 @@ export class MoviesListViewModel {
       return []
     }
   }
+
+  async deleteMovie(id: string): Promise<boolean> {
+    try {
+      const result = await deleteMovieUseCase.execute(id)
+      if (result) {
+        toast.success('Filme excluído com sucesso!')
+      }
+      return result
+    } catch (error) {
+      console.error('Error deleting movie:', error)
+      toast.error('Erro ao excluir filme')
+      return false
+    }
+  }
 }
 
 export function useMoviesListViewModel() {
-  const [movies, setMovies] = useState<MovieConnection | null>(null)
-  const [genres, setGenres] = useState<Array<Genre>>([])
   const [filters, setFilters] = useState<MovieFilters>({})
   const [orderBy, setOrderBy] = useState<{
     field: string
@@ -44,64 +62,82 @@ export function useMoviesListViewModel() {
     field: 'CREATED_AT',
     direction: 'DESC',
   })
-  const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [cursorMap, setCursorMap] = useState<Record<number, string>>({})
   const pageSize = 10
   const viewModel = new MoviesListViewModel()
+  const queryClient = useQueryClient()
 
-  const fetchMovies = async (
-    newFilters?: MovieFilters,
-    newOrderBy?: { field: string; direction: 'ASC' | 'DESC' },
-    pageToFetch: number = 1,
-  ): Promise<void> => {
-    try {
-      setLoading(true)
+  // Construir a chave da query com base nos filtros e paginação
+  const getQueryKey = useCallback(
+    (page: number = currentPage) => {
+      const after = page > 1 ? cursorMap[page - 1] : undefined
+      return [
+        QUERY_KEYS.MOVIES,
+        {
+          filters,
+          orderBy,
+          pagination: {
+            pageSize,
+            after,
+          },
+        },
+      ]
+    },
+    [filters, orderBy, currentPage, cursorMap, pageSize],
+  )
 
-      const filtersToUse = newFilters || filters
-      const orderByToUse = newOrderBy || orderBy
-
-      // Se estiver na primeira página, não usar cursor
-      // Se estiver em páginas posteriores, usar o cursor mapeado
-      const after = pageToFetch > 1 ? cursorMap[pageToFetch - 1] : undefined
-
-      const result = await viewModel.getMovies(filtersToUse, {
+  // Buscar filmes com React Query
+  const {
+    data: movies,
+    isLoading: loadingMovies,
+    refetch: refetchMovies,
+  } = useQuery({
+    queryKey: getQueryKey(),
+    queryFn: () =>
+      viewModel.getMovies(filters, {
         pageSize,
-        after,
-        orderBy: orderByToUse,
-      })
+        after: currentPage > 1 ? cursorMap[currentPage - 1] : undefined,
+        orderBy,
+      }),
+    staleTime: 60 * 1000, // 1 minuto
+  })
 
-      if (result) {
-        setMovies(result)
+  // Buscar gêneros com React Query
+  const { data: genres = [], isLoading: loadingGenres } = useQuery({
+    queryKey: [QUERY_KEYS.GENRES],
+    queryFn: () => viewModel.getGenres(),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  })
 
-        // Armazenar o cursor para a próxima página
-        if (result.edges.length > 0 && result.pageInfo.hasNextPage) {
-          setCursorMap((prev) => ({
-            ...prev,
-            [pageToFetch]:
-              result.pageInfo.endCursor ||
-              result.edges[result.edges.length - 1].cursor,
-          }))
-        }
+  // Mutation para excluir filme
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => viewModel.deleteMovie(id),
+    onSuccess: () => {
+      // Invalidar queries relacionadas a filmes quando um filme for excluído
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MOVIES] })
+    },
+  })
 
-        setCurrentPage(pageToFetch)
-      }
-    } catch (error) {
-      console.error('Error in fetchMovies:', error)
-    } finally {
-      setLoading(false)
+  // Atualizar o mapa de cursores quando os dados dos filmes forem carregados
+  useEffect(() => {
+    if (movies && movies.edges.length > 0 && movies.pageInfo.hasNextPage) {
+      setCursorMap((prev) => ({
+        ...prev,
+        [currentPage]:
+          movies.pageInfo.endCursor ||
+          movies.edges[movies.edges.length - 1].cursor,
+      }))
     }
-  }
-
-  const fetchGenres = async (): Promise<void> => {
-    const result = await viewModel.getGenres()
-    setGenres(result)
-  }
+  }, [movies, currentPage])
 
   const handleFilterChange = (newFilters: MovieFilters) => {
     setFilters(newFilters)
     setCursorMap({}) // Resetar cursores quando mudam os filtros
-    fetchMovies(newFilters, orderBy, 1)
+    setCurrentPage(1) // Voltar para a primeira página
+
+    // Não é necessário chamar refetch explicitamente aqui,
+    // pois a mudança em filters causa a reexecução da query
   }
 
   const handleOrderChange = (newOrderBy: {
@@ -110,25 +146,26 @@ export function useMoviesListViewModel() {
   }) => {
     setOrderBy(newOrderBy)
     setCursorMap({}) // Resetar cursores quando muda a ordenação
-    fetchMovies(filters, newOrderBy, 1)
+    setCurrentPage(1) // Voltar para a primeira página
+
+    // Não é necessário chamar refetch explicitamente aqui,
+    // pois a mudança em orderBy causa a reexecução da query
   }
 
   const handlePageChange = (page: number) => {
     if (page < 1) return
 
-    // Se estamos tentando ir para uma página que ainda não temos cursor
-    // e não é a primeira página, precisamos construir os cursores intermediários
     if (
       page > 1 &&
       !cursorMap[page - 1] &&
       page > Object.keys(cursorMap).length + 1
     ) {
       // Por enquanto, simplesmente voltar para a página 1 se tentarmos pular muitas páginas
-      fetchMovies(filters, orderBy, 1)
+      setCurrentPage(1)
       return
     }
 
-    fetchMovies(filters, orderBy, page)
+    setCurrentPage(page)
   }
 
   const calculateTotalPages = (): number => {
@@ -136,16 +173,19 @@ export function useMoviesListViewModel() {
     return Math.ceil(movies.totalCount / pageSize)
   }
 
-  const initialize = async () => {
-    setLoading(true)
-    await Promise.all([fetchMovies(), fetchGenres()])
-    setLoading(false)
+  const deleteMovie = async (id: string): Promise<boolean> => {
+    return await deleteMutation.mutateAsync(id)
   }
+
+  const initialize = useCallback(() => {
+    // A inicialização já é feita automaticamente pelo React Query
+    // Esta função é mantida para compatibilidade com o código existente
+  }, [])
 
   return {
     movies,
     genres,
-    loading,
+    loading: loadingMovies || loadingGenres || deleteMutation.isPending,
     filters,
     orderBy,
     currentPage,
@@ -155,6 +195,7 @@ export function useMoviesListViewModel() {
     handleFilterChange,
     handleOrderChange,
     handlePageChange,
-    refetch: () => fetchMovies(),
+    deleteMovie,
+    refetch: refetchMovies,
   }
 }

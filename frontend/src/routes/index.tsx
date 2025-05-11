@@ -1,11 +1,12 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { FiFilm, FiPlus, FiSearch } from 'react-icons/fi'
 import { Button } from '@/components/ui/button'
 import { useMoviesListViewModel } from '@/features/movies/viewmodel/movies-list.viewmodel'
 import { MovieCard } from '@/features/movies/components/movie-card'
 import { FilterModal } from '@/features/movies/components/filter-modal'
 import { MoviePagination } from '@/features/movies/components/movie-pagination'
+import { CreateMovieModal } from '@/features/movies/components/create-movie-modal'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -24,9 +25,11 @@ function HomePage() {
     handlePageChange,
   } = useMoviesListViewModel()
 
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
   useEffect(() => {
     initialize()
-  }, [])
+  }, [initialize])
 
   return (
     <div className="min-h-screen">
@@ -51,12 +54,13 @@ function HomePage() {
                 currentFilters={filters}
                 onApplyFilters={handleFilterChange}
               />
-              <Link to="/movies/new">
-                <Button className="flex items-center gap-2">
-                  <FiPlus className="w-4 h-4" />
-                  <span>Novo Filme</span>
-                </Button>
-              </Link>
+              <Button
+                className="flex items-center gap-2"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <FiPlus className="w-4 h-4" />
+                <span>Novo Filme</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -80,12 +84,13 @@ function HomePage() {
               Não encontramos nenhum filme com os filtros atuais. Tente ajustar
               os filtros ou adicione um novo filme.
             </p>
-            <Link to="/movies/new">
-              <Button className="flex items-center gap-2">
-                <FiPlus className="w-4 h-4" />
-                Adicionar Filme
-              </Button>
-            </Link>
+            <Button
+              className="flex items-center gap-2"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <FiPlus className="w-4 h-4" />
+              Adicionar Filme
+            </Button>
           </div>
         ) : (
           <>
@@ -106,6 +111,15 @@ function HomePage() {
           </>
         )}
       </main>
+
+      {/* Modal de criação de filme */}
+      <CreateMovieModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={() => {
+          setShowCreateModal(false)
+        }}
+      />
     </div>
   )
 }
