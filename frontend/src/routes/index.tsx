@@ -35,7 +35,7 @@ function HomePage() {
     <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-8">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <div className="flex flex-col md:flex-row gap-2">
+          <div className="flex flex-col md:flex-row gap-2 justify-end w-full">
             <div className="relative">
               <input
                 type="text"
