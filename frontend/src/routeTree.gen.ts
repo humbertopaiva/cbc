@@ -16,8 +16,6 @@ import { Route as LoginImport } from './routes/login'
 import { Route as ForgotPasswordImport } from './routes/forgot-password'
 import { Route as IndexImport } from './routes/index'
 import { Route as ResetPasswordTokenImport } from './routes/reset-password/$token'
-import { Route as MoviesNewImport } from './routes/movies/new'
-import { Route as MoviesEditImport } from './routes/movies/edit'
 import { Route as MoviesIdImport } from './routes/movies/$id'
 
 // Create/Update Routes
@@ -49,18 +47,6 @@ const IndexRoute = IndexImport.update({
 const ResetPasswordTokenRoute = ResetPasswordTokenImport.update({
   id: '/reset-password/$token',
   path: '/reset-password/$token',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const MoviesNewRoute = MoviesNewImport.update({
-  id: '/movies/new',
-  path: '/movies/new',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const MoviesEditRoute = MoviesEditImport.update({
-  id: '/movies/edit',
-  path: '/movies/edit',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -109,20 +95,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MoviesIdImport
       parentRoute: typeof rootRoute
     }
-    '/movies/edit': {
-      id: '/movies/edit'
-      path: '/movies/edit'
-      fullPath: '/movies/edit'
-      preLoaderRoute: typeof MoviesEditImport
-      parentRoute: typeof rootRoute
-    }
-    '/movies/new': {
-      id: '/movies/new'
-      path: '/movies/new'
-      fullPath: '/movies/new'
-      preLoaderRoute: typeof MoviesNewImport
-      parentRoute: typeof rootRoute
-    }
     '/reset-password/$token': {
       id: '/reset-password/$token'
       path: '/reset-password/$token'
@@ -141,8 +113,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/movies/$id': typeof MoviesIdRoute
-  '/movies/edit': typeof MoviesEditRoute
-  '/movies/new': typeof MoviesNewRoute
   '/reset-password/$token': typeof ResetPasswordTokenRoute
 }
 
@@ -152,8 +122,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/movies/$id': typeof MoviesIdRoute
-  '/movies/edit': typeof MoviesEditRoute
-  '/movies/new': typeof MoviesNewRoute
   '/reset-password/$token': typeof ResetPasswordTokenRoute
 }
 
@@ -164,8 +132,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/movies/$id': typeof MoviesIdRoute
-  '/movies/edit': typeof MoviesEditRoute
-  '/movies/new': typeof MoviesNewRoute
   '/reset-password/$token': typeof ResetPasswordTokenRoute
 }
 
@@ -177,8 +143,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/movies/$id'
-    | '/movies/edit'
-    | '/movies/new'
     | '/reset-password/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,8 +151,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/movies/$id'
-    | '/movies/edit'
-    | '/movies/new'
     | '/reset-password/$token'
   id:
     | '__root__'
@@ -197,8 +159,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/movies/$id'
-    | '/movies/edit'
-    | '/movies/new'
     | '/reset-password/$token'
   fileRoutesById: FileRoutesById
 }
@@ -209,8 +169,6 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   MoviesIdRoute: typeof MoviesIdRoute
-  MoviesEditRoute: typeof MoviesEditRoute
-  MoviesNewRoute: typeof MoviesNewRoute
   ResetPasswordTokenRoute: typeof ResetPasswordTokenRoute
 }
 
@@ -220,8 +178,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   MoviesIdRoute: MoviesIdRoute,
-  MoviesEditRoute: MoviesEditRoute,
-  MoviesNewRoute: MoviesNewRoute,
   ResetPasswordTokenRoute: ResetPasswordTokenRoute,
 }
 
@@ -240,8 +196,6 @@ export const routeTree = rootRoute
         "/login",
         "/register",
         "/movies/$id",
-        "/movies/edit",
-        "/movies/new",
         "/reset-password/$token"
       ]
     },
@@ -259,12 +213,6 @@ export const routeTree = rootRoute
     },
     "/movies/$id": {
       "filePath": "movies/$id.tsx"
-    },
-    "/movies/edit": {
-      "filePath": "movies/edit.tsx"
-    },
-    "/movies/new": {
-      "filePath": "movies/new.tsx"
     },
     "/reset-password/$token": {
       "filePath": "reset-password/$token.tsx"
