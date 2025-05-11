@@ -2,15 +2,15 @@ import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class PageInfo {
-  @Field()
+  @Field(() => Boolean)
   hasNextPage: boolean;
 
-  @Field()
+  @Field(() => Boolean)
   hasPreviousPage: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   startCursor?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   endCursor?: string;
 }

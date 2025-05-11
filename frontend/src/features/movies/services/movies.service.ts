@@ -21,6 +21,7 @@ export class MoviesService {
     filters?: MovieFilters,
     first: number = 10,
     after?: string,
+    orderBy?: { field: string; direction: 'ASC' | 'DESC' },
   ): Promise<MovieConnection> {
     const { data } = await apolloClient.query({
       query: GET_MOVIES,
@@ -29,8 +30,10 @@ export class MoviesService {
         pagination: {
           first,
           after,
+          orderBy,
         },
       },
+      fetchPolicy: 'network-only', // Sempre buscar dados novos
     })
     return data.movies
   }
@@ -39,6 +42,7 @@ export class MoviesService {
     const { data } = await apolloClient.query({
       query: GET_MOVIE,
       variables: { id },
+      fetchPolicy: 'network-only',
     })
     return data.movie
   }
@@ -46,6 +50,7 @@ export class MoviesService {
   async getGenres(): Promise<Array<Genre>> {
     const { data } = await apolloClient.query({
       query: GET_GENRES,
+      fetchPolicy: 'network-only',
     })
     return data.genres
   }

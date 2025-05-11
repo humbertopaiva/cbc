@@ -28,10 +28,9 @@ function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen ">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-8">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold">Filmes</h2>
           <div className="flex flex-col md:flex-row gap-2">
             <div className="relative">
               <input
@@ -89,7 +88,7 @@ function HomePage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 bg-foreground/8 p-6">
               {movies?.edges.map(({ node }) => (
                 <div key={node.id} className="h-full">
                   <MovieCard movie={node} />
@@ -117,9 +116,25 @@ function HomePage() {
               </div>
             )}
 
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              Exibindo {movies?.edges.length} de {movies?.totalCount} filmes
-            </div>
+            {movies?.pageInfo.hasNextPage && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  variant="outline"
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="min-w-40"
+                >
+                  {loadingMore ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 border-2 border-t-current rounded-full animate-spin"></div>
+                      <span>Carregando...</span>
+                    </div>
+                  ) : (
+                    'Carregar mais'
+                  )}
+                </Button>
+              </div>
+            )}
           </>
         )}
       </main>

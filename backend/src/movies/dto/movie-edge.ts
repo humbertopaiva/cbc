@@ -6,6 +6,6 @@ export class MovieEdge {
   @Field(() => Movie)
   node: Movie;
 
-  @Field()
+  @Field(() => String)
   cursor: string;
 }

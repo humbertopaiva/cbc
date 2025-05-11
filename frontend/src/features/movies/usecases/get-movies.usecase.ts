@@ -6,8 +6,9 @@ export class GetMoviesUseCase {
     filters?: MovieFilters,
     first: number = 10,
     after?: string,
+    orderBy?: { field: string; direction: 'ASC' | 'DESC' },
   ): Promise<MovieConnection> {
-    return moviesService.getMovies(filters, first, after)
+    return moviesService.getMovies(filters, first, after, orderBy)
   }
 }
 
