@@ -4,7 +4,6 @@ import { z } from 'zod'
 import { authService } from '../services/auth.service'
 import { useFormViewModel } from '@/core/hooks/useFormViewModel'
 
-// Definindo o schema aqui já que é simples e específico para esta feature
 const forgotPasswordSchema = z.object({
   email: z.string().email('Email inválido'),
 })
@@ -40,12 +39,20 @@ export function useForgotPasswordViewModel() {
     }
   }
 
-  const { register, handleSubmit, errors, isLoading, submitError, onSubmit } =
-    useFormViewModel({
-      schema: forgotPasswordSchema,
-      defaultValues,
-      onSubmitHandler,
-    })
+  const {
+    register,
+    handleSubmit,
+    errors,
+    isLoading,
+    submitError,
+    onSubmit,
+    setValue,
+    watch,
+  } = useFormViewModel({
+    schema: forgotPasswordSchema,
+    defaultValues,
+    onSubmitHandler,
+  })
 
   return {
     register,
@@ -56,5 +63,7 @@ export function useForgotPasswordViewModel() {
     submitError,
     message,
     success,
+    setValue,
+    watch,
   }
 }

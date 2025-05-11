@@ -43,6 +43,8 @@ export function useSignupViewModel() {
     submitError,
     onSubmit,
     reset,
+    setValue,
+    watch,
   } = useFormViewModel({
     schema: signupSchema,
     defaultValues,
@@ -57,5 +59,7 @@ export function useSignupViewModel() {
     isLoading,
     submitError,
     reset,
+    setValue,
+    watch,
   }
 }
