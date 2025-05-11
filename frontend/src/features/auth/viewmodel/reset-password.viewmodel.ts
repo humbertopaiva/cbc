@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { authService } from '../services/auth.service'
+import { useFormViewModel } from '@/core/hooks/useFormViewModel'
 
 const resetPasswordSchema = z
   .object({
@@ -19,36 +19,41 @@ const resetPasswordSchema = z
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
 
 export function useResetPasswordViewModel(token: string) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
-  })
+  const defaultValues: ResetPasswordFormData = {
+    newPassword: '',
+    confirmPassword: '',
+  }
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
-    setIsLoading(true)
-    setMessage(null)
-
+  const onSubmitHandler = async (data: ResetPasswordFormData) => {
     try {
       const result = await authService.resetPassword(token, data.newPassword)
       setSuccess(result.success)
       setMessage(result.message)
+
+      if (result.success) {
+        toast.success('Senha atualizada com sucesso!')
+      } else {
+        toast.warning(result.message)
+      }
     } catch (error) {
+      console.error('Error resetting password:', error)
       setSuccess(false)
       setMessage(
         'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
       )
-      console.error('Error resetting password:', error)
-    } finally {
-      setIsLoading(false)
+      throw error
     }
   }
+
+  const { register, handleSubmit, errors, isLoading, submitError, onSubmit } =
+    useFormViewModel({
+      schema: resetPasswordSchema,
+      defaultValues,
+      onSubmitHandler,
+    })
 
   return {
     register,
@@ -56,6 +61,7 @@ export function useResetPasswordViewModel(token: string) {
     onSubmit,
     errors,
     isLoading,
+    submitError,
     message,
     success,
   }

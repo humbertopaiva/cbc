@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { authService } from '../services/auth.service'
+import { useFormViewModel } from '@/core/hooks/useFormViewModel'
 
+// Definindo o schema aqui já que é simples e específico para esta feature
 const forgotPasswordSchema = z.object({
   email: z.string().email('Email inválido'),
 })
@@ -11,36 +12,40 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
 
 export function useForgotPasswordViewModel() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
-  })
+  const defaultValues: ForgotPasswordFormData = {
+    email: '',
+  }
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
-    setIsLoading(true)
-    setMessage(null)
-
+  const onSubmitHandler = async (data: ForgotPasswordFormData) => {
     try {
       const result = await authService.requestPasswordReset(data.email)
       setSuccess(result.success)
       setMessage(result.message)
+
+      if (result.success) {
+        toast.success('Instruções de recuperação enviadas para seu email')
+      } else {
+        toast.warning(result.message)
+      }
     } catch (error) {
+      console.error('Error requesting password reset:', error)
       setSuccess(false)
       setMessage(
         'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.',
       )
-      console.error('Error requesting password reset:', error)
-    } finally {
-      setIsLoading(false)
+      throw error
     }
   }
+
+  const { register, handleSubmit, errors, isLoading, submitError, onSubmit } =
+    useFormViewModel({
+      schema: forgotPasswordSchema,
+      defaultValues,
+      onSubmitHandler,
+    })
 
   return {
     register,
@@ -48,6 +53,7 @@ export function useForgotPasswordViewModel() {
     onSubmit,
     errors,
     isLoading,
+    submitError,
     message,
     success,
   }

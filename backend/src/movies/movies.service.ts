@@ -125,8 +125,8 @@ export class MoviesService {
       pageInfo: {
         hasNextPage: hasNextPage,
         hasPreviousPage: !!pagination?.after,
-        startCursor: movies.length > 0 ? movies[0]?.id : null,
-        endCursor: movies.length > 0 ? movies[movies.length - 1]?.id : null,
+        startCursor: movies.length > 0 ? movies[0]?.id : undefined,
+        endCursor: movies.length > 0 ? movies[movies.length - 1]?.id : undefined,
       },
       totalCount: totalCount,
     };
@@ -134,20 +134,20 @@ export class MoviesService {
 
   // Método auxiliar para aplicar a condição de paginação
   private applyPaginationCondition(
-    qb: any,
+    qb: ReturnType<Repository<Movie>['createQueryBuilder']>,
     field: MovieOrderField,
     direction: OrderDirection,
     lastMovie: Movie,
   ): void {
-    // Usa strings literais para evitar problemas de enum
-    if (field === 'TITLE') {
-      if (direction === 'ASC') {
+    // Comparar com os valores do enum em vez de strings
+    if (field === MovieOrderField.TITLE) {
+      if (direction === OrderDirection.ASC) {
         qb.andWhere('movie.title > :title', { title: lastMovie.title });
       } else {
         qb.andWhere('movie.title < :title', { title: lastMovie.title });
       }
-    } else if (field === 'RELEASE_DATE') {
-      if (direction === 'ASC') {
+    } else if (field === MovieOrderField.RELEASE_DATE) {
+      if (direction === OrderDirection.ASC) {
         qb.andWhere('movie.releaseDate > :releaseDate', {
           releaseDate: lastMovie.releaseDate,
         });
@@ -156,21 +156,21 @@ export class MoviesService {
           releaseDate: lastMovie.releaseDate,
         });
       }
-    } else if (field === 'DURATION') {
-      if (direction === 'ASC') {
+    } else if (field === MovieOrderField.DURATION) {
+      if (direction === OrderDirection.ASC) {
         qb.andWhere('movie.duration > :duration', { duration: lastMovie.duration });
       } else {
         qb.andWhere('movie.duration < :duration', { duration: lastMovie.duration });
       }
-    } else if (field === 'RATING') {
-      if (direction === 'ASC') {
+    } else if (field === MovieOrderField.RATING) {
+      if (direction === OrderDirection.ASC) {
         qb.andWhere('movie.rating > :rating', { rating: lastMovie.rating });
       } else {
         qb.andWhere('movie.rating < :rating', { rating: lastMovie.rating });
       }
     } else {
       // CREATED_AT é o padrão
-      if (direction === 'ASC') {
+      if (direction === OrderDirection.ASC) {
         qb.andWhere('movie.createdAt > :createdAt', { createdAt: lastMovie.createdAt });
       } else {
         qb.andWhere('movie.createdAt < :createdAt', { createdAt: lastMovie.createdAt });
@@ -347,17 +347,17 @@ export class MoviesService {
     return true;
   }
 
-  private getOrderByColumn(field: string): string {
+  private getOrderByColumn(field: MovieOrderField): string {
     switch (field) {
-      case 'TITLE':
+      case MovieOrderField.TITLE:
         return 'movie.title';
-      case 'RELEASE_DATE':
+      case MovieOrderField.RELEASE_DATE:
         return 'movie.releaseDate';
-      case 'DURATION':
+      case MovieOrderField.DURATION:
         return 'movie.duration';
-      case 'RATING':
+      case MovieOrderField.RATING:
         return 'movie.rating';
-      case 'CREATED_AT':
+      case MovieOrderField.CREATED_AT:
       default:
         return 'movie.createdAt';
     }

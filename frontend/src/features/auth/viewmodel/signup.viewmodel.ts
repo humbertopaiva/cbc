@@ -1,98 +1,61 @@
-import { useMutation } from '@apollo/client'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'react-toastify'
-import { SIGN_UP } from '../graphql/auth.graphql'
-import { useAuth } from '../context/auth.context'
+import { authService } from '../services/auth.service'
 import { signupSchema } from '../schemas/auth.schema'
-import type { SignUpInput, User } from '../model/auth.model'
+import { useAuth } from '../context/auth.context'
 import type { SignupFormData } from '../schemas/auth.schema'
-
-export class SignupViewModel {
-  constructor(private authContext: ReturnType<typeof useAuth>) {}
-
-  setupForm() {
-    return useForm<SignupFormData>({
-      resolver: zodResolver(signupSchema),
-      defaultValues: {
-        name: '',
-        email: '',
-        password: '',
-        passwordConfirmation: '',
-      },
-    })
-  }
-
-  setupMutation() {
-    const [signupMutation, { loading }] = useMutation<
-      {
-        signUp: {
-          token: string
-          user: User
-        }
-      },
-      { input: SignUpInput }
-    >(SIGN_UP, {
-      onCompleted: (data) => {
-        this.authContext.login(data.signUp.token, data.signUp.user)
-        toast.success('Cadastro realizado com sucesso!')
-      },
-      onError: (error) => {
-        console.error('Signup error:', error)
-        toast.error('Erro ao realizar cadastro.')
-        return error
-      },
-    })
-
-    return { signupMutation, loading }
-  }
-
-  handleSignupError(error: Error, setError: any) {
-    if (error.message.includes('Email already in use')) {
-      setError('email', { message: 'Este email já está em uso' })
-    } else if (error.message.includes('Passwords do not match')) {
-      setError('passwordConfirmation', { message: 'As senhas não coincidem' })
-    } else {
-      toast.error('Ocorreu um erro durante o cadastro. Tente novamente.')
-    }
-  }
-}
+import { useFormViewModel } from '@/core/hooks/useFormViewModel'
 
 export function useSignupViewModel() {
-  const auth = useAuth()
-  const viewModel = new SignupViewModel(auth)
+  const navigate = useNavigate()
+  const { login: authLogin } = useAuth()
+
+  const defaultValues: SignupFormData = {
+    name: '',
+    email: '',
+    password: '',
+    passwordConfirmation: '',
+  }
+
+  const onSubmitHandler = async (data: SignupFormData) => {
+    try {
+      const result = await authService.signup(
+        data.name,
+        data.email,
+        data.password,
+        data.passwordConfirmation,
+      )
+      authLogin(result.token, result.user)
+      toast.success('Cadastro realizado com sucesso!')
+      navigate({ to: '/' })
+    } catch (error) {
+      console.error('Signup error:', error)
+      toast.error('Erro ao realizar cadastro.')
+      throw error
+    }
+  }
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    setError,
+    errors,
+    isLoading,
+    submitError,
+    onSubmit,
     reset,
-  } = viewModel.setupForm()
-
-  const { signupMutation, loading } = viewModel.setupMutation()
-
-  const onSubmit = (data: SignupFormData) => {
-    signupMutation({
-      variables: {
-        input: {
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          passwordConfirmation: data.passwordConfirmation,
-        },
-      },
-    }).catch((error) => {
-      viewModel.handleSignupError(error, setError)
-    })
-  }
+  } = useFormViewModel({
+    schema: signupSchema,
+    defaultValues,
+    onSubmitHandler,
+  })
 
   return {
     register,
     handleSubmit,
     onSubmit,
     errors,
-    isLoading: loading,
+    isLoading,
+    submitError,
     reset,
   }
 }
