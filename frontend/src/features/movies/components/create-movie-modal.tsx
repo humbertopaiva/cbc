@@ -1,6 +1,20 @@
 import React, { useEffect } from 'react'
-import { FiSave } from 'react-icons/fi'
-import { Button } from '@/components/ui/button'
+import {
+  FiActivity,
+  FiBarChart2,
+  FiCalendar,
+  FiClock,
+  FiDollarSign,
+  FiFileText,
+  FiGlobe,
+  FiSave,
+  FiStar,
+  FiTag,
+  FiType,
+  FiYoutube,
+} from 'react-icons/fi'
+import { Button } from '@/components/custom/button'
+import { Input } from '@/components/ui/input'
 import { Modal } from '@/components/ui/modal'
 import { useCreateMovieViewModel } from '@/features/movies/viewmodel/movie-form.viewmodel'
 import { ImageUpload } from '@/features/movies/components/image-upload'
@@ -63,6 +77,7 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
         form="create-movie-form"
         className="flex items-center gap-2"
         disabled={isSubmitting}
+        variant="primary"
       >
         <FiSave className="w-4 h-4" />
         {isSubmitting ? 'Salvando...' : 'Adicionar Filme'}
@@ -90,19 +105,22 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="title"
                   className="block text-sm font-medium mb-1"
                 >
                   Título <span className="text-red-500">*</span>
                 </label>
-                <input
+                <Input
                   id="title"
                   type="text"
                   {...register('title')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Título do filme"
+                  icon={<FiType />}
+                  value={watch('title') || ''}
+                  showClearButton={!!watch('title')}
+                  onClear={() => setValue('title', '')}
                 />
                 {errors.title && (
                   <p className="text-destructive text-sm mt-1">
@@ -111,19 +129,22 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="originalTitle"
                   className="block text-sm font-medium mb-1"
                 >
                   Título Original
                 </label>
-                <input
+                <Input
                   id="originalTitle"
                   type="text"
                   {...register('originalTitle')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Título original (se diferente)"
+                  icon={<FiType />}
+                  value={watch('originalTitle') || ''}
+                  showClearButton={!!watch('originalTitle')}
+                  onClear={() => setValue('originalTitle', '')}
                 />
                 {errors.originalTitle && (
                   <p className="text-destructive text-sm mt-1">
@@ -132,19 +153,22 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="tagline"
                   className="block text-sm font-medium mb-1"
                 >
                   Frase de Efeito
                 </label>
-                <input
+                <Input
                   id="tagline"
                   type="text"
                   {...register('tagline')}
-                  className="w-full p-2 border rounded-md bg-background"
-                  placeholder="Frase de efeito do filme (ex: 'Todo herói tem um começo')"
+                  placeholder="Frase de efeito do filme"
+                  icon={<FiTag />}
+                  value={watch('tagline') || ''}
+                  showClearButton={!!watch('tagline')}
+                  onClear={() => setValue('tagline', '')}
                 />
                 {errors.tagline && (
                   <p className="text-destructive text-sm mt-1">
@@ -153,7 +177,7 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="status"
                   className="block text-sm font-medium mb-1"
@@ -163,7 +187,7 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 <select
                   id="status"
                   {...register('status')}
-                  className="w-full p-2 border rounded-md bg-background"
+                  className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="">Selecione a situação</option>
                   <option value={MovieStatus.RELEASED}>Lançado</option>
@@ -176,19 +200,22 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="language"
                   className="block text-sm font-medium mb-1"
                 >
                   Idioma
                 </label>
-                <input
+                <Input
                   id="language"
                   type="text"
                   {...register('language')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Idioma principal do filme"
+                  icon={<FiGlobe />}
+                  value={watch('language') || ''}
+                  showClearButton={!!watch('language')}
+                  onClear={() => setValue('language', '')}
                 />
                 {errors.language && (
                   <p className="text-destructive text-sm mt-1">
@@ -197,18 +224,21 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="releaseDate"
                   className="block text-sm font-medium mb-1"
                 >
                   Data de Lançamento
                 </label>
-                <input
+                <Input
                   id="releaseDate"
                   type="date"
                   {...register('releaseDate')}
-                  className="w-full p-2 border rounded-md bg-background"
+                  icon={<FiCalendar />}
+                  value={watch('releaseDate') || ''}
+                  showClearButton={!!watch('releaseDate')}
+                  onClear={() => setValue('releaseDate', '')}
                 />
                 {errors.releaseDate && (
                   <p className="text-destructive text-sm mt-1">
@@ -217,20 +247,23 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="duration"
                   className="block text-sm font-medium mb-1"
                 >
                   Duração (minutos)
                 </label>
-                <input
+                <Input
                   id="duration"
                   type="number"
                   {...register('duration')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Duração em minutos"
                   min="1"
+                  icon={<FiClock />}
+                  value={watch('duration') || ''}
+                  showClearButton={!!watch('duration')}
+                  onClear={() => setValue('duration', undefined)}
                 />
                 {errors.duration && (
                   <p className="text-destructive text-sm mt-1">
@@ -239,19 +272,22 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="trailerUrl"
                   className="block text-sm font-medium mb-1"
                 >
                   URL do Trailer
                 </label>
-                <input
+                <Input
                   id="trailerUrl"
                   type="url"
                   {...register('trailerUrl')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="URL do trailer no YouTube"
+                  icon={<FiYoutube />}
+                  value={watch('trailerUrl') || ''}
+                  showClearButton={!!watch('trailerUrl')}
+                  onClear={() => setValue('trailerUrl', '')}
                 />
                 {errors.trailerUrl && (
                   <p className="text-destructive text-sm mt-1">
@@ -262,21 +298,24 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
             </div>
 
             <div className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="budget"
                   className="block text-sm font-medium mb-1"
                 >
                   Orçamento (USD)
                 </label>
-                <input
+                <Input
                   id="budget"
                   type="number"
                   {...register('budget')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Orçamento em dólares"
                   min="0"
                   step="0.01"
+                  icon={<FiDollarSign />}
+                  value={watch('budget') || ''}
+                  showClearButton={!!watch('budget')}
+                  onClear={() => setValue('budget', undefined)}
                 />
                 {errors.budget && (
                   <p className="text-destructive text-sm mt-1">
@@ -285,21 +324,24 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="revenue"
                   className="block text-sm font-medium mb-1"
                 >
                   Receita (USD)
                 </label>
-                <input
+                <Input
                   id="revenue"
                   type="number"
                   {...register('revenue')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Receita em dólares"
                   min="0"
                   step="0.01"
+                  icon={<FiDollarSign />}
+                  value={watch('revenue') || ''}
+                  showClearButton={!!watch('revenue')}
+                  onClear={() => setValue('revenue', undefined)}
                 />
                 {errors.revenue && (
                   <p className="text-destructive text-sm mt-1">
@@ -308,20 +350,23 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="popularity"
                   className="block text-sm font-medium mb-1"
                 >
                   Popularidade
                 </label>
-                <input
+                <Input
                   id="popularity"
                   type="number"
                   {...register('popularity')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Nível de popularidade"
                   min="0"
+                  icon={<FiBarChart2 />}
+                  value={watch('popularity') || ''}
+                  showClearButton={!!watch('popularity')}
+                  onClear={() => setValue('popularity', undefined)}
                 />
                 {errors.popularity && (
                   <p className="text-destructive text-sm mt-1">
@@ -330,20 +375,23 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="voteCount"
                   className="block text-sm font-medium mb-1"
                 >
                   Contagem de Votos
                 </label>
-                <input
+                <Input
                   id="voteCount"
                   type="number"
                   {...register('voteCount')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Número total de votos"
                   min="0"
+                  icon={<FiActivity />}
+                  value={watch('voteCount') || ''}
+                  showClearButton={!!watch('voteCount')}
+                  onClear={() => setValue('voteCount', undefined)}
                 />
                 {errors.voteCount && (
                   <p className="text-destructive text-sm mt-1">
@@ -352,22 +400,25 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="rating"
                   className="block text-sm font-medium mb-1"
                 >
                   Nota (0-10)
                 </label>
-                <input
+                <Input
                   id="rating"
                   type="number"
                   {...register('rating')}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Avaliação de 0 a 10"
                   min="0"
                   max="10"
                   step="0.1"
+                  icon={<FiStar />}
+                  value={watch('rating') || ''}
+                  showClearButton={!!watch('rating')}
+                  onClear={() => setValue('rating', undefined)}
                 />
                 {errors.rating && (
                   <p className="text-destructive text-sm mt-1">
@@ -376,7 +427,7 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 )}
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="description"
                   className="block text-sm font-medium mb-1"
@@ -386,9 +437,10 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 <textarea
                   id="description"
                   {...register('description')}
-                  className="w-full p-2 border rounded-md bg-background h-32"
+                  className="w-full p-3 border rounded-md bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 h-32"
                   placeholder="Descrição do filme"
-                />
+                  value={watch('description') || ''}
+                ></textarea>
                 {errors.description && (
                   <p className="text-destructive text-sm mt-1">
                     {errors.description.message}
@@ -407,7 +459,7 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                   id="genreIds"
                   multiple
                   {...register('genreIds')}
-                  className="w-full p-2 border rounded-md bg-background h-40"
+                  className="w-full p-2 border rounded-md bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 h-40"
                 >
                   {genres.map((genre) => (
                     <option key={genre.id} value={genre.id}>
