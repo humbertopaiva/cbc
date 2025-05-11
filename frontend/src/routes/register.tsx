@@ -1,7 +1,7 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useSignupViewModel } from '@/features/auth/viewmodel/signup.viewmodel'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/custom/button'
 import { useAuth } from '@/features/auth/context/auth.context'
 
 export const Route = createFileRoute('/register')({
@@ -21,11 +21,8 @@ function RegisterPage() {
   }, [isAuthenticated, navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full p-8 bg-card rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6">CUBOS Movies</h1>
-        <h2 className="text-xl font-semibold text-center mb-6">Registro</h2>
-
+    <div className="flex items-center justify-center flex-1">
+      <div className="max-w-md w-full rounded-xs p-4 bg-card/80 backdrop-blur-sm shadow-xl border border-border">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="name" className="block text-sm font-medium">
@@ -35,7 +32,7 @@ function RegisterPage() {
               id="name"
               type="text"
               {...register('name')}
-              className="w-full p-2 border rounded-md bg-background"
+              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite seu nome"
             />
             {errors.name && (
@@ -51,7 +48,7 @@ function RegisterPage() {
               id="email"
               type="email"
               {...register('email')}
-              className="w-full p-2 border rounded-md bg-background"
+              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite seu email"
             />
             {errors.email && (
@@ -67,7 +64,7 @@ function RegisterPage() {
               id="password"
               type="password"
               {...register('password')}
-              className="w-full p-2 border rounded-md bg-background"
+              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite sua senha"
             />
             {errors.password && (
@@ -88,7 +85,7 @@ function RegisterPage() {
               id="passwordConfirmation"
               type="password"
               {...register('passwordConfirmation')}
-              className="w-full p-2 border rounded-md bg-background"
+              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Confirme sua senha"
             />
             {errors.passwordConfirmation && (
@@ -98,12 +95,17 @@ function RegisterPage() {
             )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading}
+            variant="primary"
+          >
             {isLoading ? 'Carregando...' : 'Registrar'}
           </Button>
         </form>
 
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <p className="text-sm">
             Já tem uma conta?{' '}
             <Link to="/login" className="text-primary hover:underline">
