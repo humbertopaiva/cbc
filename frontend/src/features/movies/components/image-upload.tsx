@@ -3,6 +3,7 @@ import { FiUpload, FiX } from 'react-icons/fi'
 
 import { s3UploadService } from '../services/s3-upload.service'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface ImageUploadProps {
   imageUrl: string | undefined
@@ -11,6 +12,8 @@ interface ImageUploadProps {
   label: string
   movieTitle?: string
   folder?: string
+  aspectRatio?: 'poster' | 'backdrop' // Novo prop para controlar a proporção
+  className?: string
 }
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -19,6 +22,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   onImageChange,
   label,
   folder = 'images',
+  aspectRatio = 'poster', // Default para poster (vertical)
+  className,
 }) => {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -80,8 +85,14 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     onImageChange('', undefined)
   }, [onImageChange, imageKey])
 
+  // Classes para controlar a proporção
+  const aspectClasses = {
+    poster: 'aspect-[2/3]', // Proporção vertical para pôsteres (2:3)
+    backdrop: 'aspect-[16/9]', // Proporção horizontal para backdrops (16:9)
+  }
+
   return (
-    <div className="space-y-2">
+    <div className={cn('space-y-2', className)}>
       <label className="block text-sm font-medium mb-1">{label}</label>
 
       {imageUrl ? (
@@ -89,7 +100,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           <img
             src={imageUrl}
             alt={label}
-            className="w-full h-48 object-cover rounded-md border"
+            className={cn(
+              'w-full object-cover rounded-md border',
+              aspectClasses[aspectRatio],
+            )}
           />
           <button
             onClick={handleRemoveImage}
@@ -101,10 +115,17 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           </button>
         </div>
       ) : (
-        <div className="border-2 border-dashed border-input rounded-md p-6 flex flex-col items-center">
+        <div
+          className={cn(
+            'border-2 border-dashed border-input rounded-md flex flex-col items-center justify-center',
+            aspectClasses[aspectRatio],
+          )}
+        >
           <FiUpload className="w-8 h-8 text-muted-foreground mb-2" />
-          <p className="text-sm text-muted-foreground mb-4">
-            Clique para fazer upload ou use uma URL
+          <p className="text-sm text-muted-foreground mb-4 text-center px-4">
+            {aspectRatio === 'poster'
+              ? 'Imagem no formato retrato (2:3)'
+              : 'Imagem no formato paisagem (16:9)'}
           </p>
           <div className="flex space-x-2">
             <div className="relative">

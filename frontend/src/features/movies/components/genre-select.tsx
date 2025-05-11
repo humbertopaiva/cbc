@@ -17,7 +17,6 @@ export const GenreSelect: React.FC<GenreSelectProps> = ({
   error,
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   // Filtrar gêneros com base no termo de busca
   const filteredGenres = genres.filter((genre) =>
@@ -73,72 +72,56 @@ export const GenreSelect: React.FC<GenreSelectProps> = ({
         ))}
       </div>
 
-      {/* Campo de pesquisa com dropdown */}
+      {/* Campo de pesquisa */}
       <div className="relative">
         <div className="flex items-center border rounded-md bg-background">
           <Search size={16} className="ml-2 text-muted-foreground" />
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value)
-              if (!isDropdownOpen) setIsDropdownOpen(true)
-            }}
-            onFocus={() => setIsDropdownOpen(true)}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Pesquisar gêneros..."
             className="w-full p-2 bg-transparent border-none focus:outline-none focus:ring-0"
           />
         </div>
 
-        {/* Dropdown de resultados */}
-        {isDropdownOpen && (
-          <div className="absolute z-10 w-full mt-1 max-h-60 overflow-auto border rounded-md bg-card shadow-lg">
-            {filteredGenres.length === 0 ? (
-              <div className="p-3 text-center text-muted-foreground">
-                Nenhum gênero encontrado
-              </div>
-            ) : (
-              <ul>
-                {filteredGenres.map((genre) => {
-                  const selected = isSelected(genre.id)
-                  return (
-                    <li
-                      key={genre.id}
-                      className={cn(
-                        'flex items-center justify-between p-3 cursor-pointer hover:bg-accent',
-                        selected && 'bg-primary/10',
-                      )}
-                      onClick={() => {
-                        if (selected) {
-                          removeGenre(genre.id)
-                        } else {
-                          addGenre(genre.id)
-                        }
-                      }}
-                    >
-                      <span>{genre.name}</span>
-                      {selected ? (
-                        <Check size={16} className="text-primary" />
-                      ) : (
-                        <Plus size={16} className="text-muted-foreground" />
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-
-            <div className="p-2 border-t">
-              <button
-                type="button"
-                onClick={() => setIsDropdownOpen(false)}
-                className="w-full p-2 bg-muted hover:bg-muted/80 rounded-md text-center text-sm"
-              >
-                Fechar
-              </button>
+        {/* Lista de gêneros (sempre visível) */}
+        <div className="w-full mt-1 max-h-60 overflow-auto border rounded-md bg-card shadow-md">
+          {filteredGenres.length === 0 ? (
+            <div className="p-3 text-center text-muted-foreground">
+              Nenhum gênero encontrado
             </div>
-          </div>
-        )}
+          ) : (
+            <ul>
+              {filteredGenres.map((genre) => {
+                const selected = isSelected(genre.id)
+                return (
+                  <li
+                    key={genre.id}
+                    className={cn(
+                      'flex items-center justify-between p-3 cursor-pointer hover:bg-accent',
+                      selected && 'bg-primary/10',
+                    )}
+                    onClick={() => {
+                      if (selected) {
+                        removeGenre(genre.id)
+                      } else {
+                        addGenre(genre.id)
+                      }
+                    }}
+                  >
+                    <span>{genre.name}</span>
+                    {selected ? (
+                      <Check size={16} className="text-primary" />
+                    ) : (
+                      <Plus size={16} className="text-muted-foreground" />
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
       </div>
 
       {error && <p className="text-destructive text-sm mt-1">{error}</p>}

@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {
-  FiBookOpen,
-  FiClock,
-  FiDollarSign,
-  FiFilm,
-  FiImage,
-  FiInfo,
-  FiSave,
-  FiTag,
-} from 'react-icons/fi'
+import { FiBookOpen, FiDollarSign, FiInfo, FiSave } from 'react-icons/fi'
 import { GenreSelect } from './genre-select'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
@@ -90,89 +81,145 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
   // Conteúdo das abas
   const tabContent = {
     basic: (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <h3 className="text-lg font-semibold mb-3">Informações Básicas</h3>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Coluna da esquerda: Imagem do Poster */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1">
-              Título <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="title"
-              type="text"
-              {...register('title')}
-              className="w-full p-2 border rounded-md bg-background"
-              placeholder="Título do filme"
+            <ImageUpload
+              imageUrl={watch('imageUrl')}
+              imageKey={watch('imageKey')}
+              onImageChange={(url, key) => {
+                setValue('imageUrl', url)
+                setValue('imageKey', key)
+              }}
+              label="Imagem de Capa"
+              folder="posters"
+              aspectRatio="poster"
             />
-            {errors.title && (
+            {errors.imageUrl && (
               <p className="text-destructive text-sm mt-1">
-                {errors.title.message}
+                {errors.imageUrl.message}
               </p>
             )}
           </div>
 
-          <div>
-            <label
-              htmlFor="originalTitle"
-              className="block text-sm font-medium mb-1"
-            >
-              Título Original
-            </label>
-            <input
-              id="originalTitle"
-              type="text"
-              {...register('originalTitle')}
-              className="w-full p-2 border rounded-md bg-background"
-              placeholder="Título original (se diferente)"
-            />
-            {errors.originalTitle && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.originalTitle.message}
-              </p>
-            )}
-          </div>
+          {/* Coluna da direita: Informações básicas */}
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium mb-1">
+                Título <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="title"
+                type="text"
+                {...register('title')}
+                className="w-full p-2 border rounded-md bg-background"
+                placeholder="Título do filme"
+              />
+              {errors.title && (
+                <p className="text-destructive text-sm mt-1">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="tagline" className="block text-sm font-medium mb-1">
-              Frase de Efeito
-            </label>
-            <input
-              id="tagline"
-              type="text"
-              {...register('tagline')}
-              className="w-full p-2 border rounded-md bg-background"
-              placeholder="Frase de efeito do filme (ex: 'Todo herói tem um começo')"
-            />
-            {errors.tagline && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.tagline.message}
-              </p>
-            )}
-          </div>
+            <div>
+              <label
+                htmlFor="originalTitle"
+                className="block text-sm font-medium mb-1"
+              >
+                Título Original
+              </label>
+              <input
+                id="originalTitle"
+                type="text"
+                {...register('originalTitle')}
+                className="w-full p-2 border rounded-md bg-background"
+                placeholder="Título original (se diferente)"
+              />
+              {errors.originalTitle && (
+                <p className="text-destructive text-sm mt-1">
+                  {errors.originalTitle.message}
+                </p>
+              )}
+            </div>
 
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium mb-1"
-            >
-              Descrição
-            </label>
-            <textarea
-              id="description"
-              {...register('description')}
-              className="w-full p-2 border rounded-md bg-background h-32"
-              placeholder="Descrição do filme"
-            />
-            {errors.description && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.description.message}
-              </p>
-            )}
+            <div>
+              <label
+                htmlFor="tagline"
+                className="block text-sm font-medium mb-1"
+              >
+                Frase de Efeito
+              </label>
+              <input
+                id="tagline"
+                type="text"
+                {...register('tagline')}
+                className="w-full p-2 border rounded-md bg-background"
+                placeholder="Frase de efeito do filme (ex: 'Todo herói tem um começo')"
+              />
+              {errors.tagline && (
+                <p className="text-destructive text-sm mt-1">
+                  {errors.tagline.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium mb-1"
+              >
+                Descrição
+              </label>
+              <textarea
+                id="description"
+                {...register('description')}
+                className="w-full p-2 border rounded-md bg-background h-24"
+                placeholder="Descrição do filme"
+              />
+              {errors.description && (
+                <p className="text-destructive text-sm mt-1">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
           </div>
+        </div>
+
+        <div className="mt-8">
+          <h4 className="text-md font-medium mb-3">Imagem de Fundo</h4>
+          <ImageUpload
+            imageUrl={watch('backdropUrl')}
+            imageKey={watch('backdropKey')}
+            onImageChange={(url, key) => {
+              setValue('backdropUrl', url)
+              setValue('backdropKey', key)
+            }}
+            label="Banner/Backdrop (formato paisagem)"
+            folder="backdrops"
+            aspectRatio="backdrop"
+          />
+          {errors.backdropUrl && (
+            <p className="text-destructive text-sm mt-1">
+              {errors.backdropUrl.message}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-8">
+          <GenreSelect
+            genres={genres}
+            selectedGenres={watch('genreIds') || []}
+            onChange={handleGenresChange}
+            error={errors.genreIds?.message}
+          />
         </div>
       </div>
     ),
+
     details: (
       <div className="space-y-4">
         <h3 className="text-lg font-semibold mb-3">Detalhes</h3>
@@ -282,17 +329,9 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
             )}
           </div>
         </div>
-
-        <div className="mt-6">
-          <GenreSelect
-            genres={genres}
-            selectedGenres={watch('genreIds') || []}
-            onChange={handleGenresChange}
-            error={errors.genreIds?.message}
-          />
-        </div>
       </div>
     ),
+
     financial: (
       <div className="space-y-4">
         <h3 className="text-lg font-semibold mb-3">Informações Financeiras</h3>
@@ -405,49 +444,6 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
         </div>
       </div>
     ),
-    images: (
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold mb-3">Imagens</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <ImageUpload
-              imageUrl={watch('imageUrl')}
-              imageKey={watch('imageKey')}
-              onImageChange={(url, key) => {
-                setValue('imageUrl', url)
-                setValue('imageKey', key)
-              }}
-              label="Imagem de Capa"
-              folder="posters"
-            />
-            {errors.imageUrl && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.imageUrl.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <ImageUpload
-              imageUrl={watch('backdropUrl')}
-              imageKey={watch('backdropKey')}
-              onImageChange={(url, key) => {
-                setValue('backdropUrl', url)
-                setValue('backdropKey', key)
-              }}
-              label="Imagem de Fundo (Backdrop)"
-              folder="backdrops"
-            />
-            {errors.backdropUrl && (
-              <p className="text-destructive text-sm mt-1">
-                {errors.backdropUrl.message}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    ),
   }
 
   return (
@@ -478,7 +474,7 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 type="button"
               >
                 <FiBookOpen className="mr-2 h-4 w-4" />
-                Básico
+                Informações Básicas
               </button>
               <button
                 className={`inline-flex items-center px-4 py-2 border-b-2 text-sm font-medium ${
@@ -504,18 +500,6 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 <FiDollarSign className="mr-2 h-4 w-4" />
                 Financeiro
               </button>
-              <button
-                className={`inline-flex items-center px-4 py-2 border-b-2 text-sm font-medium ${
-                  activeTab === 'images'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-foreground/30'
-                }`}
-                onClick={() => setActiveTab('images')}
-                type="button"
-              >
-                <FiImage className="mr-2 h-4 w-4" />
-                Imagens
-              </button>
             </div>
           </div>
 
@@ -530,7 +514,7 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    const tabs = ['basic', 'details', 'financial', 'images']
+                    const tabs = ['basic', 'details', 'financial']
                     const currentIndex = tabs.indexOf(activeTab)
                     setActiveTab(tabs[currentIndex - 1])
                   }}
@@ -539,13 +523,13 @@ export const CreateMovieModal: React.FC<CreateMovieModalProps> = ({
                 </Button>
               )}
 
-              {activeTab !== 'images' && (
+              {activeTab !== 'financial' && (
                 <Button
                   type="button"
                   variant="outline"
                   className="ml-auto"
                   onClick={() => {
-                    const tabs = ['basic', 'details', 'financial', 'images']
+                    const tabs = ['basic', 'details', 'financial']
                     const currentIndex = tabs.indexOf(activeTab)
                     setActiveTab(tabs[currentIndex + 1])
                   }}
