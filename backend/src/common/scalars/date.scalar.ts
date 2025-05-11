@@ -13,13 +13,13 @@ export class DateScalar implements CustomScalar<string, Date> {
     if (typeof value === 'string') {
       return value;
     }
-    return value instanceof Date ? value.toISOString().split('T')[0] : null;
+    return value instanceof Date ? value.toISOString().split('T')[0] : '';
   }
 
   parseLiteral(ast: ValueNode): Date {
     if (ast.kind === Kind.STRING) {
       return new Date(ast.value);
     }
-    return null;
+    return new Date();
   }
 }
