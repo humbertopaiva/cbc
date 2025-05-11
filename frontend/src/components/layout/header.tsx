@@ -1,48 +1,62 @@
 import React from 'react'
 import { Link } from '@tanstack/react-router'
-import { FiFilm, FiLogIn, FiUser } from 'react-icons/fi'
+import { FiLogIn, FiUser } from 'react-icons/fi'
 import { useAuth } from '@/features/auth/context/auth.context'
 import { ThemeToggle } from '@/features/theme/components/theme-toggle'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth()
 
   return (
-    <header className="bg-card  shadow-sm">
+    <header className="bg-card shadow-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
-          {/* Logo à esquerda */}
-          <Link to="/" className="flex items-center gap-2 text-primary">
-            <FiFilm className="h-6 w-6" />
-            <span className="text-xl font-bold hidden sm:inline">
-              CUBOS Movies
-            </span>
+          {/* Logo responsiva (mobile e desktop) */}
+          <Link to="/" className="flex items-center">
+            <img
+              src="/logo-mobile.svg"
+              alt="Logo Mobile"
+              className="h-8 block md:hidden"
+            />
+            <img
+              src="/logo-horizontal.svg"
+              alt="Logo Desktop"
+              className="h-8 hidden md:block"
+            />
           </Link>
 
-          {/* Controles à direita */}
-          <div className="flex items-center gap-2 sm:gap-4">
-            <ThemeToggle />
-
+          {/* Botões lado direito */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {isAuthenticated ? (
-              <div className="flex items-center gap-2 sm:gap-4">
+              <>
                 <span className="text-sm hidden md:inline">
                   Olá, {user?.name}
                 </span>
+                <ThemeToggle />
                 <Button
                   onClick={logout}
-                  variant="outline"
-                  className="flex items-center gap-1"
+                  className={cn(
+                    'w-9 h-9 p-0 bg-purple-600 hover:bg-purple-700 text-white rounded-md',
+                  )}
                 >
                   <FiUser className="h-4 w-4" />
-                  <span className="hidden sm:inline">Sair</span>
                 </Button>
-              </div>
+              </>
             ) : (
-              <Button as={Link} to="/login" className="flex items-center gap-1">
-                <FiLogIn className="h-4 w-4" />
-                <span className="hidden sm:inline">Entrar</span>
-              </Button>
+              <>
+                <ThemeToggle />
+                <Button
+                  as={Link}
+                  to="/login"
+                  className={cn(
+                    'w-9 h-9 p-0 bg-purple-600 hover:bg-purple-700 text-white rounded-md',
+                  )}
+                >
+                  <FiLogIn className="h-4 w-4" />
+                </Button>
+              </>
             )}
           </div>
         </div>
