@@ -13,7 +13,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
   return (
     <Link to="/movies/$id" params={{ id: movie.id }} className="block h-full">
       <div
-        className="bg-card shadow-md rounded-lg overflow-hidden transition-transform hover:scale-[1.03] h-full cursor-pointer"
+        className="bg-card shadow-md overflow-hidden transition-transform hover:scale-[1.03] h-full cursor-pointer"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
@@ -28,12 +28,12 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent dark:from-black/90 dark:via-black/50 dark:to-transparent"></div>
 
           {/* Informações de título na parte inferior */}
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <h3 className="font-bold text-lg text-white line-clamp-1">
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+            <h3 className="font-bold text-base sm:text-lg text-white line-clamp-1">
               {movie.title}
             </h3>
             {movie.originalTitle && (
-              <p className="text-white/80 text-sm italic line-clamp-1">
+              <p className="text-white/80 text-xs sm:text-sm italic line-clamp-1">
                 {movie.originalTitle}
               </p>
             )}
