@@ -15,7 +15,7 @@ export const Main: React.FC<MainProps> = ({
   return (
     <main
       className={cn(
-        'flex-1 w-full relative',
+        'flex-1 w-full relative flex flex-col',
         withBackground && 'bg-cover bg-center',
         className,
       )}
@@ -26,12 +26,11 @@ export const Main: React.FC<MainProps> = ({
       }
     >
       {withBackground && (
-        <div className="absolute inset-0 bg-black/50 dark:bg-black/70 z-0"></div>
+        <div className="absolute inset-0 bg-white/80 dark:bg-black/90 z-0"></div>
       )}
       <div
         className={cn(
-          'relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10',
-          withBackground && 'text-white',
+          'relative z-10 flex-1 flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10',
         )}
       >
         {children}

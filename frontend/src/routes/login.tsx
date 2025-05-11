@@ -21,8 +21,8 @@ function LoginPage() {
   }, [isAuthenticated, navigate])
 
   return (
-    <div className="flex items-center justify-center py-12">
-      <div className="max-w-md w-full p-8 bg-card/90 backdrop-blur-sm rounded-lg shadow-xl border border-border">
+    <div className="flex items-center justify-center flex-1">
+      <div className="max-w-md w-full p-8 bg-card/90 backdrop-blur-sm shadow-xl border border-border">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="block text-sm font-medium">
@@ -32,7 +32,7 @@ function LoginPage() {
               id="email"
               type="email"
               {...register('email')}
-              className="w-full p-3 border rounded-md bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite seu email"
             />
             {errors.email && (
@@ -48,7 +48,7 @@ function LoginPage() {
               id="password"
               type="password"
               {...register('password')}
-              className="w-full p-3 border rounded-md bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite sua senha"
             />
             {errors.password && (
