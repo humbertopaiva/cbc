@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useParams } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { FiArrowLeft, FiEdit, FiTrash2 } from 'react-icons/fi'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useMovieDetailsViewModel } from '@/features/movies/viewmodel/movie-details.viewmodel'
 import { MovieStatus } from '@/features/movies/model/movie.model'
 import { MovieTrailer } from '@/features/movies/components/movie-trailer'
+import { EditMovieModal } from '@/features/movies/components/edit-movie-modal'
 
 export const Route = createFileRoute('/movies/$id')({
   component: MovieDetailsPage,
@@ -17,6 +18,8 @@ function MovieDetailsPage() {
   const { id } = useParams({ from: '/movies/$id' })
   const { movie, loading, isDeleting, fetchMovie, handleDelete } =
     useMovieDetailsViewModel(id)
+
+  const [showEditModal, setShowEditModal] = useState(false)
 
   useEffect(() => {
     fetchMovie()
@@ -94,9 +97,7 @@ function MovieDetailsPage() {
                 <Button
                   variant="outline"
                   className="bg-transparent border-white/30 text-white hover:bg-white/10 flex items-center gap-2"
-                  as={Link}
-                  to="/movies/$id/edit"
-                  params={{ id }}
+                  onClick={() => setShowEditModal(true)}
                 >
                   <FiEdit className="w-4 h-4" />
                   Editar
@@ -287,6 +288,16 @@ function MovieDetailsPage() {
           </div>
         )}
       </div>
+
+      <EditMovieModal
+        open={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSuccess={() => {
+          setShowEditModal(false)
+          fetchMovie() // Para atualizar os dados após edição
+        }}
+        movieId={id}
+      />
     </AuthGuard>
   )
 }
