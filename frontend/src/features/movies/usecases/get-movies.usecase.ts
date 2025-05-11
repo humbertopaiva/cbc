@@ -4,11 +4,14 @@ import type { MovieConnection, MovieFilters } from '../model/movie.model'
 export class GetMoviesUseCase {
   async execute(
     filters?: MovieFilters,
-    first: number = 10,
-    after?: string,
-    orderBy?: { field: string; direction: 'ASC' | 'DESC' },
+    pagination?: {
+      page?: number
+      pageSize?: number
+      after?: string
+      orderBy?: { field: string; direction: 'ASC' | 'DESC' }
+    },
   ): Promise<MovieConnection> {
-    return moviesService.getMovies(filters, first, after, orderBy)
+    return moviesService.getMovies(filters, pagination)
   }
 }
 

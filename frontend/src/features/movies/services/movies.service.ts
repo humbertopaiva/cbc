@@ -19,16 +19,26 @@ import { apolloClient } from '@/core/lib/apollo'
 export class MoviesService {
   async getMovies(
     filters?: MovieFilters,
-    first: number = 10,
-    after?: string,
-    orderBy?: { field: string; direction: 'ASC' | 'DESC' },
+    pagination?: {
+      page?: number
+      pageSize?: number
+      after?: string
+      orderBy?: { field: string; direction: 'ASC' | 'DESC' }
+    },
   ): Promise<MovieConnection> {
+    const pageSize = pagination?.pageSize || 10
+    const after = pagination?.after
+    const orderBy = pagination?.orderBy || {
+      field: 'CREATED_AT',
+      direction: 'DESC',
+    }
+
     const { data } = await apolloClient.query({
       query: GET_MOVIES,
       variables: {
         filters,
         pagination: {
-          first,
+          first: pageSize,
           after,
           orderBy,
         },
