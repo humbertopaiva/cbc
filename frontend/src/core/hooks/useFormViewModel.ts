@@ -107,6 +107,8 @@ export function useFormViewModel<TFormValues extends FieldValues>(
     setError,
     formMethods,
     reset,
+    setValue, // Adicionar setValue
+    watch, // Adicionar watch
 
     // Estado do formulário
     isLoading,
