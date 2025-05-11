@@ -29,12 +29,20 @@ export function useLoginViewModel() {
     }
   }
 
-  const { register, handleSubmit, errors, isLoading, submitError, onSubmit } =
-    useFormViewModel({
-      schema: loginSchema,
-      defaultValues,
-      onSubmitHandler,
-    })
+  const {
+    register,
+    handleSubmit,
+    errors,
+    isLoading,
+    submitError,
+    onSubmit,
+    setValue,
+    watch,
+  } = useFormViewModel({
+    schema: loginSchema,
+    defaultValues,
+    onSubmitHandler,
+  })
 
   return {
     register,
@@ -43,5 +51,7 @@ export function useLoginViewModel() {
     errors,
     isLoading,
     submitError,
+    setValue,
+    watch,
   }
 }

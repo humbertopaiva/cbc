@@ -1,7 +1,9 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { FiLock, FiMail } from 'react-icons/fi'
 import { useLoginViewModel } from '@/features/auth/viewmodel/login.viewmodel'
 import { Button } from '@/components/custom/button'
+import { Input } from '@/components/ui/input'
 import { useAuth } from '@/features/auth/context/auth.context'
 
 export const Route = createFileRoute('/login')({
@@ -9,8 +11,15 @@ export const Route = createFileRoute('/login')({
 })
 
 function LoginPage() {
-  const { register, handleSubmit, onSubmit, errors, isLoading } =
-    useLoginViewModel()
+  const {
+    register,
+    handleSubmit,
+    onSubmit,
+    errors,
+    isLoading,
+    setValue,
+    watch,
+  } = useLoginViewModel()
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
@@ -28,12 +37,15 @@ function LoginPage() {
             <label htmlFor="email" className="block text-sm font-medium">
               Email
             </label>
-            <input
+            <Input
               id="email"
               type="email"
-              {...register('email')}
-              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite seu email"
+              icon={<FiMail />}
+              showClearButton
+              onClear={() => setValue('email', '')}
+              {...register('email')}
+              value={watch('email') || ''}
             />
             {errors.email && (
               <p className="text-destructive text-sm">{errors.email.message}</p>
@@ -44,12 +56,13 @@ function LoginPage() {
             <label htmlFor="password" className="block text-sm font-medium">
               Senha
             </label>
-            <input
+            <Input
               id="password"
               type="password"
-              {...register('password')}
-              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite sua senha"
+              icon={<FiLock />}
+              {...register('password')}
+              value={watch('password') || ''}
             />
             {errors.password && (
               <p className="text-destructive text-sm">
