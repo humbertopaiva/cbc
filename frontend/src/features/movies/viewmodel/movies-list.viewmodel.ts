@@ -9,50 +9,6 @@ import {
 import { QUERY_KEYS } from './movie-form.viewmodel'
 import type { Genre, MovieConnection, MovieFilters } from '../model/movie.model'
 
-export class MoviesListViewModel {
-  async getMovies(
-    filters?: MovieFilters,
-    pagination?: {
-      page?: number
-      pageSize?: number
-      after?: string
-      orderBy?: { field: string; direction: 'ASC' | 'DESC' }
-    },
-  ): Promise<MovieConnection | null> {
-    try {
-      return await getMoviesUseCase.execute(filters, pagination)
-    } catch (error) {
-      console.error('Error fetching movies:', error)
-      toast.error('Erro ao carregar filmes')
-      return null
-    }
-  }
-
-  async getGenres(): Promise<Array<Genre>> {
-    try {
-      return await getGenresUseCase.execute()
-    } catch (error) {
-      console.error('Error fetching genres:', error)
-      toast.error('Erro ao carregar gêneros')
-      return []
-    }
-  }
-
-  async deleteMovie(id: string): Promise<boolean> {
-    try {
-      const result = await deleteMovieUseCase.execute(id)
-      if (result) {
-        toast.success('Filme excluído com sucesso!')
-      }
-      return result
-    } catch (error) {
-      console.error('Error deleting movie:', error)
-      toast.error('Erro ao excluir filme')
-      return false
-    }
-  }
-}
-
 export function useMoviesListViewModel() {
   const [filters, setFilters] = useState<MovieFilters>({})
   const [orderBy, setOrderBy] = useState<{
@@ -65,7 +21,6 @@ export function useMoviesListViewModel() {
   const [currentPage, setCurrentPage] = useState(1)
   const [cursorMap, setCursorMap] = useState<Record<number, string>>({})
   const pageSize = 10
-  const viewModel = new MoviesListViewModel()
   const queryClient = useQueryClient()
 
   // Construir a chave da query com base nos filtros e paginação
@@ -95,7 +50,7 @@ export function useMoviesListViewModel() {
   } = useQuery({
     queryKey: getQueryKey(),
     queryFn: () =>
-      viewModel.getMovies(filters, {
+      getMoviesUseCase.execute(filters, {
         pageSize,
         after: currentPage > 1 ? cursorMap[currentPage - 1] : undefined,
         orderBy,
@@ -106,13 +61,13 @@ export function useMoviesListViewModel() {
   // Buscar gêneros com React Query
   const { data: genres = [], isLoading: loadingGenres } = useQuery({
     queryKey: [QUERY_KEYS.GENRES],
-    queryFn: () => viewModel.getGenres(),
+    queryFn: () => getGenresUseCase.execute(),
     staleTime: 5 * 60 * 1000, // 5 minutos
   })
 
   // Mutation para excluir filme
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => viewModel.deleteMovie(id),
+    mutationFn: (id: string) => deleteMovieUseCase.execute(id),
     onSuccess: () => {
       // Invalidar queries relacionadas a filmes quando um filme for excluído
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MOVIES] })
@@ -135,9 +90,6 @@ export function useMoviesListViewModel() {
     setFilters(newFilters)
     setCursorMap({}) // Resetar cursores quando mudam os filtros
     setCurrentPage(1) // Voltar para a primeira página
-
-    // Não é necessário chamar refetch explicitamente aqui,
-    // pois a mudança em filters causa a reexecução da query
   }
 
   const handleOrderChange = (newOrderBy: {
@@ -147,9 +99,6 @@ export function useMoviesListViewModel() {
     setOrderBy(newOrderBy)
     setCursorMap({}) // Resetar cursores quando muda a ordenação
     setCurrentPage(1) // Voltar para a primeira página
-
-    // Não é necessário chamar refetch explicitamente aqui,
-    // pois a mudança em orderBy causa a reexecução da query
   }
 
   const handlePageChange = (page: number) => {
@@ -174,7 +123,15 @@ export function useMoviesListViewModel() {
   }
 
   const deleteMovie = async (id: string): Promise<boolean> => {
-    return await deleteMutation.mutateAsync(id)
+    try {
+      await deleteMutation.mutateAsync(id)
+      toast.success('Filme excluído com sucesso!')
+      return true
+    } catch (error) {
+      console.error('Error deleting movie:', error)
+      toast.error('Erro ao excluir filme')
+      return false
+    }
   }
 
   const initialize = useCallback(() => {

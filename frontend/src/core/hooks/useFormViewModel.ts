@@ -1,12 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type {
-  DefaultValues,
-  FieldValues,
-  Path,
-  UseFormReturn,
-} from 'react-hook-form'
+import type { DefaultValues, FieldValues, Path } from 'react-hook-form'
 import type { ZodType } from 'zod'
 
 interface FormViewModelOptions<TFormValues extends FieldValues> {
@@ -107,6 +102,8 @@ export function useFormViewModel<TFormValues extends FieldValues>(
     setError,
     formMethods,
     reset,
+    setValue, // Adicionar setValue
+    watch, // Adicionar watch
 
     // Estado do formulário
     isLoading,

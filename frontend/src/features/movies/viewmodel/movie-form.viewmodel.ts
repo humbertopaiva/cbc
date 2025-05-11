@@ -1,6 +1,4 @@
-import React, { useCallback, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'react-toastify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -22,6 +20,7 @@ import type {
   CreateMovieFormData,
   UpdateMovieFormData,
 } from '../schemas/movie.schema'
+import { useFormViewModel } from '@/core/hooks/useFormViewModel'
 
 // Chaves de cache para React Query
 export const QUERY_KEYS = {
@@ -87,16 +86,28 @@ export class MovieFormViewModel {
 }
 
 export function useCreateMovieViewModel() {
-  const [submitting, setSubmitting] = useState(false)
-  const viewModel = new MovieFormViewModel()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [genres, setGenres] = useState<Array<Genre>>([])
+  const viewModel = new MovieFormViewModel()
 
   // Fetch de gêneros usando React Query
-  const { data: genres = [], isLoading: loading } = useQuery({
+  const {
+    data: genresData,
+    isLoading: loading,
+    refetch: refetchGenres,
+  } = useQuery({
     queryKey: [QUERY_KEYS.GENRES],
     queryFn: () => viewModel.getGenres(),
     staleTime: 5 * 60 * 1000, // 5 minutos de cache
   })
+
+  // Atualizar o estado quando os dados de gêneros mudarem
+  useEffect(() => {
+    if (genresData) {
+      setGenres(genresData)
+    }
+  }, [genresData])
 
   // Mutation para criar filme
   const createMovieMutation = useMutation({
@@ -104,74 +115,88 @@ export function useCreateMovieViewModel() {
     onSuccess: () => {
       // Invalidar queries relacionadas a filmes quando um novo filme for criado
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MOVIES] })
+      navigate({ to: '/' })
     },
   })
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    watch,
-    reset,
-  } = useForm<CreateMovieFormData>({
-    resolver: zodResolver(movieFormSchema),
-    defaultValues: {
-      title: '',
-      originalTitle: '',
-      description: '',
-      status: MovieStatus.IN_PRODUCTION,
-      language: '',
-      trailerUrl: '',
-      genreIds: [],
-      imageUrl: '',
-      backdropUrl: '',
-    },
-  })
+  const defaultValues: CreateMovieFormData = {
+    title: '',
+    originalTitle: '',
+    description: '',
+    tagline: '',
+    budget: undefined,
+    revenue: undefined,
+    releaseDate: '',
+    duration: undefined,
+    status: MovieStatus.IN_PRODUCTION,
+    language: '',
+    trailerUrl: '',
+    popularity: undefined,
+    voteCount: undefined,
+    genreIds: [],
+    imageUrl: '',
+    imageKey: '',
+    backdropUrl: '',
+    backdropKey: '',
+    rating: undefined,
+  }
 
-  const onSubmit = async (data: CreateMovieFormData): Promise<boolean> => {
-    setSubmitting(true)
-
+  const onSubmitHandler = async (data: CreateMovieFormData) => {
     const input: CreateMovieInput = {
       title: data.title,
       originalTitle: data.originalTitle || undefined,
       description: data.description || undefined,
       tagline: data.tagline || undefined,
-      budget: data.budget,
-      revenue: data.revenue,
+      budget: data.budget ? data.budget : undefined,
+      revenue: data.revenue ? data.revenue : undefined,
       releaseDate: data.releaseDate || undefined,
-      duration: data.duration,
+      duration: data.duration ? data.duration : undefined,
       status: data.status,
       language: data.language || undefined,
       trailerUrl: data.trailerUrl || undefined,
-      popularity: data.popularity,
-      voteCount: data.voteCount,
-      genreIds: data.genreIds || undefined,
+      popularity: data.popularity ? data.popularity : undefined,
+      voteCount: data.voteCount ? data.voteCount : undefined,
+      genreIds: data.genreIds?.length ? data.genreIds : undefined,
       imageUrl: data.imageUrl || undefined,
       imageKey: data.imageKey || undefined,
       backdropUrl: data.backdropUrl || undefined,
       backdropKey: data.backdropKey || undefined,
-      rating: data.rating,
+      rating: data.rating ? data.rating : undefined,
     }
 
+    await createMovieMutation.mutateAsync(input)
+  }
+
+  // Usando a forma adequada para extrair os valores do useFormViewModel
+  const formViewModel = useFormViewModel({
+    schema: movieFormSchema,
+    defaultValues,
+    onSubmitHandler,
+  })
+
+  const {
+    register,
+    handleSubmit,
+    errors,
+    reset,
+    isLoading: formLoading,
+    setValue,
+    watch,
+  } = formViewModel
+
+  const fetchGenres = useCallback(async (): Promise<void> => {
+    await refetchGenres()
+  }, [refetchGenres])
+
+  // Mantendo a assinatura original da função onSubmit para compatibilidade
+  const onSubmit = async (data: CreateMovieFormData): Promise<boolean> => {
     try {
-      const result = await createMovieMutation.mutateAsync(input)
-      setSubmitting(false)
-
-      if (result) {
-        return true
-      }
-
-      return false
+      await onSubmitHandler(data)
+      return true
     } catch (error) {
-      setSubmitting(false)
       return false
     }
   }
-
-  const fetchGenres = useCallback(async (): Promise<void> => {
-    await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GENRES] })
-  }, [queryClient])
 
   return {
     register,
@@ -181,31 +206,55 @@ export function useCreateMovieViewModel() {
     watch,
     reset,
     genres,
-    loading,
-    isSubmitting: submitting || createMovieMutation.isPending,
+    loading: loading || formLoading,
+    isSubmitting: createMovieMutation.isPending,
     onSubmit,
     fetchGenres,
   }
 }
 
 export function useUpdateMovieViewModel(id: string) {
-  const [submitting, setSubmitting] = useState(false)
-  const viewModel = new MovieFormViewModel()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [movie, setMovie] = useState<Movie | null>(null)
+  const [genres, setGenres] = useState<Array<Genre>>([])
+  const viewModel = new MovieFormViewModel()
 
   // Fetch do filme usando React Query
-  const { data: movie, isLoading: loadingMovie } = useQuery({
+  const {
+    data: movieData,
+    isLoading: loadingMovie,
+    refetch: refetchMovie,
+  } = useQuery({
     queryKey: [QUERY_KEYS.MOVIE(id)],
     queryFn: () => viewModel.getMovie(id),
     staleTime: 5 * 60 * 1000, // 5 minutos de cache
   })
 
+  // Atualizar o estado quando os dados do filme mudarem
+  useEffect(() => {
+    if (movieData) {
+      setMovie(movieData)
+    }
+  }, [movieData])
+
   // Fetch de gêneros usando React Query
-  const { data: genres = [], isLoading: loadingGenres } = useQuery({
+  const {
+    data: genresData,
+    isLoading: loadingGenres,
+    refetch: refetchGenres,
+  } = useQuery({
     queryKey: [QUERY_KEYS.GENRES],
     queryFn: () => viewModel.getGenres(),
     staleTime: 5 * 60 * 1000, // 5 minutos de cache
   })
+
+  // Atualizar o estado quando os dados de gêneros mudarem
+  useEffect(() => {
+    if (genresData) {
+      setGenres(genresData)
+    }
+  }, [genresData])
 
   // Mutation para atualizar filme
   const updateMovieMutation = useMutation({
@@ -217,35 +266,82 @@ export function useUpdateMovieViewModel(id: string) {
         queryClient.invalidateQueries({
           queryKey: [QUERY_KEYS.MOVIE(updatedMovie.id)],
         })
+        navigate({ to: `/movies/${id}` })
       }
     },
+  })
+
+  const defaultValues: UpdateMovieFormData = {
+    id,
+    title: '',
+    originalTitle: '',
+    description: '',
+    tagline: '',
+    budget: undefined,
+    revenue: undefined,
+    releaseDate: '',
+    duration: undefined,
+    status: MovieStatus.IN_PRODUCTION,
+    language: '',
+    trailerUrl: '',
+    popularity: undefined,
+    voteCount: undefined,
+    genreIds: [],
+    imageUrl: '',
+    imageKey: '',
+    backdropUrl: '',
+    backdropKey: '',
+    rating: undefined,
+  }
+
+  const onSubmitHandler = async (data: UpdateMovieFormData) => {
+    const input: UpdateMovieInput = {
+      id,
+      title: data.title,
+      originalTitle: data.originalTitle || undefined,
+      description: data.description || undefined,
+      tagline: data.tagline || undefined,
+      budget: data.budget ? data.budget : undefined,
+      revenue: data.revenue ? data.revenue : undefined,
+      releaseDate: data.releaseDate
+        ? new Date(data.releaseDate).toISOString()
+        : undefined,
+      duration: data.duration ? data.duration : undefined,
+      status: data.status,
+      language: data.language || undefined,
+      trailerUrl: data.trailerUrl || undefined,
+      popularity: data.popularity ? data.popularity : undefined,
+      voteCount: data.voteCount ? data.voteCount : undefined,
+      genreIds: data.genreIds?.length ? data.genreIds : undefined,
+      imageUrl: data.imageUrl || undefined,
+      imageKey: data.imageKey || undefined,
+      backdropUrl: data.backdropUrl || undefined,
+      backdropKey: data.backdropKey || undefined,
+      rating: data.rating ? data.rating : undefined,
+    }
+
+    await updateMovieMutation.mutateAsync(input)
+  }
+
+  // Usando a forma adequada para extrair os valores do useFormViewModel
+  const formViewModel = useFormViewModel({
+    schema: movieFormSchema,
+    defaultValues,
+    onSubmitHandler,
   })
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    errors,
+    reset,
+    isLoading: formLoading,
     setValue,
     watch,
-    reset,
-  } = useForm<UpdateMovieFormData>({
-    resolver: zodResolver(movieFormSchema),
-    defaultValues: {
-      id,
-      title: '',
-      originalTitle: '',
-      description: '',
-      status: MovieStatus.IN_PRODUCTION,
-      language: '',
-      trailerUrl: '',
-      genreIds: [],
-      imageUrl: '',
-      backdropUrl: '',
-    },
-  })
+  } = formViewModel
 
   // Atualizar o formulário quando os dados do filme estiverem disponíveis
-  React.useEffect(() => {
+  useEffect(() => {
     if (movie) {
       reset({
         id,
@@ -253,79 +349,41 @@ export function useUpdateMovieViewModel(id: string) {
         originalTitle: movie.originalTitle || '',
         description: movie.description || '',
         tagline: movie.tagline || '',
-        budget: movie.budget,
-        revenue: movie.revenue,
+        budget: movie.budget || undefined,
+        revenue: movie.revenue || undefined,
         releaseDate: movie.releaseDate
           ? new Date(movie.releaseDate).toISOString().split('T')[0]
-          : undefined,
-        duration: movie.duration,
+          : '',
+        duration: movie.duration || undefined,
         status: movie.status || MovieStatus.IN_PRODUCTION,
         language: movie.language || '',
         trailerUrl: movie.trailerUrl || '',
-        popularity: movie.popularity,
-        voteCount: movie.voteCount,
+        popularity: movie.popularity || undefined,
+        voteCount: movie.voteCount || undefined,
         genreIds: movie.genres.map((g) => g.id),
         imageUrl: movie.imageUrl || '',
         imageKey: movie.imageKey || '',
         backdropUrl: movie.backdropUrl || '',
         backdropKey: movie.backdropKey || '',
-        rating: movie.rating,
+        rating: movie.rating || undefined,
       })
     }
   }, [id, movie, reset])
 
+  // Manter fetchData para compatibilidade
+  const fetchData = useCallback(async (): Promise<void> => {
+    await Promise.all([refetchMovie(), refetchGenres()])
+  }, [refetchMovie, refetchGenres])
+
+  // Mantendo a assinatura original da função onSubmit para compatibilidade
   const onSubmit = async (data: UpdateMovieFormData): Promise<boolean> => {
-    setSubmitting(true)
-
-    const input: UpdateMovieInput = {
-      id,
-      title: data.title,
-      originalTitle: data.originalTitle || undefined,
-      description: data.description || undefined,
-      tagline: data.tagline || undefined,
-      budget: data.budget,
-      revenue: data.revenue,
-      releaseDate: data.releaseDate
-        ? new Date(data.releaseDate).toISOString()
-        : undefined,
-      duration: data.duration,
-      status: data.status,
-      language: data.language || undefined,
-      trailerUrl: data.trailerUrl || undefined,
-      popularity: data.popularity,
-      voteCount: data.voteCount,
-      genreIds: data.genreIds || undefined,
-      imageUrl: data.imageUrl || undefined,
-      imageKey: data.imageKey || undefined,
-      backdropUrl: data.backdropUrl || undefined,
-      backdropKey: data.backdropKey || undefined,
-      rating: data.rating,
-    }
-
     try {
-      const result = await updateMovieMutation.mutateAsync(input)
-      setSubmitting(false)
-
-      if (result) {
-        return true
-      }
-
-      return false
+      await onSubmitHandler(data)
+      return true
     } catch (error) {
-      setSubmitting(false)
       return false
     }
   }
-
-  // Manter fetchData para compatibilidade, embora o React Query já faça isso automaticamente
-  const fetchData = useCallback(async (): Promise<void> => {
-    // O React Query já está buscando os dados, então esta função é apenas um wrapper
-    // mas mantemos para compatibilidade com o código existente
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MOVIE(id)] }),
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GENRES] }),
-    ])
-  }, [id, queryClient])
 
   return {
     register,
@@ -336,8 +394,8 @@ export function useUpdateMovieViewModel(id: string) {
     reset,
     movie,
     genres,
-    loading: loadingMovie || loadingGenres,
-    isSubmitting: submitting || updateMovieMutation.isPending,
+    loading: loadingMovie || loadingGenres || formLoading,
+    isSubmitting: updateMovieMutation.isPending,
     onSubmit,
     fetchData,
   }
