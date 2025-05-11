@@ -56,17 +56,37 @@ export class MoviesService {
   }
 
   async createMovie(input: CreateMovieInput): Promise<Movie> {
+    // Criamos uma cópia do input para manipular os dados
+    const formattedInput = { ...input }
+
+    // Verificamos se existe releaseDate e formatamos para uma string YYYY-MM-DD
+    if (formattedInput.releaseDate) {
+      formattedInput.releaseDate = new Date(formattedInput.releaseDate)
+        .toISOString()
+        .split('T')[0]
+    }
+
     const { data } = await apolloClient.mutate({
       mutation: CREATE_MOVIE,
-      variables: { input },
+      variables: { input: formattedInput },
     })
     return data.createMovie
   }
 
   async updateMovie(input: UpdateMovieInput): Promise<Movie> {
+    // Criamos uma cópia do input para manipular os dados
+    const formattedInput = { ...input }
+
+    // Verificamos se existe releaseDate e formatamos para uma string YYYY-MM-DD
+    if (formattedInput.releaseDate) {
+      formattedInput.releaseDate = new Date(formattedInput.releaseDate)
+        .toISOString()
+        .split('T')[0]
+    }
+
     const { data } = await apolloClient.mutate({
       mutation: UPDATE_MOVIE,
-      variables: { input },
+      variables: { input: formattedInput },
     })
     return data.updateMovie
   }

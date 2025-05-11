@@ -57,7 +57,7 @@ export class UpdateMovieInput {
   profit?: number;
 
   @Field({ nullable: true })
-  @IsDateString()
+  @IsString()
   @IsOptional()
   releaseDate?: string;
 

@@ -6,7 +6,6 @@ import {
   IsUUID,
   Min,
   Max,
-  IsDateString,
   IsArray,
   IsUrl,
   IsEnum,
@@ -52,7 +51,7 @@ export class CreateMovieInput {
   profit?: number;
 
   @Field({ nullable: true })
-  @IsDateString()
+  @IsString()
   @IsOptional()
   releaseDate?: string;
 
