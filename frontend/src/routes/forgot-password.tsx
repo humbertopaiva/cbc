@@ -1,6 +1,8 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { Button } from '@/components/custom/button' // Igual ao Login
+import { FiMail } from 'react-icons/fi'
+import { Button } from '@/components/custom/button'
+import { Input } from '@/components/ui/input'
 import { useAuth } from '@/features/auth/context/auth.context'
 import { useForgotPasswordViewModel } from '@/features/auth/viewmodel/forgot-password.viewmodel'
 
@@ -17,6 +19,8 @@ function ForgotPasswordPage() {
     isLoading,
     message,
     success,
+    setValue,
+    watch,
   } = useForgotPasswordViewModel()
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
@@ -54,12 +58,15 @@ function ForgotPasswordPage() {
               <label htmlFor="email" className="block text-sm font-medium">
                 Email
               </label>
-              <input
+              <Input
                 id="email"
                 type="email"
-                {...register('email')}
-                className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="Digite seu email"
+                icon={<FiMail />}
+                showClearButton
+                onClear={() => setValue('email', '')}
+                {...register('email')}
+                value={watch('email') || ''}
               />
               {errors.email && (
                 <p className="text-destructive text-sm">

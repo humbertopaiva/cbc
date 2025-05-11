@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { FiFilm, FiPlus, FiSearch } from 'react-icons/fi'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/custom/button'
+import { Input } from '@/components/ui/input'
 import { useMoviesListViewModel } from '@/features/movies/viewmodel/movies-list.viewmodel'
 import { MovieCard } from '@/features/movies/components/movie-card'
 import { FilterModal } from '@/features/movies/components/filter-modal'
@@ -26,27 +27,47 @@ function HomePage() {
   } = useMoviesListViewModel()
 
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [searchText, setSearchText] = useState(filters.search || '')
 
   useEffect(() => {
     initialize()
   }, [initialize])
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value)
+  }
+
+  const handleSearch = () => {
+    handleFilterChange({ ...filters, search: searchText })
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
+  const clearSearch = () => {
+    setSearchText('')
+    handleFilterChange({ ...filters, search: '' })
+  }
 
   return (
     <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-8">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
           <div className="flex flex-col md:flex-row gap-2 justify-end w-full">
-            <div className="relative">
-              <input
+            <div className="relative flex-grow md:max-w-xs">
+              <Input
                 type="text"
                 placeholder="Pesquisar filme..."
-                className="w-full md:w-64 pl-10 pr-4 py-2 rounded-md border bg-background"
-                value={filters.search || ''}
-                onChange={(e) =>
-                  handleFilterChange({ ...filters, search: e.target.value })
-                }
+                icon={<FiSearch />}
+                value={searchText}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                showClearButton={!!searchText}
+                onClear={clearSearch}
               />
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             </div>
             <div className="flex gap-2">
               <FilterModal
@@ -57,6 +78,7 @@ function HomePage() {
               <Button
                 className="flex items-center gap-2"
                 onClick={() => setShowCreateModal(true)}
+                variant="primary"
               >
                 <FiPlus className="w-4 h-4" />
                 <span>Novo Filme</span>
@@ -65,6 +87,7 @@ function HomePage() {
           </div>
         </div>
 
+        {/* Resto do código permanece o mesmo */}
         {loading && !movies ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-pulse flex flex-col items-center">
@@ -87,6 +110,7 @@ function HomePage() {
             <Button
               className="flex items-center gap-2"
               onClick={() => setShowCreateModal(true)}
+              variant="primary"
             >
               <FiPlus className="w-4 h-4" />
               Adicionar Filme

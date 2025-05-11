@@ -48,12 +48,20 @@ export function useResetPasswordViewModel(token: string) {
     }
   }
 
-  const { register, handleSubmit, errors, isLoading, submitError, onSubmit } =
-    useFormViewModel({
-      schema: resetPasswordSchema,
-      defaultValues,
-      onSubmitHandler,
-    })
+  const {
+    register,
+    handleSubmit,
+    errors,
+    isLoading,
+    submitError,
+    onSubmit,
+    setValue,
+    watch,
+  } = useFormViewModel({
+    schema: resetPasswordSchema,
+    defaultValues,
+    onSubmitHandler,
+  })
 
   return {
     register,
@@ -64,5 +72,7 @@ export function useResetPasswordViewModel(token: string) {
     submitError,
     message,
     success,
+    setValue,
+    watch,
   }
 }

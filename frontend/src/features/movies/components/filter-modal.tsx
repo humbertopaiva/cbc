@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { FiFilter, FiX } from 'react-icons/fi'
+import { FiCalendar, FiClock, FiFilter, FiGlobe, FiX } from 'react-icons/fi'
 import { MovieStatus } from '../model/movie.model'
 import type { Genre, MovieFilters } from '../model/movie.model'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/custom/button'
+import { Input } from '@/components/ui/input'
 
 interface FilterModalProps {
   genres: Array<Genre>
@@ -94,25 +95,29 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             </div>
 
             <div className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="search"
                   className="block text-sm font-medium mb-1"
                 >
                   Pesquisar
                 </label>
-                <input
+                <Input
                   id="search"
                   name="search"
                   type="text"
                   value={filters.search || ''}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Título, título original ou descrição"
+                  icon={<FiFilter />}
+                  showClearButton={!!filters.search}
+                  onClear={() =>
+                    setFilters((prev) => ({ ...prev, search: '' }))
+                  }
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="status"
                   className="block text-sm font-medium mb-1"
@@ -124,7 +129,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   name="status"
                   value={filters.status || ''}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-md bg-background"
+                  className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="">Todas as situações</option>
                   <option value={MovieStatus.RELEASED}>Lançado</option>
@@ -132,92 +137,124 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 </select>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="language"
                   className="block text-sm font-medium mb-1"
                 >
                   Idioma
                 </label>
-                <input
+                <Input
                   id="language"
                   name="language"
                   type="text"
                   value={filters.language || ''}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded-md bg-background"
                   placeholder="Filtrar por idioma"
+                  icon={<FiGlobe />}
+                  showClearButton={!!filters.language}
+                  onClear={() =>
+                    setFilters((prev) => ({ ...prev, language: '' }))
+                  }
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="minDuration"
                     className="block text-sm font-medium mb-1"
                   >
                     Duração Mínima (min)
                   </label>
-                  <input
+                  <Input
                     id="minDuration"
                     name="minDuration"
                     type="number"
                     min="0"
                     value={filters.minDuration || ''}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded-md bg-background"
+                    icon={<FiClock />}
+                    showClearButton={!!filters.minDuration}
+                    onClear={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        minDuration: undefined,
+                      }))
+                    }
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="maxDuration"
                     className="block text-sm font-medium mb-1"
                   >
                     Duração Máxima (min)
                   </label>
-                  <input
+                  <Input
                     id="maxDuration"
                     name="maxDuration"
                     type="number"
                     min="0"
                     value={filters.maxDuration || ''}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded-md bg-background"
+                    icon={<FiClock />}
+                    showClearButton={!!filters.maxDuration}
+                    onClear={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        maxDuration: undefined,
+                      }))
+                    }
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="releaseDateFrom"
                     className="block text-sm font-medium mb-1"
                   >
                     Data de Lançamento (De)
                   </label>
-                  <input
+                  <Input
                     id="releaseDateFrom"
                     name="releaseDateFrom"
                     type="date"
                     value={filters.releaseDateFrom || ''}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded-md bg-background"
+                    icon={<FiCalendar />}
+                    showClearButton={!!filters.releaseDateFrom}
+                    onClear={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        releaseDateFrom: undefined,
+                      }))
+                    }
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <label
                     htmlFor="releaseDateTo"
                     className="block text-sm font-medium mb-1"
                   >
                     Data de Lançamento (Até)
                   </label>
-                  <input
+                  <Input
                     id="releaseDateTo"
                     name="releaseDateTo"
                     type="date"
                     value={filters.releaseDateTo || ''}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded-md bg-background"
+                    icon={<FiCalendar />}
+                    showClearButton={!!filters.releaseDateTo}
+                    onClear={() =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        releaseDateTo: undefined,
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -233,7 +270,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   id="genreIds"
                   name="genreIds"
                   multiple
-                  className="w-full p-2 border rounded-md bg-background h-32"
+                  className="w-full p-2 border rounded-md bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 h-32"
                   value={filters.genreIds || []}
                   onChange={handleChange}
                 >
@@ -252,7 +289,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 <Button variant="outline" onClick={handleClear}>
                   Limpar
                 </Button>
-                <Button onClick={handleApply}>Aplicar</Button>
+                <Button variant="primary" onClick={handleApply}>
+                  Aplicar
+                </Button>
               </div>
             </div>
           </div>

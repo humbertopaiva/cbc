@@ -5,8 +5,9 @@ import {
   useParams,
 } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { FiLock } from 'react-icons/fi'
 import { Button } from '@/components/custom/button'
-
+import { Input } from '@/components/ui/input'
 import { useAuth } from '@/features/auth/context/auth.context'
 import { useResetPasswordViewModel } from '@/features/auth/viewmodel/reset-password.viewmodel'
 
@@ -24,6 +25,8 @@ function ResetPasswordPage() {
     isLoading,
     message,
     success,
+    setValue,
+    watch,
   } = useResetPasswordViewModel(token)
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
@@ -64,12 +67,13 @@ function ResetPasswordPage() {
               >
                 Nova Senha
               </label>
-              <input
+              <Input
                 id="newPassword"
                 type="password"
-                {...register('newPassword')}
-                className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="Digite sua nova senha"
+                icon={<FiLock />}
+                {...register('newPassword')}
+                value={watch('newPassword') || ''}
               />
               {errors.newPassword && (
                 <p className="text-destructive text-sm">
@@ -85,12 +89,13 @@ function ResetPasswordPage() {
               >
                 Confirme a Senha
               </label>
-              <input
+              <Input
                 id="confirmPassword"
                 type="password"
-                {...register('confirmPassword')}
-                className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="Confirme sua nova senha"
+                icon={<FiLock />}
+                {...register('confirmPassword')}
+                value={watch('confirmPassword') || ''}
               />
               {errors.confirmPassword && (
                 <p className="text-destructive text-sm">
@@ -99,7 +104,7 @@ function ResetPasswordPage() {
               )}
             </div>
 
-            {message && !success && (
+            {message && (
               <p className="text-destructive text-sm text-center">{message}</p>
             )}
 
