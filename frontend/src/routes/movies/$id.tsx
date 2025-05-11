@@ -26,10 +26,8 @@ function MovieDetailsPage() {
     return (
       <AuthGuard>
         <div className="min-h-screen bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex justify-center items-center h-64">
-              <p>Carregando detalhes do filme...</p>
-            </div>
+          <div className="flex justify-center items-center h-64">
+            <p>Carregando detalhes do filme...</p>
           </div>
         </div>
       </AuthGuard>
@@ -40,31 +38,10 @@ function MovieDetailsPage() {
     return (
       <AuthGuard>
         <div className="min-h-screen bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center py-8">
-              <p className="text-lg text-muted-foreground mb-4">
-                Filme não encontrado ou você não tem permissão para
-                visualizá-lo.
-              </p>
-              <Link to="/">
-                <Button variant="outline" className="flex items-center gap-2">
-                  <FiArrowLeft className="w-4 h-4" />
-                  Voltar para a lista
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </AuthGuard>
-    )
-  }
-
-  return (
-    <AuthGuard>
-      <div className="min-h-screen bg-background">
-        {/* Header com navegação de volta */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="mb-4">
+          <div className="text-center py-8">
+            <p className="text-lg text-muted-foreground mb-4">
+              Filme não encontrado ou você não tem permissão para visualizá-lo.
+            </p>
             <Link to="/">
               <Button variant="outline" className="flex items-center gap-2">
                 <FiArrowLeft className="w-4 h-4" />
@@ -73,112 +50,138 @@ function MovieDetailsPage() {
             </Link>
           </div>
         </div>
+      </AuthGuard>
+    )
+  }
 
-        {/* Primeira seção: Informações do filme com backdrop como fundo */}
+  return (
+    <AuthGuard>
+      <div className="min-h-screen bg-black text-white">
+        {/* Botão de voltar */}
+        <div className="container mx-auto px-4 py-4">
+          <Link to="/">
+            <Button variant="ghost" className="text-white">
+              <FiArrowLeft className="w-4 h-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+        </div>
+
+        {/* Primeira seção: Detalhes do filme */}
         <div
-          className="relative py-12 mb-10"
+          className="relative"
           style={{
-            backgroundImage: `url(${movie.backdropUrl || 'https://placehold.co/1200x400?text=No+Backdrop'})`,
+            backgroundImage: `url(${movie.backdropUrl || 'https://placehold.co/1200x800?text=No+Backdrop'})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
-          {/* Overlay com blur */}
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+          {/* Overlay escuro */}
+          <div className="absolute inset-0 bg-black/70"></div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Primeira coluna: Título e poster */}
+          <div className="container mx-auto px-4 py-10 relative z-10">
+            {/* Header com título e botões */}
+            <div className="flex justify-between items-start mb-8">
               <div className="flex flex-col">
-                <div className="bg-card/40 backdrop-blur-md shadow-lg rounded-lg overflow-hidden mb-4">
-                  <img
-                    src={
-                      movie.imageUrl ||
-                      'https://placehold.co/600x900?text=No+Image'
-                    }
-                    alt={movie.title}
-                    className="w-full h-auto"
-                  />
-                </div>
-                <div className="p-4 bg-card/40 backdrop-blur-md shadow-lg rounded-lg text-white">
-                  <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                    {movie.title}
-                  </h1>
-                  {movie.originalTitle && (
-                    <p className="text-lg italic text-white/80">
-                      {movie.originalTitle}
-                    </p>
-                  )}
-                  <div className="flex mt-4 space-x-2">
-                    <Button
-                      as={Link}
-                      to="/movies/$id/edit"
-                      params={{ id }}
-                      variant="outline"
-                      className="flex-1 flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20"
-                    >
-                      <FiEdit className="w-4 h-4" />
-                      Editar
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      className="flex-1 flex items-center justify-center gap-2"
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                    >
-                      <FiTrash2 className="w-4 h-4" />
-                      {isDeleting ? 'Excluindo...' : 'Excluir'}
-                    </Button>
-                  </div>
-                </div>
+                <h1 className="text-3xl font-bold">{movie.title}</h1>
+                {movie.originalTitle && (
+                  <h2 className="text-xl text-white/70 italic">
+                    {movie.originalTitle}
+                  </h2>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="bg-transparent border-white/30 text-white hover:bg-white/10 flex items-center gap-2"
+                  as={Link}
+                  to="/movies/$id/edit"
+                  params={{ id }}
+                >
+                  <FiEdit className="w-4 h-4" />
+                  Editar
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex items-center gap-2"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  <FiTrash2 className="w-4 h-4" />
+                  {isDeleting ? 'Excluindo...' : 'Excluir'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Conteúdo principal em 3 colunas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Primeira coluna: Poster */}
+              <div>
+                <img
+                  src={
+                    movie.imageUrl ||
+                    'https://placehold.co/300x450?text=No+Image'
+                  }
+                  alt={movie.title}
+                  className="w-full h-auto rounded-lg shadow-lg"
+                />
               </div>
 
               {/* Segunda coluna: Frase de efeito, sinopse e gêneros */}
-              <div className="p-6 bg-card/40 backdrop-blur-md shadow-lg rounded-lg text-white">
+              <div className="flex flex-col">
+                {/* Bloco 1: Frase de efeito */}
                 {movie.tagline && (
                   <div className="mb-6">
-                    <p className="text-xl italic font-light text-white/90">
+                    <p className="text-lg italic text-yellow-400">
                       "{movie.tagline}"
                     </p>
                   </div>
                 )}
 
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold mb-2">Sinopse</h2>
-                  <p className="text-white/90">
-                    {movie.description || 'Nenhuma descrição disponível.'}
-                  </p>
-                </div>
+                {/* Bloco 2: Sinopse e gêneros */}
+                <div className="flex flex-col">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold uppercase mb-2">
+                      SINOPSE
+                    </h3>
+                    <p className="text-white/80">
+                      {movie.description || 'Nenhuma descrição disponível.'}
+                    </p>
+                  </div>
 
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">Gêneros</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {movie.genres.length > 0 ? (
-                      movie.genres.map((genre) => (
-                        <span
-                          key={genre.id}
-                          className="bg-white/20 text-white px-3 py-1 rounded-full text-sm"
-                        >
-                          {genre.name}
-                        </span>
-                      ))
-                    ) : (
-                      <p className="text-white/70">Nenhum gênero associado</p>
-                    )}
+                  <div>
+                    <h3 className="text-lg font-semibold uppercase mb-2">
+                      GÊNEROS
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {movie.genres.length > 0 ? (
+                        movie.genres.map((genre) => (
+                          <span
+                            key={genre.id}
+                            className="px-3 py-1 bg-white/10 rounded-full text-sm"
+                          >
+                            {genre.name}
+                          </span>
+                        ))
+                      ) : (
+                        <p className="text-white/60">
+                          Nenhum gênero cadastrado
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Terceira coluna: Informações adicionais */}
-              <div className="p-6 bg-card/40 backdrop-blur-md shadow-lg rounded-lg text-white">
-                <h2 className="text-xl font-semibold mb-4">Informações</h2>
-                <div className="space-y-3">
+              {/* Terceira coluna: Informações técnicas */}
+              <div>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                   {movie.releaseDate && (
                     <div>
-                      <h3 className="font-medium text-white/70">
-                        Data de Lançamento
-                      </h3>
-                      <p>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase">
+                        LANÇAMENTO
+                      </h4>
+                      <p className="text-sm">
                         {format(new Date(movie.releaseDate), 'dd/MM/yyyy', {
                           locale: ptBR,
                         })}
@@ -186,10 +189,21 @@ function MovieDetailsPage() {
                     </div>
                   )}
 
+                  {movie.duration && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase">
+                        DURAÇÃO
+                      </h4>
+                      <p className="text-sm">{movie.duration} min</p>
+                    </div>
+                  )}
+
                   {movie.status && (
                     <div>
-                      <h3 className="font-medium text-white/70">Situação</h3>
-                      <p>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase">
+                        SITUAÇÃO
+                      </h4>
+                      <p className="text-sm">
                         {movie.status === MovieStatus.RELEASED
                           ? 'Lançado'
                           : 'Em Produção'}
@@ -199,25 +213,23 @@ function MovieDetailsPage() {
 
                   {movie.language && (
                     <div>
-                      <h3 className="font-medium text-white/70">Idioma</h3>
-                      <p>{movie.language}</p>
-                    </div>
-                  )}
-
-                  {movie.duration && (
-                    <div>
-                      <h3 className="font-medium text-white/70">Duração</h3>
-                      <p>{movie.duration} minutos</p>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase">
+                        IDIOMA
+                      </h4>
+                      <p className="text-sm">{movie.language}</p>
                     </div>
                   )}
 
                   {movie.budget !== undefined && (
                     <div>
-                      <h3 className="font-medium text-white/70">Orçamento</h3>
-                      <p>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase">
+                        ORÇAMENTO
+                      </h4>
+                      <p className="text-sm">
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
                           currency: 'USD',
+                          maximumFractionDigits: 0,
                         }).format(movie.budget)}
                       </p>
                     </div>
@@ -225,39 +237,36 @@ function MovieDetailsPage() {
 
                   {movie.revenue !== undefined && (
                     <div>
-                      <h3 className="font-medium text-white/70">Receita</h3>
-                      <p>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase">
+                        RECEITA
+                      </h4>
+                      <p className="text-sm">
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
                           currency: 'USD',
+                          maximumFractionDigits: 0,
                         }).format(movie.revenue)}
                       </p>
                     </div>
                   )}
 
-                  {movie.profit !== undefined && (
+                  {movie.popularity !== undefined && (
                     <div>
-                      <h3 className="font-medium text-white/70">Lucro</h3>
-                      <p
-                        className={
-                          movie.profit < 0 ? 'text-red-500' : 'text-green-500'
-                        }
-                      >
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'USD',
-                        }).format(movie.profit)}
-                      </p>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase">
+                        POPULARIDADE
+                      </h4>
+                      <p className="text-sm">{movie.popularity}</p>
                     </div>
                   )}
 
                   {movie.rating !== undefined && (
                     <div>
-                      <h3 className="font-medium text-white/70">Avaliação</h3>
-                      <div className="flex items-center">
-                        <div className="bg-white/20 px-2 py-1 rounded-md">
-                          <span className="font-bold">{movie.rating}</span>
-                          <span className="text-sm text-white/80">/10</span>
+                      <h4 className="text-xs font-semibold text-white/50 uppercase">
+                        AVALIAÇÃO
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center font-bold">
+                          {movie.rating}
                         </div>
                       </div>
                     </div>
@@ -270,9 +279,9 @@ function MovieDetailsPage() {
 
         {/* Segunda seção: Trailer do filme */}
         {movie.trailerUrl && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <div className="container mx-auto px-4 py-10">
             <h2 className="text-2xl font-bold mb-6">Trailer</h2>
-            <div className="aspect-video bg-black/10 rounded-lg overflow-hidden">
+            <div className="aspect-video bg-black/30 rounded-lg overflow-hidden">
               <MovieTrailer trailerUrl={movie.trailerUrl} />
             </div>
           </div>

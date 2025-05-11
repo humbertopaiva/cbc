@@ -20,8 +20,8 @@ export const MovieTrailer: React.FC<MovieTrailerProps> = ({ trailerUrl }) => {
 
   if (!youtubeVideoId) {
     return (
-      <div className="flex items-center justify-center h-full bg-card">
-        <p className="text-muted-foreground">URL do trailer inválida</p>
+      <div className="flex items-center justify-center h-full bg-black/20">
+        <p className="text-white/60">URL do trailer inválida</p>
       </div>
     )
   }
