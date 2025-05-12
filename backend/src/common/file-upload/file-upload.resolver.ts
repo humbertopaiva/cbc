@@ -22,7 +22,7 @@ export class FileUploadResolver {
     // Obter URL pré-assinada do serviço de upload, passando o usuário atual
     const result = await this.fileUploadService.getPresignedUploadUrl(folder, filename, user);
 
-    // Construir a resposta com URL pré-assinada, chave e URL final do arquivo
+    // Resposta com a URL pré-assinada, chave e URL final do arquivo
     return {
       presignedUrl: result.url,
       key: result.key,

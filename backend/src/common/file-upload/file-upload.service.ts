@@ -12,10 +12,8 @@ export class FileUploadService {
   private bucket: string;
 
   constructor(private readonly configService: ConfigService) {
-    // Usar o bucket específico fornecido
     this.bucket = this.configService.get<string>('S3_BUCKET', 'cubos-movies-humberto');
 
-    // Configurar o cliente AWS S3
     this.s3Client = new S3Client({
       region: this.configService.get<string>('AWS_REGION', 'us-east-1'),
       credentials: {
@@ -32,7 +30,7 @@ export class FileUploadService {
   // Gerar uma chave única para upload
   private generateKey(folder: string, userId: string, filename: string): string {
     const extension = filename.split('.').pop() || '';
-    // Incluir o ID do usuário na estrutura de pastas para garantir isolamento
+
     // Começar com 'imagens/', depois folder, userId e o nome do arquivo com UUID
     return `imagens/${folder}/${userId}/${randomUUID()}.${extension}`;
   }
@@ -50,7 +48,7 @@ export class FileUploadService {
       const command = new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
-        ContentType: `image/${filename.split('.').pop()}`, // Ajuste conforme necessário
+        ContentType: `image/${filename.split('.').pop()}`,
         Metadata: {
           'user-id': user.id, // Adicionar metadata com ID do usuário para rastreabilidade
         },
@@ -76,28 +74,22 @@ export class FileUploadService {
   }
 
   getFileUrl(key: string): string {
-    // Para Amazon S3 padrão
     const region = this.configService.get<string>('AWS_REGION', 'us-east-1');
 
-    // Se estiver usando um endpoint personalizado
     const customEndpoint = this.configService.get<string>('AWS_PUBLIC_ENDPOINT');
     if (customEndpoint) {
       return `${customEndpoint}/${this.bucket}/${key}`;
     }
 
-    // URL padrão para Amazon S3
     return `https://${this.bucket}.s3.${region}.amazonaws.com/${key}`;
   }
 
-  // Verificar se o usuário tem permissão para excluir o arquivo
   private canDeleteFile(key: string, userId: string): boolean {
-    // Verificar se o caminho do arquivo contém o ID do usuário
     return key.includes(`/${userId}/`);
   }
 
   async deleteFile(key: string, user: User): Promise<boolean> {
     try {
-      // Verificar se o usuário tem permissão para excluir este arquivo
       if (!this.canDeleteFile(key, user.id)) {
         this.logger.warn(`Unauthorized delete attempt by user ${user.id} for file ${key}`);
         throw new ForbiddenException('You do not have permission to delete this file');
