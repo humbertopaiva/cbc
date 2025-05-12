@@ -1,13 +1,12 @@
-version: "3.8"
-
+# docker-compose.yml
 services:
   postgres:
     image: postgres:15-alpine
     container_name: cubos-movies-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-cubos_movies}
     ports:
       - "5432:5432"
     volumes:
@@ -22,25 +21,25 @@ services:
       dockerfile: Dockerfile
     container_name: cubos-movies-backend
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_DATABASE: ${DB_DATABASE}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION: ${JWT_EXPIRATION}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-      MAIL_FROM: ${MAIL_FROM}
-      FRONTEND_URL: ${FRONTEND_URL}
-      AWS_REGION: ${AWS_REGION}
-      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
-      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
-      S3_BUCKET: ${S3_BUCKET}
-      NODE_ENV: ${NODE_ENV}
-      PORT: ${BACKEND_PORT}
-      NOTIFICATION_DEV_MODE: ${NOTIFICATION_DEV_MODE}
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_DATABASE: ${DB_DATABASE:-cubos_movies}
+      JWT_SECRET: ${JWT_SECRET:-sua_chave_secreta_aqui}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-1d}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@cubosmovies.com}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY:-}
+      S3_BUCKET: ${S3_BUCKET:-cubos-movies}
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${BACKEND_PORT:-4000}
+      NOTIFICATION_DEV_MODE: ${NOTIFICATION_DEV_MODE:-false}
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - "${BACKEND_PORT:-4000}:${BACKEND_PORT:-4000}"
     depends_on:
       - postgres
     networks:
@@ -52,12 +51,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL}
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/graphql}
     container_name: cubos-movies-frontend
     environment:
-      VITE_API_URL: ${VITE_API_URL}
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/graphql}
     ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+      - "${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000}"
     depends_on:
       - backend
     networks:
