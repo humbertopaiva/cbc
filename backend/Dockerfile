@@ -32,17 +32,20 @@ RUN npm ci --only=production
 
 # Copiar os arquivos compilados
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/src/migrations ./dist/migrations
 COPY --from=build /app/nest-cli.json .
-# Corrigindo o caminho do arquivo de configuração do TypeORM
-COPY --from=build /app/typeorm.config.ts ./dist/typeorm.config.ts
-
-# Criar script de inicialização
-COPY scripts/start.sh .
-RUN chmod +x start.sh
 
 # Expor a porta
 EXPOSE 4000
 
-# Comando para iniciar a aplicação
-CMD ["./start.sh"]
+# Criar um script de entrada diretamente no Dockerfile
+CMD echo "Waiting for PostgreSQL to start..." && \
+    until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c '\q'; do \
+      echo "PostgreSQL is unavailable - sleeping"; \
+      sleep 2; \
+    done && \
+    echo "Running migrations..." && \
+    npx typeorm migration:run -d ./dist/typeorm.config.js && \
+    echo "Running seeds..." && \
+    node ./dist/src/seeds/seed.js && \
+    echo "Starting application..." && \
+    node ./dist/src/main.js
