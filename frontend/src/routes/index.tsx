@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { FiFilm, FiPlus, FiSearch } from 'react-icons/fi'
+import { FiFilm, FiSearch } from 'react-icons/fi'
 import { Button } from '@/components/custom/button'
 import { Input } from '@/components/ui/input'
 import { useMoviesListViewModel } from '@/features/movies/viewmodel/movies-list.viewmodel'
