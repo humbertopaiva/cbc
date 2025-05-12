@@ -6,7 +6,9 @@ Uma aplicação web fullstack para gerenciamento de filmes, desenvolvida como pa
 
 ## ⭐ Demonstração em Produção
 
+
 **Acesse o projeto em produção:** [https://cb-front.limei.app](https://cb-front.limei.app)
+
 
 > 🌟 Esta URL é a versão final e otimizada do projeto para avaliação.
 
