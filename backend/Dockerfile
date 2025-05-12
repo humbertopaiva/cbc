@@ -31,7 +31,8 @@ RUN npm ci --only=production
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/src/migrations ./dist/migrations
 COPY --from=build /app/nest-cli.json .
-COPY --from=build /app/typeorm.config.js ./dist
+# Corrigindo o caminho do arquivo de configuração do TypeORM
+COPY --from=build /app/typeorm.config.ts ./dist/typeorm.config.ts
 
 # Criar script de inicialização
 COPY scripts/start.sh .
