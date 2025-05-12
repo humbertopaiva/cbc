@@ -41,8 +41,8 @@ export default defineConfig({
       'cbc-frontend.limei.app',
       'localhost',
       'teste-movies-testeteste-fllkkj-ef64e3-82-29-57-246.traefik.me',
-      '.limei.app', // Permite qualquer subdomínio de limei.app
-      'all', // Permite todos os hosts
+      '.limei.app',
+      'all',
     ],
   },
 })
