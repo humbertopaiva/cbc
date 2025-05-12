@@ -8,7 +8,13 @@ until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER"
 done
 
 echo "Running migrations..."
-npx typeorm migration:run -d dist/typeorm.config.js
+# Verificando se o arquivo existe antes de executar
+if [ -f "dist/typeorm.config.js" ]; then
+  npx typeorm migration:run -d dist/typeorm.config.js
+else
+  echo "Error: dist/typeorm.config.js not found!"
+  exit 1
+fi
 
 echo "Running seeds..."
 node dist/src/seeds/seed.js
