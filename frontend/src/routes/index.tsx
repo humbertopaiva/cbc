@@ -106,14 +106,6 @@ function HomePage() {
               Não encontramos nenhum filme com os filtros atuais. Tente ajustar
               os filtros ou adicione um novo filme.
             </p>
-            <Button
-              className="flex items-center gap-2"
-              onClick={() => setShowCreateModal(true)}
-              variant="primary"
-            >
-              <FiPlus className="w-4 h-4" />
-              Adicionar Filme
-            </Button>
           </div>
         ) : (
           <>

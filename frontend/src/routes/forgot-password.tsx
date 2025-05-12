@@ -32,7 +32,7 @@ function ForgotPasswordPage() {
   }, [isAuthenticated, navigate])
 
   return (
-    <div className="flex items-center justify-center flex-1">
+    <div className="flex items-center justify-center flex-1 p-6">
       <div className="max-w-md w-full rounded-xs p-4 bg-card/80 backdrop-blur-sm shadow-xl border border-border">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold text-foreground">

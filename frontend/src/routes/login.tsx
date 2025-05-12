@@ -30,7 +30,7 @@ function LoginPage() {
   }, [isAuthenticated, navigate])
 
   return (
-    <div className="flex items-center justify-center flex-1">
+    <div className="flex items-center justify-center flex-1 p-6">
       <div className="max-w-md w-full rounded-xs p-4 bg-card/80 backdrop-blur-sm shadow-xl border border-border">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
