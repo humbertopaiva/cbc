@@ -8,7 +8,7 @@ services:
       args:
         - VITE_API_URL=${API_URL:-http://localhost:4000/graphql}
     ports:
-      - "${FRONTEND_PORT:-80}:80"
+      - "${FRONTEND_PORT:-8080}:80" # Mudando para porta 8080 como padrão
     depends_on:
       - backend
     networks:
@@ -22,7 +22,8 @@ services:
     ports:
       - "${BACKEND_PORT:-4000}:4000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - app-network
     environment:
@@ -37,7 +38,7 @@ services:
       - JWT_EXPIRATION=${JWT_EXPIRATION:-1d}
       - RESEND_API_KEY=${RESEND_API_KEY}
       - MAIL_FROM=${MAIL_FROM:-contato@admin.cubos-movies.com}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080} # Atualizando para usar a porta 8080
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
       - AWS_SECRET_KEY=${AWS_SECRET_KEY}
@@ -53,7 +54,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-5433}:5432" # Alterando para 5433 para evitar conflitos
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
@@ -62,7 +63,7 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
