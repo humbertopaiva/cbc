@@ -1,79 +1,68 @@
+version: "3.8"
+
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:14-alpine
     container_name: cubos-movies-postgres
+    restart: always
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-cubos_movies}
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - cubos-network
-    restart: unless-stopped
+      - cubos-movies-network
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: cubos-movies-backend
-    environment:
-      DB_HOST: ${DB_HOST:-postgres}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_USERNAME: ${DB_USERNAME:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      DB_DATABASE: ${DB_DATABASE:-cubos_movies}
-      JWT_SECRET: ${JWT_SECRET:-sua_chave_secreta_aqui}
-      JWT_EXPIRATION: ${JWT_EXPIRATION:-1d}
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
-      MAIL_FROM: ${MAIL_FROM:-noreply@cubosmovies.com}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
-      AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
-      AWS_SECRET_KEY: ${AWS_SECRET_KEY:-}
-      S3_BUCKET: ${S3_BUCKET:-cubos-movies}
-      NODE_ENV: ${NODE_ENV:-production}
-      PORT: ${BACKEND_PORT:-4000}
-      NOTIFICATION_DEV_MODE: ${NOTIFICATION_DEV_MODE:-false}
-    ports:
-      - "${BACKEND_PORT:-4000}:${BACKEND_PORT:-4000}"
+    restart: always
     depends_on:
       - postgres
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - DB_DATABASE=${POSTGRES_DB:-cubos_movies}
+      - JWT_SECRET=${JWT_SECRET:-sua_chave_secreta_aqui}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1d}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - MAIL_FROM=${MAIL_FROM:-contato@admin.limei.app}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - S3_BUCKET=${S3_BUCKET:-cubos-movies-humberto}
+      - NODE_ENV=${NODE_ENV:-development}
+      - NOTIFICATION_DEV_MODE=${NOTIFICATION_DEV_MODE:-true}
     networks:
-      - cubos-network
-    restart: unless-stopped
-    command: >
-      sh -c "npm run build && 
-             echo 'Aguardando banco de dados...' && 
-             sleep 10 && 
-             echo 'Executando migrações...' && 
-             npm run migration:run && 
-             echo 'Executando seeds...' && 
-             npm run seed && 
-             echo 'Iniciando aplicação...' && 
-             npm run start:prod"
+      - cubos-movies-network
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://backend:4000/graphql}
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:4000/graphql}
     container_name: cubos-movies-frontend
-    environment:
-      VITE_API_URL: ${VITE_API_URL:-http://backend:4000/graphql}
-    ports:
-      - "${FRONTEND_PORT:-8080}:3000"
+    restart: always
     depends_on:
       - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
     networks:
-      - cubos-network
-    restart: unless-stopped
+      - cubos-movies-network
 
 networks:
-  cubos-network:
+  cubos-movies-network:
     driver: bridge
 
 volumes:
