@@ -29,7 +29,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
 
           {/* Informações de título na parte inferior */}
           <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-            <h3 className="font-sans text-base sm:text-lg text-foreground uppercase line-clamp-2">
+            <h3 className="font-sans font-semibold text-base sm:text-lg text-foreground uppercase line-clamp-2">
               {movie.title}
             </h3>
             {/* Exibindo os gêneros em vez do título original */}
