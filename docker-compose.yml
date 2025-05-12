@@ -47,21 +47,21 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/graphql}
-    container_name: cubos-movies-frontend
-    environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/graphql}
-    ports:
-      - "${FRONTEND_PORT:-8080}:3000" # Mapeando porta 8080 (externa) para 3000 (interna)
-    depends_on:
-      - backend
-    networks:
-      - cubos-network
-    restart: unless-stopped
+  build:
+    context: ./frontend
+    dockerfile: Dockerfile
+    args:
+      VITE_API_URL: ${VITE_API_URL:-http://backend:4000/graphql}
+  container_name: cubos-movies-frontend
+  environment:
+    VITE_API_URL: ${VITE_API_URL:-http://backend:4000/graphql}
+  ports:
+    - "${FRONTEND_PORT:-8080}:3000"
+  depends_on:
+    - backend
+  networks:
+    - cubos-network
+  restart: unless-stopped
 
 networks:
   cubos-network:
