@@ -59,17 +59,7 @@ function MovieDetailsPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-black text-white">
-        {/* Botão de voltar */}
-        <div className="container mx-auto px-4 py-4">
-          <Link to="/">
-            <Button variant="ghost" className="text-white">
-              <FiArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-        </div>
-
+      <div className="min-h-screen  text-white">
         {/* Primeira seção: Detalhes do filme */}
         <div
           className="relative"
@@ -80,7 +70,7 @@ function MovieDetailsPage() {
           }}
         >
           {/* Overlay escuro */}
-          <div className="absolute inset-0 bg-black/70"></div>
+          <div className="absolute inset-0 bg-black/80"></div>
 
           <div className="container mx-auto px-4 py-10 relative z-10">
             {/* Header com título e botões */}

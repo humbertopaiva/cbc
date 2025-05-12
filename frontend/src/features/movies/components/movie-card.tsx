@@ -29,14 +29,15 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
 
           {/* Informações de título na parte inferior */}
           <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-            <h3 className="font-bold text-base sm:text-lg text-white line-clamp-1">
+            <h3 className="font-sans text-base sm:text-lg text-foreground uppercase line-clamp-2">
               {movie.title}
             </h3>
-            {movie.originalTitle && (
-              <p className="text-white/80 text-xs sm:text-sm italic line-clamp-1">
-                {movie.originalTitle}
-              </p>
-            )}
+            {/* Exibindo os gêneros em vez do título original */}
+            <p className="text-white/70 text-xs sm:text-sm font-light line-clamp-1">
+              {movie.genres.length > 0
+                ? movie.genres.map((genre) => genre.name).join(', ')
+                : 'Sem gêneros definidos'}
+            </p>
           </div>
 
           {/* Rating Circle que aparece no centro apenas quando hover */}

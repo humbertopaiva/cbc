@@ -11,7 +11,6 @@ export const Header: React.FC = () => {
     <header className="bg-card shadow-sm border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
-          {/* Logo responsiva (mobile e desktop) */}
           <Link to="/" className="flex items-center">
             <img
               src="/logo-mobile.svg"

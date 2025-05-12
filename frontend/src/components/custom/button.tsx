@@ -3,7 +3,6 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-// Adicionamos um tipo específico para nossas variantes customizadas
 export type CustomButtonVariant =
   | 'primary'
   | 'secondary'
@@ -17,7 +16,6 @@ export type CustomButtonVariant =
   | 'ghost'
   | 'link'
 
-// Aqui removemos a restrição de tipo para o variant
 type ButtonProps = Omit<
   ComponentPropsWithoutRef<typeof ShadcnButton>,
   'variant'
@@ -51,19 +49,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'danger',
     ].includes(variant)
 
-    // Ajusta a combinação de classes
     const combinedClassName = cn(
       'font-sans text-md cursor-pointer px-6 py-2',
       'rounded-xs',
-      '', // Usando exatamente o mesmo padding do input
-      'border', // Adicionando a borda padrão
+      '',
+      'border',
       'flex items-center justify-center',
-      'min-h-[42px]', // Garantindo uma altura mínima igual à do input
+      'min-h-[42px]',
       useCustomClass ? variantClasses[variant] : '',
       className,
     )
 
-    // Passa a variante original apenas se não for uma das nossas customizadas
     const buttonProps = {
       ...props,
       className: combinedClassName,

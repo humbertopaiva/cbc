@@ -58,7 +58,7 @@ function PaginationLink({
         'w-14 h-12 flex rounded-xs items-center justify-center text-white text-sm font-medium transition-colors',
         isActive
           ? 'bg-[#242326] hover:hover:bg-[#242326]'
-          : 'bg-purple-600  hover:bg-purple-700',
+          : 'bg-primary  hover:bg-primary',
         className,
       )}
       {...props}
@@ -90,7 +90,7 @@ function PaginationNext({
     <PaginationLink
       aria-label="Próxima página"
       size="default"
-      className={cn('w-16 h-12 bg-purple-600', className)}
+      className={cn('w-16 h-12 bg-primary', className)}
       {...props}
     >
       <ChevronRightIcon className="w-4 h-4 text-white" />
