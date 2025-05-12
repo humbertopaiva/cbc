@@ -6,7 +6,6 @@ import { UploadScalar } from './common/scalars/upload.scalar';
 import { Request } from 'express';
 import { DateScalar } from './common/scalars/date.scalar';
 
-// Defina um contexto tipado para o GraphQL
 interface GraphQLContext {
   req: Request;
 }

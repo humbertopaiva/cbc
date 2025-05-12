@@ -24,7 +24,6 @@ export const Header: React.FC = () => {
             />
           </Link>
 
-          {/* Botões lado direito */}
           <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
             <Button onClick={logout} variant="primary">

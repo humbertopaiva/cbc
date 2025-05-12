@@ -8,13 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
-  // Configuração de CORS atualizada para aceitar requisições do frontend em produção
   app.enableCors({
-    origin: [
-      'https://cb-front.limei.app',
-      'http://localhost:3000',
-      /\.limei\.app$/, // Aceita todos os subdomínios de limei.app
-    ],
+    origin: ['https://cb-front.limei.app', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

@@ -90,17 +90,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const logout = () => {
-    // 1. Limpar o estado local
     authService.clearAuth()
     setUser(null)
 
-    // 2. Limpar o cache do Apollo Client
     apolloClient.resetStore()
 
-    // 3. Limpar o cache do React Query
     queryClient.clear()
 
-    // 4. Redirecionar para a página de login
     navigate({ to: '/login' })
   }
 

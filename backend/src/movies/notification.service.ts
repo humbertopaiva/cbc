@@ -26,9 +26,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Programar uma notificação para um filme com data de lançamento futura
-   */
   async scheduleReleaseNotification(movie: Movie): Promise<void> {
     if (!movie.releaseDate) {
       return;
@@ -62,9 +59,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Enviar notificação de lançamento para um filme específico
-   */
   private async sendMovieReleaseNotification(movie: Movie): Promise<boolean> {
     try {
       if (!movie.releaseDate || !movie.createdBy || !movie.createdBy.email) {
@@ -91,10 +85,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Verifica e envia notificações para filmes que serão lançados hoje
-   * Executado todos os dias às 8h da manhã
-   */
   @Cron('0 8 * * *')
   async checkAndSendReleaseNotifications(): Promise<void> {
     this.logger.log('Checking for movie releases today...');
@@ -144,9 +134,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Método de teste para forçar notificações (apenas para desenvolvimento/testes)
-   */
   async forceNotificationsForTestingPurposes(movieId: string): Promise<boolean> {
     try {
       const movie = await this.moviesRepository.findOne({

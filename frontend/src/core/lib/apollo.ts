@@ -25,11 +25,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
       )
 
-      // Adicionar verificação específica para erros de autenticação
       if (message === 'Unauthorized' || message.includes('UNAUTHENTICATED')) {
         console.error('Token de autenticação inválido ou ausente!')
 
-        // Em produção, você pode querer redirecionar para página de login
         if (!isDevelopment) {
           window.location.href = '/login'
         }
