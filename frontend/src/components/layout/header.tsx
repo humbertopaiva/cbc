@@ -1,12 +1,11 @@
 import React from 'react'
 import { Link } from '@tanstack/react-router'
-import { FiLogIn } from 'react-icons/fi'
 import { useAuth } from '@/features/auth/context/auth.context'
 import { ThemeToggle } from '@/features/theme/components/theme-toggle'
 import { Button } from '@/components/custom/button'
 
 export const Header: React.FC = () => {
-  const { isAuthenticated, logout } = useAuth()
+  const { logout } = useAuth()
 
   return (
     <header className="bg-card shadow-sm border-b border-border">

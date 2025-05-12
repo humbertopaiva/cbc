@@ -26,7 +26,7 @@ export const Main: React.FC<MainProps> = ({
       }
     >
       {withBackground && (
-        <div className="absolute inset-0 bg-white/90 dark:bg-black/90 z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/90 to-card dark:from-black/90 dark:via-black/90 dark:to-card z-0"></div>
       )}
       <div
         className={cn(

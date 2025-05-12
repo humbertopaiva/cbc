@@ -7,6 +7,7 @@
   --font-display: 'Satoshi', 'sans-serif';
   --breakpoint-3xl: 120rem;
   --color-primary: #8e4ec6;
+  --card: #8e4ec6;
 }
 
 body {
@@ -66,7 +67,7 @@ code {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: #121113;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
@@ -99,7 +100,7 @@ code {
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: #121113;
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
