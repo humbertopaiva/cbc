@@ -76,8 +76,39 @@ function MovieDetailsPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 dark:from-black/95 dark:via-black/80 dark:to-black/50"></div>
 
           <div className="container mx-auto px-4 py-6 relative z-10">
-            {/* Header com título e botões */}
-            <div className="flex justify-between items-start mb-8">
+            {/* Mobile: Poster first */}
+            <div className="md:hidden mb-4">
+              <img
+                src={
+                  movie.imageUrl || 'https://placehold.co/300x450?text=No+Image'
+                }
+                alt={movie.title}
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+
+            {/* Mobile: Buttons after poster */}
+            <div className="md:hidden flex justify-center lg:justify-end gap-3 mb-4">
+              <Button
+                variant="secondary"
+                className="flex items-center gap-2 flex-1 lg:flex-none"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deletando...' : 'Deletar'}
+              </Button>
+              <Button
+                variant="primary"
+                className="flex items-center gap-2 flex-1 lg:flex-none"
+                onClick={() => setShowEditModal(true)}
+              >
+                Editar
+              </Button>
+            </div>
+
+            {/* Header with title and buttons in one line on desktop */}
+            <div className="flex flex-col md:flex-row justify-between items-start mb-8">
+              {/* Títulos */}
               <div className="flex flex-col">
                 <h1 className="text-3xl font-sans font-semibold text-white dark:text-white">
                   {movie.title}
@@ -88,7 +119,9 @@ function MovieDetailsPage() {
                   </h2>
                 )}
               </div>
-              <div className="flex gap-3">
+
+              {/* Desktop buttons - now aligned with titles */}
+              <div className="flex gap-3 mt-4 md:mt-0">
                 <Button
                   variant="secondary"
                   className="flex items-center gap-2"
@@ -109,8 +142,8 @@ function MovieDetailsPage() {
 
             {/* Layout de 2 colunas com a primeira menor */}
             <div className="grid grid-cols-1 md:grid-cols-[minmax(200px,2fr)_5fr] gap-8">
-              {/* Primeira coluna: Poster */}
-              <div>
+              {/* Primeira coluna: Poster - hidden on mobile (already shown above) */}
+              <div className="hidden md:block">
                 <img
                   src={
                     movie.imageUrl ||
