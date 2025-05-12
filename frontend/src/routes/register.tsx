@@ -1,7 +1,9 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { FiLock, FiMail, FiUser } from 'react-icons/fi'
 import { useSignupViewModel } from '@/features/auth/viewmodel/signup.viewmodel'
 import { Button } from '@/components/custom/button'
+import { Input } from '@/components/ui/input'
 import { useAuth } from '@/features/auth/context/auth.context'
 
 export const Route = createFileRoute('/register')({
@@ -9,8 +11,15 @@ export const Route = createFileRoute('/register')({
 })
 
 function RegisterPage() {
-  const { register, handleSubmit, onSubmit, errors, isLoading } =
-    useSignupViewModel()
+  const {
+    register,
+    handleSubmit,
+    onSubmit,
+    errors,
+    isLoading,
+    setValue,
+    watch,
+  } = useSignupViewModel()
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
@@ -28,12 +37,15 @@ function RegisterPage() {
             <label htmlFor="name" className="block text-sm font-medium">
               Nome
             </label>
-            <input
+            <Input
               id="name"
               type="text"
-              {...register('name')}
-              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite seu nome"
+              icon={<FiUser />}
+              showClearButton
+              onClear={() => setValue('name', '')}
+              {...register('name')}
+              value={watch('name') || ''}
             />
             {errors.name && (
               <p className="text-destructive text-sm">{errors.name.message}</p>
@@ -44,12 +56,15 @@ function RegisterPage() {
             <label htmlFor="email" className="block text-sm font-medium">
               Email
             </label>
-            <input
+            <Input
               id="email"
               type="email"
-              {...register('email')}
-              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite seu email"
+              icon={<FiMail />}
+              showClearButton
+              onClear={() => setValue('email', '')}
+              {...register('email')}
+              value={watch('email') || ''}
             />
             {errors.email && (
               <p className="text-destructive text-sm">{errors.email.message}</p>
@@ -60,12 +75,13 @@ function RegisterPage() {
             <label htmlFor="password" className="block text-sm font-medium">
               Senha
             </label>
-            <input
+            <Input
               id="password"
               type="password"
-              {...register('password')}
-              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Digite sua senha"
+              icon={<FiLock />}
+              {...register('password')}
+              value={watch('password') || ''}
             />
             {errors.password && (
               <p className="text-destructive text-sm">
@@ -81,12 +97,13 @@ function RegisterPage() {
             >
               Confirme sua senha
             </label>
-            <input
+            <Input
               id="passwordConfirmation"
               type="password"
-              {...register('passwordConfirmation')}
-              className="w-full p-3 border bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
               placeholder="Confirme sua senha"
+              icon={<FiLock />}
+              {...register('passwordConfirmation')}
+              value={watch('passwordConfirmation') || ''}
             />
             {errors.passwordConfirmation && (
               <p className="text-destructive text-sm">
@@ -95,14 +112,16 @@ function RegisterPage() {
             )}
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-            variant="primary"
-          >
-            {isLoading ? 'Carregando...' : 'Registrar'}
-          </Button>
+          <div className="flex justify-center">
+            <Button
+              type="submit"
+              className=""
+              disabled={isLoading}
+              variant="primary"
+            >
+              {isLoading ? 'Carregando...' : 'Cadastrar'}
+            </Button>
+          </div>
         </form>
 
         <div className="mt-6 text-center">

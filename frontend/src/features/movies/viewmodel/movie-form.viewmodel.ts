@@ -349,23 +349,24 @@ export function useUpdateMovieViewModel(id: string) {
         originalTitle: movie.originalTitle || '',
         description: movie.description || '',
         tagline: movie.tagline || '',
-        budget: movie.budget || undefined,
-        revenue: movie.revenue || undefined,
+        budget: movie.budget !== undefined ? String(movie.budget) : '',
+        revenue: movie.revenue !== undefined ? String(movie.revenue) : '',
         releaseDate: movie.releaseDate
           ? new Date(movie.releaseDate).toISOString().split('T')[0]
           : '',
-        duration: movie.duration || undefined,
+        duration: movie.duration !== undefined ? String(movie.duration) : '',
         status: movie.status || MovieStatus.IN_PRODUCTION,
         language: movie.language || '',
         trailerUrl: movie.trailerUrl || '',
-        popularity: movie.popularity || undefined,
-        voteCount: movie.voteCount || undefined,
+        popularity:
+          movie.popularity !== undefined ? String(movie.popularity) : '',
+        voteCount: movie.voteCount !== undefined ? String(movie.voteCount) : '',
         genreIds: movie.genres.map((g) => g.id),
         imageUrl: movie.imageUrl || '',
         imageKey: movie.imageKey || '',
         backdropUrl: movie.backdropUrl || '',
         backdropKey: movie.backdropKey || '',
-        rating: movie.rating || undefined,
+        rating: movie.rating !== undefined ? String(movie.rating) : '',
       })
     }
   }, [id, movie, reset])

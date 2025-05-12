@@ -29,20 +29,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', ...props }, ref) => {
     const variantClasses = {
       primary: 'bg-primary text-primary-white hover:bg-primary/90',
-      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
+      secondary: 'bg-primary/20 text-secondary-foreground hover:bg-primary/50',
       success: 'bg-green-600 text-white hover:bg-green-700',
       warning: 'bg-amber-500 text-white hover:bg-amber-600',
       info: 'bg-sky-500 text-white hover:bg-sky-600',
       danger:
         'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-      default: '', // Deixe vazio para usar a variante padrão do shadcn
+      default: '',
       destructive: '',
       outline: '',
       ghost: '',
       link: '',
     }
 
-    // Determine se devemos usar nossas classes personalizadas ou passar a variante para o Button original
     const useCustomClass = [
       'primary',
       'secondary',
@@ -54,8 +53,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     // Ajusta a combinação de classes
     const combinedClassName = cn(
-      'font-light text-md',
-      'rounded-none',
+      'font-sans text-md cursor-pointer px-6 py-2',
+      'rounded-xs',
+      '', // Usando exatamente o mesmo padding do input
+      'border', // Adicionando a borda padrão
+      'flex items-center justify-center',
+      'min-h-[42px]', // Garantindo uma altura mínima igual à do input
       useCustomClass ? variantClasses[variant] : '',
       className,
     )

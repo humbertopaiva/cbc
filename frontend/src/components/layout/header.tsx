@@ -1,13 +1,12 @@
 import React from 'react'
 import { Link } from '@tanstack/react-router'
-import { FiLogIn, FiUser } from 'react-icons/fi'
+import { FiLogIn } from 'react-icons/fi'
 import { useAuth } from '@/features/auth/context/auth.context'
 import { ThemeToggle } from '@/features/theme/components/theme-toggle'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/custom/button'
 
 export const Header: React.FC = () => {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, logout } = useAuth()
 
   return (
     <header className="bg-card shadow-sm border-b border-border">
@@ -29,35 +28,10 @@ export const Header: React.FC = () => {
 
           {/* Botões lado direito */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {isAuthenticated ? (
-              <>
-                <span className="text-sm hidden md:inline">
-                  Olá, {user?.name}
-                </span>
-                <ThemeToggle />
-                <Button
-                  onClick={logout}
-                  className={cn(
-                    'w-9 h-9 p-0 bg-purple-600 hover:bg-purple-700 text-white rounded-md',
-                  )}
-                >
-                  <FiUser className="h-4 w-4" />
-                </Button>
-              </>
-            ) : (
-              <>
-                <ThemeToggle />
-                <Button
-                  as={Link}
-                  to="/login"
-                  className={cn(
-                    'w-9 h-9 p-0 bg-purple-600 hover:bg-purple-700 text-white rounded-md',
-                  )}
-                >
-                  <FiLogIn className="h-4 w-4" />
-                </Button>
-              </>
-            )}
+            <ThemeToggle />
+            <Button onClick={logout} variant="primary">
+              Logout
+            </Button>
           </div>
         </div>
       </div>
