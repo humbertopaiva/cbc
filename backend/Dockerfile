@@ -23,6 +23,9 @@ FROM node:24-alpine AS production
 
 WORKDIR /app
 
+# Instalar cliente PostgreSQL e ferramentas necessárias
+RUN apk add --no-cache postgresql-client
+
 # Instalar apenas dependências de produção
 COPY package*.json ./
 RUN npm ci --only=production
