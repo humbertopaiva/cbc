@@ -85,6 +85,15 @@ export class MovieFormViewModel {
   }
 }
 
+// Função auxiliar para converter de string para número ou undefined
+const safeNumberConversion = (
+  val: string | undefined | null,
+): number | undefined => {
+  if (val === undefined || val === null || val === '') return undefined
+  const num = Number(val)
+  return isNaN(num) ? undefined : num
+}
+
 export function useCreateMovieViewModel() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -124,21 +133,21 @@ export function useCreateMovieViewModel() {
     originalTitle: '',
     description: '',
     tagline: '',
-    budget: undefined,
-    revenue: undefined,
+    budget: '',
+    revenue: '',
     releaseDate: '',
-    duration: undefined,
+    duration: '',
     status: MovieStatus.IN_PRODUCTION,
     language: '',
     trailerUrl: '',
-    popularity: undefined,
-    voteCount: undefined,
+    popularity: '',
+    voteCount: '',
     genreIds: [],
     imageUrl: '',
     imageKey: '',
     backdropUrl: '',
     backdropKey: '',
-    rating: undefined,
+    rating: '',
   }
 
   const onSubmitHandler = async (data: CreateMovieFormData) => {
@@ -147,21 +156,21 @@ export function useCreateMovieViewModel() {
       originalTitle: data.originalTitle || undefined,
       description: data.description || undefined,
       tagline: data.tagline || undefined,
-      budget: data.budget ? data.budget : undefined,
-      revenue: data.revenue ? data.revenue : undefined,
+      budget: safeNumberConversion(data.budget),
+      revenue: safeNumberConversion(data.revenue),
       releaseDate: data.releaseDate || undefined,
-      duration: data.duration ? data.duration : undefined,
+      duration: safeNumberConversion(data.duration),
       status: data.status,
       language: data.language || undefined,
       trailerUrl: data.trailerUrl || undefined,
-      popularity: data.popularity ? data.popularity : undefined,
-      voteCount: data.voteCount ? data.voteCount : undefined,
+      popularity: safeNumberConversion(data.popularity),
+      voteCount: safeNumberConversion(data.voteCount),
       genreIds: data.genreIds?.length ? data.genreIds : undefined,
       imageUrl: data.imageUrl || undefined,
       imageKey: data.imageKey || undefined,
       backdropUrl: data.backdropUrl || undefined,
       backdropKey: data.backdropKey || undefined,
-      rating: data.rating ? data.rating : undefined,
+      rating: safeNumberConversion(data.rating),
     }
 
     await createMovieMutation.mutateAsync(input)
@@ -277,47 +286,46 @@ export function useUpdateMovieViewModel(id: string) {
     originalTitle: '',
     description: '',
     tagline: '',
-    budget: undefined,
-    revenue: undefined,
+    budget: '',
+    revenue: '',
     releaseDate: '',
-    duration: undefined,
+    duration: '',
     status: MovieStatus.IN_PRODUCTION,
     language: '',
     trailerUrl: '',
-    popularity: undefined,
-    voteCount: undefined,
+    popularity: '',
+    voteCount: '',
     genreIds: [],
     imageUrl: '',
     imageKey: '',
     backdropUrl: '',
     backdropKey: '',
-    rating: undefined,
+    rating: '',
   }
 
   const onSubmitHandler = async (data: UpdateMovieFormData) => {
+    // Garantir que valores undefined ou NaN não sejam enviados para a API
     const input: UpdateMovieInput = {
       id,
       title: data.title,
       originalTitle: data.originalTitle || undefined,
       description: data.description || undefined,
       tagline: data.tagline || undefined,
-      budget: data.budget ? data.budget : undefined,
-      revenue: data.revenue ? data.revenue : undefined,
-      releaseDate: data.releaseDate
-        ? new Date(data.releaseDate).toISOString()
-        : undefined,
-      duration: data.duration ? data.duration : undefined,
+      budget: safeNumberConversion(data.budget),
+      revenue: safeNumberConversion(data.revenue),
+      releaseDate: data.releaseDate ? data.releaseDate : undefined,
+      duration: safeNumberConversion(data.duration),
       status: data.status,
       language: data.language || undefined,
       trailerUrl: data.trailerUrl || undefined,
-      popularity: data.popularity ? data.popularity : undefined,
-      voteCount: data.voteCount ? data.voteCount : undefined,
+      popularity: safeNumberConversion(data.popularity),
+      voteCount: safeNumberConversion(data.voteCount),
       genreIds: data.genreIds?.length ? data.genreIds : undefined,
       imageUrl: data.imageUrl || undefined,
       imageKey: data.imageKey || undefined,
       backdropUrl: data.backdropUrl || undefined,
       backdropKey: data.backdropKey || undefined,
-      rating: data.rating ? data.rating : undefined,
+      rating: safeNumberConversion(data.rating),
     }
 
     await updateMovieMutation.mutateAsync(input)
@@ -349,42 +357,25 @@ export function useUpdateMovieViewModel(id: string) {
         originalTitle: movie.originalTitle || '',
         description: movie.description || '',
         tagline: movie.tagline || '',
-        // Para campos numéricos, use undefined em vez de string vazia se o valor não existir
-        budget:
-          movie.budget !== undefined
-            ? parseFloat(String(movie.budget))
-            : undefined,
-        revenue:
-          movie.revenue !== undefined
-            ? parseFloat(String(movie.revenue))
-            : undefined,
+        // Para campos numéricos, usar string vazia para valores undefined ou null
+        budget: movie.budget !== undefined ? String(movie.budget) : '',
+        revenue: movie.revenue !== undefined ? String(movie.revenue) : '',
         releaseDate: movie.releaseDate
           ? new Date(movie.releaseDate).toISOString().split('T')[0]
           : '',
-        duration:
-          movie.duration !== undefined
-            ? parseInt(String(movie.duration))
-            : undefined,
+        duration: movie.duration !== undefined ? String(movie.duration) : '',
         status: movie.status || MovieStatus.IN_PRODUCTION,
         language: movie.language || '',
         trailerUrl: movie.trailerUrl || '',
         popularity:
-          movie.popularity !== undefined
-            ? parseInt(String(movie.popularity))
-            : undefined,
-        voteCount:
-          movie.voteCount !== undefined
-            ? parseInt(String(movie.voteCount))
-            : undefined,
+          movie.popularity !== undefined ? String(movie.popularity) : '',
+        voteCount: movie.voteCount !== undefined ? String(movie.voteCount) : '',
         genreIds: movie.genres.map((g) => g.id),
         imageUrl: movie.imageUrl || '',
         imageKey: movie.imageKey || '',
         backdropUrl: movie.backdropUrl || '',
         backdropKey: movie.backdropKey || '',
-        rating:
-          movie.rating !== undefined
-            ? parseFloat(String(movie.rating))
-            : undefined,
+        rating: movie.rating !== undefined ? String(movie.rating) : '',
       })
     }
   }, [id, movie, reset])

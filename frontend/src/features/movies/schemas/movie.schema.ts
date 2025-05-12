@@ -70,23 +70,11 @@ export const movieFormSchema = z.object({
   originalTitle: z.string().optional(),
   description: z.string().optional(),
   tagline: z.string().optional(),
-  budget: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseFloat(val) : undefined)),
-  revenue: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseFloat(val) : undefined)),
-  profit: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseFloat(val) : undefined)),
+  budget: z.string().optional(),
+  revenue: z.string().optional(),
+  profit: z.string().optional(),
   releaseDate: z.string().optional(),
-  duration: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseInt(val) : undefined)),
+  duration: z.string().optional(),
   status: z.nativeEnum(MovieStatus).optional(),
   language: z.string().optional(),
   trailerUrl: z
@@ -94,23 +82,14 @@ export const movieFormSchema = z.object({
     .url('O URL do trailer deve ser válido')
     .optional()
     .or(z.literal('')),
-  popularity: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseInt(val) : undefined)),
-  voteCount: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseInt(val) : undefined)),
+  popularity: z.string().optional(),
+  voteCount: z.string().optional(),
   genreIds: z.array(z.string().uuid()).optional(),
   imageUrl: z.string().url('A URL da imagem deve ser válida').optional(),
   imageKey: z.string().optional(),
   backdropUrl: z.string().url('A URL do backdrop deve ser válida').optional(),
   backdropKey: z.string().optional(),
-  rating: z
-    .string()
-    .optional()
-    .transform((val) => (val ? parseFloat(val) : undefined)),
+  rating: z.string().optional(),
 })
 
 export type MovieFiltersFormData = z.infer<typeof movieFiltersSchema>
