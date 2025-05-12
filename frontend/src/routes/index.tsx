@@ -55,9 +55,9 @@ function HomePage() {
   return (
     <div className="min-h-screen">
       <main className="max-w-7xl mx-auto lg:px-0">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+        <div className="flex flex-col md:flex-row md:justify-end md:items-center mb-6 gap-4">
           <div className="flex flex-col md:flex-row gap-2 justify-end w-full px-3 lg:px-0">
-            <div className="relative flex-grow md:max-w-md">
+            <div className="relative flex-grow sm:max-w-3xl max-w-xl ">
               <Input
                 type="text"
                 placeholder="Pesquisar filme..."
@@ -69,14 +69,14 @@ function HomePage() {
                 onClear={clearSearch}
               />
             </div>
-            <div className="flex gap-2 self-end">
+            <div className="flex gap-2 flex-1l">
               <FilterModal
                 genres={genres}
                 currentFilters={filters}
                 onApplyFilters={handleFilterChange}
               />
               <Button
-                className="flex items-center gap-2 flex-1 max-w-48"
+                className="flex items-center gap-2 flex-1 md:flex-none  md:max-w-48 "
                 onClick={() => setShowCreateModal(true)}
                 variant="primary"
               >
