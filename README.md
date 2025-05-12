@@ -1,6 +1,6 @@
 # Cubos Movies 🎬
 
-![Cubos Movies Logo](/frontend/public/logo-horizontal.svg)
+![Cubos Movies Imagem](https://raw.githubusercontent.com/humbertopaiva/cbc/main/frontend/public/imagem.jpg)
 
 Uma aplicação web fullstack para gerenciamento de filmes, desenvolvida como parte do desafio técnico da Cubos Tecnologia.
 
