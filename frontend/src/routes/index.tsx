@@ -57,7 +57,7 @@ function HomePage() {
       <main className="max-w-7xl mx-auto lg:px-0">
         <div className="flex flex-col md:flex-row md:justify-end md:items-center mb-6 gap-4">
           <div className="flex flex-col md:flex-row gap-2 justify-end w-full px-3 lg:px-0">
-            <div className="relative flex-grow sm:max-w-3xl max-w-xl ">
+            <div className="relative flex-grow sm:max-w-2xl lg:max-w-lg ">
               <Input
                 type="text"
                 placeholder="Pesquisar filme..."
