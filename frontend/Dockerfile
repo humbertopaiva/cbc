@@ -1,4 +1,3 @@
-# Build stage
 FROM node:24-alpine AS build
 
 WORKDIR /app
@@ -19,17 +18,28 @@ ENV VITE_API_URL=${VITE_API_URL}
 # Construir a aplicação
 RUN npm run build
 
-# Production stage
-FROM nginx:stable-alpine AS production
+# Usar a mesma imagem para produção
+FROM node:24-alpine
 
-# Copiar a configuração do nginx
-COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Copiar os arquivos de build
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copiar package.json e package-lock.json
+COPY --from=build /app/package*.json ./
+
+# Copiar o diretório node_modules que contém as dependências
+COPY --from=build /app/node_modules ./node_modules
+
+# Copiar arquivos de build
+COPY --from=build /app/dist ./dist
+
+# Copiar arquivos de configuração do Vite
+COPY --from=build /app/vite.config.js ./
 
 # Expor a porta 80
 EXPOSE 80
 
-# Comando para iniciar o nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Definir variável de ambiente para a porta do preview
+ENV PORT=80
+
+# Comando para usar o script "serve" do package.json
+CMD ["npm", "run", "start"]
