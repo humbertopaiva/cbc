@@ -1,98 +1,50 @@
 version: "3.8"
 
 services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: cubos_movies
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    depends_on:
+      - postgres
+    env_file:
+      - ./backend/.env
     ports:
       - "4000:4000"
+    command: npm run start:dev
+    working_dir: /app
     volumes:
       - ./backend:/app
       - /app/node_modules
-    depends_on:
-      - postgres
-      - mailhog
-      - minio
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
-      - DB_DATABASE=cubos_movies
-      - JWT_SECRET=your_jwt_secret_key
-      - MAIL_HOST=mailhog
-      - MAIL_PORT=1025
-      - MAIL_USER=null
-      - MAIL_PASS=null
-      - MAIL_FROM=noreply@cubosmovies.com
-      - S3_BUCKET=cubos-movies
-      - S3_HOST=localhost
-      - S3_PORT=9000
-      - S3_ACCESS_KEY=minioadmin
-      - S3_SECRET_KEY=minioadmin
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    env_file:
+      - ./frontend/.env
     ports:
       - "3000:3000"
+    working_dir: /app
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    depends_on:
-      - backend
-
-  postgres:
-    image: postgres:15
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=cubos_movies
-
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-
-  minio:
-    image: minio/minio:latest
-    ports:
-      - "9000:9000" # API
-      - "9001:9001" # Console
-    volumes:
-      - minio_data:/data
-    environment:
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=minioadmin
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-
-  createbuckets:
-    image: minio/mc
-    depends_on:
-      - minio
-    entrypoint: >
-      /bin/sh -c "
-      sleep 10;
-      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb myminio/cubos-movies --ignore-existing;
-      /usr/bin/mc anonymous set download myminio/cubos-movies;
-      /usr/bin/mc admin policy set public myminio/cubos-movies;
-      exit 0;
-      "
+    command: yarn dev
 
 volumes:
   postgres_data:
-  minio_data:
