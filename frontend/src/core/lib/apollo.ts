@@ -11,7 +11,7 @@ import { onError } from '@apollo/client/link/error'
 const isDevelopment = import.meta.env.DEV
 const API_URL = isDevelopment
   ? import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql'
-  : 'https://cbc-backend.limei.app/graphql'
+  : 'https://cb-back.limei.app/graphql'
 
 const httpLink = createHttpLink({
   uri: API_URL,
