@@ -1,297 +1,276 @@
-Welcome to your new TanStack app!
+# Cubos Movies 🎬
 
-# Getting Started
+![Cubos Movies Logo](/frontend/public/logo-horizontal.svg)
 
-To run this application:
+Uma aplicação web fullstack para gerenciamento de filmes, desenvolvida como parte do desafio técnico da Cubos Tecnologia.
+
+## 🌟 Visão Geral
+
+Cubos Movies é uma plataforma responsiva para cadastro, edição, visualização e exclusão de filmes. A aplicação oferece funcionalidades de autenticação, busca avançada e filtros personalizados.
+
+![Screenshot da aplicação](/frontend/public/screenshot.png)
+
+## ✨ Funcionalidades
+
+### Autenticação e Segurança
+
+- 🔐 Cadastro e login de usuários
+- 🔑 Recuperação de senha via email
+- 🛡️ Proteção de rotas com JWT
+
+### Gerenciamento de Filmes
+
+- 📝 Cadastro completo de informações de filmes
+- 🏷️ Categorização por gêneros
+- 📅 Notificação automática por email no dia de lançamento
+- 🔍 Busca por texto e filtros avançados
+- 📊 Visualização detalhada com métricas
+
+### Upload de Imagens
+
+- 🖼️ Suporte para imagens de pôster e backdrop
+- ☁️ Armazenamento na nuvem com AWS S3
+- 🔄 Pré-visualização e edição
+
+### Interface
+
+- 📱 Design responsivo para todos os dispositivos
+- 🌓 Modo claro e escuro
+- 📊 Componentes interativos e dinâmicos
+
+## 🛠️ Tecnologias Utilizadas
+
+### Backend
+
+- **Framework**: NestJS
+- **Linguagem**: TypeScript
+- **Banco de Dados**: PostgreSQL
+- **ORM**: TypeORM
+- **API**: GraphQL
+- **Autenticação**: JWT, Passport
+- **Armazenamento**: AWS S3
+- **Email**: Resend API
+- **Agendamento**: NestJS Schedule
+
+### Frontend
+
+- **Framework**: React
+- **Roteamento**: TanStack Router
+- **Gerenciamento de Estado**: React Query, Apollo Client
+- **Estilização**: TailwindCSS
+- **Formulários**: React Hook Form, Zod
+- **UI/UX**: Design System personalizado
+- **Animações**: CSS Transitions
+
+## 🚀 Como Executar o Projeto
+
+### Pré-requisitos
+
+- Node.js (v18+)
+- npm ou yarn
+- PostgreSQL
+- Conta AWS (para o S3) ou serviço de armazenamento compatível
+
+### Configuração do Backend
+
+1. Clone o repositório:
+
+   ```bash
+   git clone https://github.com/seu-usuario/cubos-movies.git
+   cd cubos-movies
+   ```
+
+2. Crie um arquivo `.env` na pasta backend com as seguintes variáveis:
+
+   ```env
+   # Database
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
+   DB_DATABASE=cubos_movies
+
+   # JWT
+   JWT_SECRET=sua_chave_secreta_aqui
+   JWT_EXPIRATION=1d
+
+   # Email
+   RESEND_API_KEY=sua_chave_resend_api
+   MAIL_FROM=seu_email@exemplo.com
+   FRONTEND_URL=http://localhost:3000
+
+   # AWS S3
+   AWS_REGION=us-east-1
+   AWS_ACCESS_KEY=sua_access_key
+   AWS_SECRET_KEY=sua_secret_key
+   S3_BUCKET=seu_bucket_name
+
+   # App
+   NODE_ENV=development
+   PORT=4000
+   NOTIFICATION_DEV_MODE=true
+   ```
+
+3. Instale as dependências e execute o backend:
+
+   ```bash
+   cd backend
+   npm install
+   npm run start:dev
+   ```
+
+4. Execute as migrações para criar o banco de dados:
+
+   ```bash
+   npm run migration:run
+   ```
+
+5. Popule o banco com os dados iniciais:
+   ```bash
+   npm run seed
+   ```
+
+### Configuração do Frontend
+
+1. Crie um arquivo `.env` na pasta frontend:
+
+   ```env
+   VITE_API_URL=http://localhost:4000/graphql
+   ```
+
+2. Instale as dependências e execute o frontend:
+
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. Acesse o aplicativo em `http://localhost:3000`
+
+## 🐳 Implantação com Docker
+
+O projeto está configurado para fácil implantação usando Docker e Docker Compose, sendo compatível com Dokploy.
+
+### Pré-requisitos
+
+- Docker
+- Docker Compose
+
+### Configuração para Docker
+
+1. Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
+   ```env
+   # Database Configuration
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=postgres
+   POSTGRES_DB=cubos_movies
+   DB_HOST=postgres
+   DB_PORT=5432
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
+   DB_DATABASE=cubos_movies
+
+   # JWT Configuration
+   JWT_SECRET=sua_chave_secreta_aqui
+   JWT_EXPIRATION=1d
+
+   # Email Configuration
+   RESEND_API_KEY=sua_chave_resend_api
+   MAIL_FROM=seu_email@exemplo.com
+   FRONTEND_URL=http://localhost:3000
+
+   # S3 Configuration
+   AWS_REGION=us-east-1
+   AWS_ACCESS_KEY=sua_access_key
+   AWS_SECRET_KEY=sua_secret_key
+   S3_BUCKET=seu_bucket_name
+
+   # App Configuration
+   NODE_ENV=development
+   BACKEND_PORT=4000
+   FRONTEND_PORT=3000
+   NOTIFICATION_DEV_MODE=true
+
+   # Frontend Configuration
+   VITE_API_URL=http://localhost:4000/graphql
+   ```
+
+### Passos para implantação local
+
+1. Clone o repositório:
+
+   ```bash
+   git clone https://github.com/seu-usuario/cubos-movies.git
+   cd cubos-movies
+   ```
+
+2. Inicie os contêineres:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. Acesse a aplicação:
+   - Frontend: http://localhost:3000
+   - API GraphQL: http://localhost:4000/graphql
+
+### Implantação com Dokploy
+
+Para implantar com Dokploy, você pode usar os Dockerfiles incluídos no projeto:
+
+1. Configure as variáveis de ambiente no painel Dokploy
+2. Aponte para o repositório Git
+3. Selecione o serviço e o Dockerfile correspondente
+4. Implante
+
+### Serviços disponíveis
+
+- **Frontend**: Aplicação React rodando no Vite
+- **Backend**: API GraphQL NestJS
+- **Postgres**: Banco de dados PostgreSQL
+
+### Comandos úteis
 
 ```bash
-npm install
-npm run start
+# Ver logs de todos os contêineres
+docker-compose logs -f
+
+# Ver logs de um serviço específico
+docker-compose logs -f backend
+
+# Parar todos os contêineres
+docker-compose down
+
+# Reconstruir e reiniciar serviços
+docker-compose up -d --build
 ```
 
-# Building For Production
+## 📝 Recursos Adicionais
 
-To build this application for production:
-
-```bash
-npm run build
-```
-
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+### Testes
 
 ```bash
+# Backend
+cd backend
+npm run test
+
+# Frontend
+cd frontend
 npm run test
 ```
 
-## Styling
+### Documentação da API
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+A documentação GraphQL está disponível em:
 
-## Linting & Formatting
+- Playground: http://localhost:4000/graphql
 
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
+## 👨‍💻 Autor
 
-```bash
-npm run lint
-npm run format
-npm run check
-```
+Criado com 💜 por Seu Nome - [GitHub](https://github.com/seu-usuario) | [LinkedIn](https://linkedin.com/in/seu-perfil)
 
-## Routing
+## 📄 Licença
 
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from '@tanstack/react-router'
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/people',
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json() as Promise<{
-      results: {
-        name: string
-      }[]
-    }>
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData()
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    )
-  },
-})
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
-
-```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
-```
-
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
-// ...
-
-const queryClient = new QueryClient()
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
-  )
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from '@tanstack/react-query'
-
-import './App.css'
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ['people'],
-    queryFn: () =>
-      fetch('https://swapi.dev/api/people')
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  })
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-export default App
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-npm install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from '@tanstack/react-store'
-import { Store } from '@tanstack/store'
-import './App.css'
-
-const countStore = new Store(0)
-
-function App() {
-  const count = useStore(countStore)
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  )
-}
-
-export default App
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from '@tanstack/react-store'
-import { Store, Derived } from '@tanstack/store'
-import './App.css'
-
-const countStore = new Store(0)
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-})
-doubledStore.mount()
-
-function App() {
-  const count = useStore(countStore)
-  const doubledCount = useStore(doubledStore)
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  )
-}
-
-export default App
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.

@@ -2,49 +2,71 @@ version: "3.8"
 
 services:
   postgres:
-    image: postgres:16
-    container_name: postgres
-    restart: always
+    image: postgres:15-alpine
+    container_name: cubos-movies-postgres
     environment:
-      POSTGRES_DB: cubos_movies
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cubos-network
+    restart: unless-stopped
 
   backend:
-    build:
-      context: ./backend
-    container_name: backend
-    restart: always
-    depends_on:
-      - postgres
-    env_file:
-      - ./backend/.env
-    ports:
-      - "4000:4000"
-    command: npm run start:dev
-    working_dir: /app
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+  container_name: cubos-movies-backend
+  environment:
+    - DB_HOST=${DB_HOST}
+    - DB_PORT=${DB_PORT}
+    - DB_USERNAME=${DB_USERNAME}
+    - DB_PASSWORD=${DB_PASSWORD}
+    - DB_DATABASE=${DB_DATABASE}
+    - JWT_SECRET=${JWT_SECRET}
+    - JWT_EXPIRATION=${JWT_EXPIRATION}
+    - RESEND_API_KEY=${RESEND_API_KEY}
+    - MAIL_FROM=${MAIL_FROM}
+    - FRONTEND_URL=${FRONTEND_URL}
+    - AWS_REGION=${AWS_REGION}
+    - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+    - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+    - S3_BUCKET=${S3_BUCKET}
+    - NODE_ENV=${NODE_ENV}
+    - PORT=${BACKEND_PORT}
+    - NOTIFICATION_DEV_MODE=${NOTIFICATION_DEV_MODE}
+  ports:
+    - "${BACKEND_PORT}:${BACKEND_PORT}"
+  depends_on:
+    - postgres
+  networks:
+    - cubos-network
+  restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
-    container_name: frontend
-    restart: always
-    env_file:
-      - ./frontend/.env
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+    container_name: cubos-movies-frontend
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
     ports:
-      - "3000:3000"
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: yarn dev
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    depends_on:
+      - backend
+    networks:
+      - cubos-network
+    restart: unless-stopped
+
+networks:
+  cubos-network:
+    driver: bridge
 
 volumes:
   postgres_data:
