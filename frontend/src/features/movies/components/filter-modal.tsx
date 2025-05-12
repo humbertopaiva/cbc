@@ -73,11 +73,10 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   return (
     <>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={handleOpen}
         className="flex items-center gap-2"
       >
-        <FiFilter className="w-4 h-4" />
         Filtros
       </Button>
 

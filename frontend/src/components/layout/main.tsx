@@ -30,7 +30,7 @@ export const Main: React.FC<MainProps> = ({
       )}
       <div
         className={cn(
-          'relative z-10 flex-1 flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10',
+          'relative z-10 flex-1 flex flex-col max-w-7xl mx-auto w-full px-0 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10',
         )}
       >
         {children}

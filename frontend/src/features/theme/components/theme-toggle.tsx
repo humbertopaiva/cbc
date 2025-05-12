@@ -8,13 +8,13 @@ export const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+      className="py-3 px-5 rounded-xs focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 bg-purple-500/8"
       aria-label={
         theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'
       }
     >
       {theme === 'dark' ? (
-        <FiSun className="w-5 h-5 text-yellow-400" />
+        <FiSun className="w-5 h-5 text-white" />
       ) : (
         <FiMoon className="w-5 h-5 text-gray-700" />
       )}

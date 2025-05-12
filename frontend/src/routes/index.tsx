@@ -54,10 +54,10 @@ function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-8">
+      <main className="max-w-7xl mx-auto lg:px-0">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <div className="flex flex-col md:flex-row gap-2 justify-end w-full">
-            <div className="relative flex-grow md:max-w-xs">
+          <div className="flex flex-col md:flex-row gap-2 justify-end w-full px-3 lg:px-0">
+            <div className="relative flex-grow md:max-w-md">
               <Input
                 type="text"
                 placeholder="Pesquisar filme..."
@@ -69,19 +69,18 @@ function HomePage() {
                 onClear={clearSearch}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 self-end">
               <FilterModal
                 genres={genres}
                 currentFilters={filters}
                 onApplyFilters={handleFilterChange}
               />
               <Button
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 flex-1 max-w-48"
                 onClick={() => setShowCreateModal(true)}
                 variant="primary"
               >
-                <FiPlus className="w-4 h-4" />
-                <span>Novo Filme</span>
+                <span>Adicionar Filme</span>
               </Button>
             </div>
           </div>
@@ -118,7 +117,7 @@ function HomePage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 bg-foreground/8 p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 bg-foreground/8 p-3 md:p-6">
               {movies?.edges.map(({ node }) => (
                 <div key={node.id} className="h-full">
                   <MovieCard movie={node} />

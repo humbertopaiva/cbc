@@ -47,9 +47,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           type={inputType}
           className={cn(
-            'w-full p-3 border bg-background/70 backdrop-blur-sm',
+            'w-full  border bg-background/70 backdrop-blur-sm',
+            'min-h-[42px] box-border', // Garantindo a mesma altura mínima do botão
             'focus:outline-none focus:ring-2 focus:ring-primary/50',
             'transition-colors duration-200',
+            'rounded-none', // Aplicando a mesma propriedade de arredondamento do botão
             icon && 'pl-10',
             (showClearButton || isPasswordInput) && 'pr-10',
             className,
