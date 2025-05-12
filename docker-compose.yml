@@ -1,50 +1,76 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:16
-    container_name: postgres
-    restart: always
-    environment:
-      POSTGRES_DB: cubos_movies
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${API_URL:-http://localhost:4000/graphql}
     ports:
-      - "5432:5432"
+      - "${FRONTEND_PORT:-8080}:80" # Mudando para porta 8080 como padrão
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
 
   backend:
     build:
       context: ./backend
-    container_name: backend
-    restart: always
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
     depends_on:
-      - postgres
-    env_file:
-      - ./backend/.env
-    ports:
-      - "4000:4000"
-    command: npm run start:dev
-    working_dir: /app
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - DB_DATABASE=${POSTGRES_DB:-cubos_movies}
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1d}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - MAIL_FROM=${MAIL_FROM:-contato@admin.cubos-movies.com}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8080} # Atualizando para usar a porta 8080
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - S3_BUCKET=${S3_BUCKET:-cubos-movies}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-cubos_movies}
+    restart: unless-stopped
 
-  frontend:
-    build:
-      context: ./frontend
-    container_name: frontend
-    restart: always
-    env_file:
-      - ./frontend/.env
-    ports:
-      - "3000:3000"
-    working_dir: /app
+  postgres:
+    image: postgres:16-alpine
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: yarn dev
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5433}:5432" # Alterando para 5433 para evitar conflitos
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-cubos_movies}
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres_data:

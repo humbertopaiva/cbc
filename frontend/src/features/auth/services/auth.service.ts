@@ -3,18 +3,6 @@ import { gql } from '@apollo/client'
 import type { User } from '../model/auth.model'
 import { apolloClient } from '@/core/lib/apollo'
 
-interface SignUpInput {
-  name: string
-  email: string
-  password: string
-  passwordConfirmation: string
-}
-
-interface LoginInput {
-  email: string
-  password: string
-}
-
 interface AuthPayload {
   token: string
   user: User

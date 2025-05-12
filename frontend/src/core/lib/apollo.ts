@@ -8,8 +8,10 @@ import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 
 // URL do nosso backend GraphQL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql'
+
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: API_URL,
 })
 
 // Link para tratamento de erros
@@ -23,6 +25,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       // Adicionar verificação específica para erros de autenticação
       if (message === 'Unauthorized' || message.includes('UNAUTHENTICATED')) {
         console.error('Token de autenticação inválido ou ausente!')
+
+        // Em produção, você pode querer redirecionar para página de login
+        if (import.meta.env.PROD) {
+          window.location.href = '/login'
+        }
       }
     })
   if (networkError) console.error(`[Network error]: ${networkError}`)
@@ -33,8 +40,6 @@ const authLink = setContext((_, { headers }) => {
   // Pegar o token de autenticação do localStorage
   const token = localStorage.getItem('auth_token')
 
-  console.log('Token de autenticação sendo enviado:', token ? 'Sim' : 'Não')
-
   // Retornar os headers com o token se ele existir
   return {
     headers: {
@@ -44,17 +49,47 @@ const authLink = setContext((_, { headers }) => {
   }
 })
 
+// Opções de cache otimizadas para produção
+const cache = new InMemoryCache({
+  typePolicies: {
+    Query: {
+      fields: {
+        movies: {
+          // Mesclar paginação em vez de substituir
+          keyArgs: ['filters'],
+          merge(
+            existing = { edges: [], pageInfo: {}, totalCount: 0 },
+            incoming,
+          ) {
+            if (!existing) return incoming
+
+            // Para recarregar completamente quando os filtros mudam
+            if (incoming.pageInfo.startCursor === incoming.pageInfo.endCursor) {
+              return incoming
+            }
+
+            return {
+              ...incoming,
+              edges: [...existing.edges, ...incoming.edges],
+            }
+          },
+        },
+      },
+    },
+  },
+})
+
 // Criar o cliente Apollo com os links configurados
 export const apolloClient = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
-  cache: new InMemoryCache(),
+  cache,
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: 'network-only', // Não usar cache para consultas
+      fetchPolicy: import.meta.env.DEV ? 'network-only' : 'cache-and-network',
       errorPolicy: 'all',
     },
     query: {
-      fetchPolicy: 'network-only', // Não usar cache para consultas
+      fetchPolicy: import.meta.env.DEV ? 'network-only' : 'cache-first',
       errorPolicy: 'all',
     },
   },

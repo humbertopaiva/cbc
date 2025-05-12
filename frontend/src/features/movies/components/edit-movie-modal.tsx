@@ -86,8 +86,8 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
           <div>
             <p>Por favor, corrija os seguintes campos:</p>
             <ul className="mt-2 list-disc pl-4">
-              {errorFields.map((error, index) => (
-                <li key={index}>{error}</li>
+              {errorFields.map((errorField, index) => (
+                <li key={index}>{errorField}</li>
               ))}
             </ul>
           </div>,

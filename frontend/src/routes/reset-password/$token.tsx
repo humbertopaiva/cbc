@@ -25,7 +25,6 @@ function ResetPasswordPage() {
     isLoading,
     message,
     success,
-    setValue,
     watch,
   } = useResetPasswordViewModel(token)
   const { isAuthenticated } = useAuth()

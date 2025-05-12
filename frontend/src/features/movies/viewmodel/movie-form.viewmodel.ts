@@ -349,24 +349,42 @@ export function useUpdateMovieViewModel(id: string) {
         originalTitle: movie.originalTitle || '',
         description: movie.description || '',
         tagline: movie.tagline || '',
-        budget: movie.budget !== undefined ? String(movie.budget) : '',
-        revenue: movie.revenue !== undefined ? String(movie.revenue) : '',
+        // Para campos numéricos, use undefined em vez de string vazia se o valor não existir
+        budget:
+          movie.budget !== undefined
+            ? parseFloat(String(movie.budget))
+            : undefined,
+        revenue:
+          movie.revenue !== undefined
+            ? parseFloat(String(movie.revenue))
+            : undefined,
         releaseDate: movie.releaseDate
           ? new Date(movie.releaseDate).toISOString().split('T')[0]
           : '',
-        duration: movie.duration !== undefined ? String(movie.duration) : '',
+        duration:
+          movie.duration !== undefined
+            ? parseInt(String(movie.duration))
+            : undefined,
         status: movie.status || MovieStatus.IN_PRODUCTION,
         language: movie.language || '',
         trailerUrl: movie.trailerUrl || '',
         popularity:
-          movie.popularity !== undefined ? String(movie.popularity) : '',
-        voteCount: movie.voteCount !== undefined ? String(movie.voteCount) : '',
+          movie.popularity !== undefined
+            ? parseInt(String(movie.popularity))
+            : undefined,
+        voteCount:
+          movie.voteCount !== undefined
+            ? parseInt(String(movie.voteCount))
+            : undefined,
         genreIds: movie.genres.map((g) => g.id),
         imageUrl: movie.imageUrl || '',
         imageKey: movie.imageKey || '',
         backdropUrl: movie.backdropUrl || '',
         backdropKey: movie.backdropKey || '',
-        rating: movie.rating !== undefined ? String(movie.rating) : '',
+        rating:
+          movie.rating !== undefined
+            ? parseFloat(String(movie.rating))
+            : undefined,
       })
     }
   }, [id, movie, reset])
