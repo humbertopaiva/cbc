@@ -73,7 +73,7 @@ function MovieDetailsPage() {
           }}
         >
           {/* Overlay escuro - Adaptado para o modo escuro */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 dark:from-black/95 dark:via-black/80 dark:to-black/50"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-card/100 via-card/70 to-card/30 dark:from-card/95 dark:via-card/80 dark:to-card/50"></div>
 
           <div className="container mx-auto px-4 py-6 relative z-10">
             {/* Mobile: Poster first */}
@@ -171,7 +171,7 @@ function MovieDetailsPage() {
                   <div className="md:w-1/2 flex flex-wrap justify-end gap-3 mt-4 md:mt-0">
                     {/* Popularidade como box */}
                     {movie.popularity !== undefined && (
-                      <div className="bg-card/80 backdrop-blur-sm dark:bg-card/40 p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/80  dark:bg-card/40 p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-sans font-semibold text-foreground/70 dark:text-white/70 uppercase">
                           POPULARIDADE
                         </h4>
@@ -183,7 +183,7 @@ function MovieDetailsPage() {
 
                     {/* Votos como box */}
                     {movie.voteCount !== undefined && (
-                      <div className="bg-card/80 backdrop-blur-sm dark:bg-card/40 p-3 rounded-xs flex flex-col items-center justify-between">
+                      <div className="bg-card/80  dark:bg-card/40 p-3 rounded-xs flex flex-col items-center justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           VOTOS
                         </h4>
@@ -203,7 +203,7 @@ function MovieDetailsPage() {
                 {/* Segunda seção: Sinopse e informações técnicas em duas colunas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Coluna 1: Sinopse */}
-                  <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-4 rounded-xs h-full">
+                  <div className="bg-card/90  p-4 rounded-xs h-full">
                     <h3 className="text-lg font-sans font-semibold uppercase mb-2 text-foreground dark:text-foreground">
                       SINOPSE
                     </h3>
@@ -215,7 +215,7 @@ function MovieDetailsPage() {
                   {/* Coluna 2: Informações técnicas em cards */}
                   <div className="grid grid-cols-2 gap-3">
                     {movie.releaseDate && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/90  p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           LANÇAMENTO
                         </h4>
@@ -228,7 +228,7 @@ function MovieDetailsPage() {
                     )}
 
                     {movie.duration && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/95  p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           DURAÇÃO
                         </h4>
@@ -239,7 +239,7 @@ function MovieDetailsPage() {
                     )}
 
                     {movie.status && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/95  p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           SITUAÇÃO
                         </h4>
@@ -252,7 +252,7 @@ function MovieDetailsPage() {
                     )}
 
                     {movie.language && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/90  p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           IDIOMA
                         </h4>
@@ -263,7 +263,7 @@ function MovieDetailsPage() {
                     )}
 
                     {movie.budget !== undefined && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/90  p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           ORÇAMENTO
                         </h4>
@@ -278,7 +278,7 @@ function MovieDetailsPage() {
                     )}
 
                     {movie.revenue !== undefined && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/90  p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           RECEITA
                         </h4>
@@ -295,8 +295,8 @@ function MovieDetailsPage() {
                 </div>
 
                 {/* Terceira seção: Gêneros - limitada ao tamanho do conteúdo */}
-                <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-4 rounded-xs inline-block">
-                  <h3 className="text-lg font-semibold uppercase mb-2 font-sans text-white dark:text-white">
+                <div className="bg-card/90  p-4 rounded-xs inline-block">
+                  <h3 className="text-lg font-semibold uppercase mb-2 font-sans text-foreground">
                     GÊNEROS
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -310,7 +310,7 @@ function MovieDetailsPage() {
                         </span>
                       ))
                     ) : (
-                      <p className="text-white/60 dark:text-white/60">
+                      <p className="text-foreground">
                         Nenhum gênero cadastrado
                       </p>
                     )}
