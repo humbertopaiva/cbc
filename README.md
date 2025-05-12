@@ -6,7 +6,9 @@ Uma aplicação web fullstack para gerenciamento de filmes, desenvolvida como pa
 
 ## ⭐ Demonstração em Produção
 
-**Acesse o projeto em produção:** [https://cbc-front.limei.app](https://cb-front.limei.app)
+
+**Acesse o projeto em produção:** [https://cb-front.limei.app](https://cb-front.limei.app)
+
 
 > 🌟 Esta URL é a versão final e otimizada do projeto para avaliação.
 
@@ -142,7 +144,7 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
 4. Acesse o aplicativo:
    - Frontend: http://localhost:3000
    - API GraphQL: http://localhost:4000/graphql
-   - Produção: https://cbc-front.limei.app
+   - Produção: https://cb-front.limei.app
 
 ### Opção 2: Execução Local (Desenvolvimento)
 
@@ -269,7 +271,7 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
 3. Acesse:
    - Frontend: http://localhost:3000
    - API GraphQL: http://localhost:4000/graphql
-   - Produção: https://cbc-front.limei.app
+   - Produção: https://cb-front.limei.app
 
 ## 👨‍💻 Autor
 
