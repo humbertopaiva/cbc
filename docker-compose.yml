@@ -44,7 +44,7 @@ services:
       - NOTIFICATION_DEV_MODE=${NOTIFICATION_DEV_MODE:-true}
     volumes:
       - ./backend:/app
-    command: sh -c "npm install && npm run start:dev"
+    command: sh -c "npm install && npm run migration:run && npx nest start --watch"
     networks:
       - cubos-movies-network
 
