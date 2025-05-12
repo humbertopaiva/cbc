@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import { FiBookOpen, FiDollarSign, FiInfo, FiSave } from 'react-icons/fi'
+import {
+  FiBookOpen,
+  FiCalendar,
+  FiClock,
+  FiDollarSign,
+  FiFile,
+  FiFlag,
+  FiGlobe,
+  FiInfo,
+  FiTag,
+  FiType,
+  FiVideo,
+} from 'react-icons/fi'
 import { toast } from 'react-toastify'
 import { GenreSelect } from './genre-select'
-import { Button } from '@/components/ui/button'
+
 import { Modal } from '@/components/ui/modal'
 import { useUpdateMovieViewModel } from '@/features/movies/viewmodel/movie-form.viewmodel'
 import { ImageUpload } from '@/features/movies/components/image-upload'
 import { MovieStatus } from '@/features/movies/model/movie.model'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/custom/button'
 
 interface EditMovieModalProps {
   open: boolean
@@ -93,16 +107,15 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
   // Footer com botões de ação
   const modalFooter = (
     <div className="flex justify-end gap-2">
-      <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+      <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
         Cancelar
       </Button>
       <Button
-        type="submit"
+        variant="primary"
         form="edit-movie-form"
         className="flex items-center gap-2"
         disabled={isSubmitting}
       >
-        <FiSave className="w-4 h-4" />
         {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
       </Button>
     </div>
@@ -136,16 +149,19 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
 
           {/* Coluna da direita: Informações básicas */}
           <div className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <label htmlFor="title" className="block text-sm font-medium mb-1">
                 Título <span className="text-red-500">*</span>
               </label>
-              <input
+              <Input
                 id="title"
                 type="text"
-                {...register('title')}
-                className="w-full p-2 border rounded-md bg-background"
                 placeholder="Título do filme"
+                icon={<FiType />}
+                {...register('title')}
+                value={watch('title') || ''}
+                showClearButton
+                onClear={() => setValue('title', '')}
               />
               {errors.title && (
                 <p className="text-destructive text-sm mt-1">
@@ -154,19 +170,22 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               )}
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="originalTitle"
                 className="block text-sm font-medium mb-1"
               >
                 Título Original
               </label>
-              <input
+              <Input
                 id="originalTitle"
                 type="text"
-                {...register('originalTitle')}
-                className="w-full p-2 border rounded-md bg-background"
                 placeholder="Título original (se diferente)"
+                icon={<FiType />}
+                {...register('originalTitle')}
+                value={watch('originalTitle') || ''}
+                showClearButton
+                onClear={() => setValue('originalTitle', '')}
               />
               {errors.originalTitle && (
                 <p className="text-destructive text-sm mt-1">
@@ -175,19 +194,22 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               )}
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="tagline"
                 className="block text-sm font-medium mb-1"
               >
                 Frase de Efeito
               </label>
-              <input
+              <Input
                 id="tagline"
                 type="text"
-                {...register('tagline')}
-                className="w-full p-2 border rounded-md bg-background"
                 placeholder="Frase de efeito do filme (ex: 'Todo herói tem um começo')"
+                icon={<FiTag />}
+                {...register('tagline')}
+                value={watch('tagline') || ''}
+                showClearButton
+                onClear={() => setValue('tagline', '')}
               />
               {errors.tagline && (
                 <p className="text-destructive text-sm mt-1">
@@ -196,7 +218,7 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               )}
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="description"
                 className="block text-sm font-medium mb-1"
@@ -253,7 +275,7 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
         <h3 className="text-lg font-semibold mb-3">Detalhes</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div className="space-y-2">
             <label htmlFor="status" className="block text-sm font-medium mb-1">
               Situação
             </label>
@@ -273,19 +295,22 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="language"
               className="block text-sm font-medium mb-1"
             >
               Idioma
             </label>
-            <input
+            <Input
               id="language"
               type="text"
-              {...register('language')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Idioma principal do filme"
+              icon={<FiGlobe />}
+              {...register('language')}
+              value={watch('language') || ''}
+              showClearButton
+              onClear={() => setValue('language', '')}
             />
             {errors.language && (
               <p className="text-destructive text-sm mt-1">
@@ -294,18 +319,19 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="releaseDate"
               className="block text-sm font-medium mb-1"
             >
               Data de Lançamento
             </label>
-            <input
+            <Input
               id="releaseDate"
               type="date"
+              icon={<FiCalendar />}
               {...register('releaseDate')}
-              className="w-full p-2 border rounded-md bg-background"
+              value={watch('releaseDate') || ''}
             />
             {errors.releaseDate && (
               <p className="text-destructive text-sm mt-1">
@@ -314,20 +340,23 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="duration"
               className="block text-sm font-medium mb-1"
             >
               Duração (minutos)
             </label>
-            <input
+            <Input
               id="duration"
               type="number"
-              {...register('duration')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Duração em minutos"
+              icon={<FiClock />}
               min="1"
+              {...register('duration')}
+              value={watch('duration') || ''}
+              showClearButton
+              onClear={() => setValue('duration', undefined)}
             />
             {errors.duration && (
               <p className="text-destructive text-sm mt-1">
@@ -336,19 +365,22 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             )}
           </div>
 
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 space-y-2">
             <label
               htmlFor="trailerUrl"
               className="block text-sm font-medium mb-1"
             >
               URL do Trailer
             </label>
-            <input
+            <Input
               id="trailerUrl"
               type="url"
-              {...register('trailerUrl')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="URL do trailer no YouTube"
+              icon={<FiVideo />}
+              {...register('trailerUrl')}
+              value={watch('trailerUrl') || ''}
+              showClearButton
+              onClear={() => setValue('trailerUrl', '')}
             />
             {errors.trailerUrl && (
               <p className="text-destructive text-sm mt-1">
@@ -365,18 +397,21 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
         <h3 className="text-lg font-semibold mb-3">Informações Financeiras</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div className="space-y-2">
             <label htmlFor="budget" className="block text-sm font-medium mb-1">
               Orçamento (USD)
             </label>
-            <input
+            <Input
               id="budget"
               type="number"
-              {...register('budget')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Orçamento em dólares"
+              icon={<FiDollarSign />}
               min="0"
               step="0.01"
+              {...register('budget')}
+              value={watch('budget') || ''}
+              showClearButton
+              onClear={() => setValue('budget', undefined)}
             />
             {errors.budget && (
               <p className="text-destructive text-sm mt-1">
@@ -385,18 +420,21 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label htmlFor="revenue" className="block text-sm font-medium mb-1">
               Receita (USD)
             </label>
-            <input
+            <Input
               id="revenue"
               type="number"
-              {...register('revenue')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Receita em dólares"
+              icon={<FiDollarSign />}
               min="0"
               step="0.01"
+              {...register('revenue')}
+              value={watch('revenue') || ''}
+              showClearButton
+              onClear={() => setValue('revenue', undefined)}
             />
             {errors.revenue && (
               <p className="text-destructive text-sm mt-1">
@@ -405,20 +443,23 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="popularity"
               className="block text-sm font-medium mb-1"
             >
               Popularidade
             </label>
-            <input
+            <Input
               id="popularity"
               type="number"
-              {...register('popularity')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Nível de popularidade"
+              icon={<FiFile />}
               min="0"
+              {...register('popularity')}
+              value={watch('popularity') || ''}
+              showClearButton
+              onClear={() => setValue('popularity', undefined)}
             />
             {errors.popularity && (
               <p className="text-destructive text-sm mt-1">
@@ -427,20 +468,23 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="voteCount"
               className="block text-sm font-medium mb-1"
             >
               Contagem de Votos
             </label>
-            <input
+            <Input
               id="voteCount"
               type="number"
-              {...register('voteCount')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Número total de votos"
+              icon={<FiFile />}
               min="0"
+              {...register('voteCount')}
+              value={watch('voteCount') || ''}
+              showClearButton
+              onClear={() => setValue('voteCount', undefined)}
             />
             {errors.voteCount && (
               <p className="text-destructive text-sm mt-1">
@@ -449,19 +493,22 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label htmlFor="rating" className="block text-sm font-medium mb-1">
               Nota (0-10)
             </label>
-            <input
+            <Input
               id="rating"
               type="number"
-              {...register('rating')}
-              className="w-full p-2 border rounded-md bg-background"
               placeholder="Avaliação de 0 a 10"
+              icon={<FiFlag />}
               min="0"
               max="10"
               step="0.1"
+              {...register('rating')}
+              value={watch('rating') || ''}
+              showClearButton
+              onClear={() => setValue('rating', undefined)}
             />
             {errors.rating && (
               <p className="text-destructive text-sm mt-1">

@@ -50,7 +50,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ].includes(variant)
 
     const combinedClassName = cn(
-      'font-sans text-md cursor-pointer px-6 py-2',
+      'font-sans text-xs cursor-pointer px-6 py-2',
       'rounded-xs',
       '',
       'border',
