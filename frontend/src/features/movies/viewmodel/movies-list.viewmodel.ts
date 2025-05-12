@@ -7,7 +7,7 @@ import {
   getMoviesUseCase,
 } from '../usecases'
 import { QUERY_KEYS } from './movie-form.viewmodel'
-import type { Genre, MovieConnection, MovieFilters } from '../model/movie.model'
+import type { MovieFilters } from '../model/movie.model'
 
 export function useMoviesListViewModel() {
   const [filters, setFilters] = useState<MovieFilters>({})
