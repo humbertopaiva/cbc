@@ -21,16 +21,28 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
-  // Adicionar configuração de preview para permitir todos os hosts
   preview: {
     port: parseInt(process.env.PORT || '3000', 10),
     host: true,
-    allowedHosts: 'all', // Permitir todos os hosts
+    // Adicionar seu domínio específico e também 'all' para permitir quaisquer hosts
+    allowedHosts: [
+      'cbc-frontend.limei.app',
+      'localhost',
+      'teste-movies-testeteste-fllkkj-ef64e3-82-29-57-246.traefik.me',
+      '.limei.app', // Permite qualquer subdomínio de limei.app
+      'all', // Permite todos os hosts
+    ],
   },
-  // Configuração do servidor de desenvolvimento também
   server: {
     port: parseInt(process.env.PORT || '3000', 10),
     host: true,
-    allowedHosts: 'all', // Permitir todos os hosts
+    // Adicionar as mesmas configurações para o servidor de desenvolvimento
+    allowedHosts: [
+      'cbc-frontend.limei.app',
+      'localhost',
+      'teste-movies-testeteste-fllkkj-ef64e3-82-29-57-246.traefik.me',
+      '.limei.app', // Permite qualquer subdomínio de limei.app
+      'all', // Permite todos os hosts
+    ],
   },
 })
