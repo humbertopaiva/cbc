@@ -139,6 +139,7 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               }}
               label="Imagem de Capa"
               folder="posters"
+              aspectRatio="poster"
             />
             {errors.imageUrl && (
               <p className="text-destructive text-sm mt-1">
@@ -251,6 +252,7 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
             }}
             label="Banner/Backdrop (formato paisagem)"
             folder="backdrops"
+            aspectRatio="backdrop"
           />
           {errors.backdropUrl && (
             <p className="text-destructive text-sm mt-1">
@@ -354,7 +356,12 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               icon={<FiClock />}
               min="1"
               {...register('duration')}
-              value={watch('duration') || ''}
+              value={
+                watch('duration') !== undefined &&
+                !isNaN(Number(watch('duration')))
+                  ? watch('duration')
+                  : ''
+              }
               showClearButton
               onClear={() => setValue('duration', undefined)}
             />
@@ -409,7 +416,11 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               min="0"
               step="0.01"
               {...register('budget')}
-              value={watch('budget') || ''}
+              value={
+                watch('budget') !== undefined && !isNaN(Number(watch('budget')))
+                  ? watch('budget')
+                  : ''
+              }
               showClearButton
               onClear={() => setValue('budget', undefined)}
             />
@@ -432,7 +443,12 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               min="0"
               step="0.01"
               {...register('revenue')}
-              value={watch('revenue') || ''}
+              value={
+                watch('revenue') !== undefined &&
+                !isNaN(Number(watch('revenue')))
+                  ? watch('revenue')
+                  : ''
+              }
               showClearButton
               onClear={() => setValue('revenue', undefined)}
             />
@@ -457,7 +473,12 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               icon={<FiFile />}
               min="0"
               {...register('popularity')}
-              value={watch('popularity') || ''}
+              value={
+                watch('popularity') !== undefined &&
+                !isNaN(Number(watch('popularity')))
+                  ? watch('popularity')
+                  : ''
+              }
               showClearButton
               onClear={() => setValue('popularity', undefined)}
             />
@@ -482,7 +503,12 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               icon={<FiFile />}
               min="0"
               {...register('voteCount')}
-              value={watch('voteCount') || ''}
+              value={
+                watch('voteCount') !== undefined &&
+                !isNaN(Number(watch('voteCount')))
+                  ? watch('voteCount')
+                  : ''
+              }
               showClearButton
               onClear={() => setValue('voteCount', undefined)}
             />
@@ -506,7 +532,11 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
               max="10"
               step="0.1"
               {...register('rating')}
-              value={watch('rating') || ''}
+              value={
+                watch('rating') !== undefined && !isNaN(Number(watch('rating')))
+                  ? watch('rating')
+                  : ''
+              }
               showClearButton
               onClear={() => setValue('rating', undefined)}
             />
