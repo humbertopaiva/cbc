@@ -27,6 +27,16 @@ function MovieDetailsPage() {
     fetchMovie()
   }, [fetchMovie, id])
 
+  // Função auxiliar para verificar se um valor está vazio
+  const isEmpty = (value: any): boolean => {
+    return value === undefined || value === null || value === ''
+  }
+
+  // Função helper para valores numéricos
+  const isPositiveNumber = (value: number | undefined | null): boolean => {
+    return typeof value === 'number' && value > 0
+  }
+
   if (loading) {
     return (
       <AuthGuard>
@@ -60,6 +70,24 @@ function MovieDetailsPage() {
     )
   }
 
+  // Agora que verificamos que movie não é nulo, podemos usá-lo com segurança
+  const {
+    originalTitle,
+    tagline,
+    popularity,
+    voteCount,
+    rating,
+    description,
+    releaseDate,
+    duration,
+    status,
+    language,
+    budget,
+    revenue,
+    genres,
+    trailerUrl,
+  } = movie
+
   return (
     <AuthGuard>
       <div className="min-h-screen">
@@ -73,7 +101,7 @@ function MovieDetailsPage() {
           }}
         >
           {/* Overlay escuro - Adaptado para o modo escuro */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 dark:from-black/95 dark:via-black/80 dark:to-black/50"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-card/100 via-card/70 to-card/30 dark:from-card/95 dark:via-card/80 dark:to-card/50"></div>
 
           <div className="container mx-auto px-4 py-6 relative z-10">
             {/* Mobile: Poster first */}
@@ -113,15 +141,15 @@ function MovieDetailsPage() {
                 <h1 className="text-3xl font-sans font-semibold text-white dark:text-white">
                   {movie.title}
                 </h1>
-                {movie.originalTitle && (
+                {!isEmpty(originalTitle) && (
                   <h2 className="text-xl text-white/70 dark:text-white/70">
-                    {movie.originalTitle}
+                    {originalTitle}
                   </h2>
                 )}
               </div>
 
               {/* Desktop buttons - now aligned with titles */}
-              <div className="flex gap-3 mt-4 md:mt-0">
+              <div className="hidden md:flex gap-3 mt-4 md:mt-0">
                 <Button
                   variant="secondary"
                   className="flex items-center gap-2"
@@ -159,111 +187,122 @@ function MovieDetailsPage() {
                 {/* Primeira seção: Frase de efeito e métricas */}
                 <div className="flex flex-col md:flex-row justify-between">
                   {/* Frase de efeito à esquerda */}
-                  <div className="md:w-1/2">
-                    {movie.tagline && (
+                  {!isEmpty(tagline) && (
+                    <div className="md:w-1/2">
                       <p className="text-lg italic text-white dark:text-white">
-                        {movie.tagline}
+                        {tagline}
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Métricas à direita - Transformadas em boxes */}
                   <div className="md:w-1/2 flex flex-wrap justify-end gap-3 mt-4 md:mt-0">
-                    {/* Popularidade como box */}
-                    {movie.popularity !== undefined && (
-                      <div className="bg-card/80 backdrop-blur-sm dark:bg-card/40 p-3 rounded-xs flex flex-col justify-between">
+                    {/* Popularidade como box - Só exibe se tiver valor */}
+                    {isPositiveNumber(popularity) && (
+                      <div className="bg-card/80 dark:bg-card/40 p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-sans font-semibold text-foreground/70 dark:text-white/70 uppercase">
                           POPULARIDADE
                         </h4>
                         <p className="text-sm text-foreground dark:text-foreground">
-                          {movie.popularity}
+                          {popularity}
                         </p>
                       </div>
                     )}
 
-                    {/* Votos como box */}
-                    {movie.voteCount !== undefined && (
-                      <div className="bg-card/80 backdrop-blur-sm dark:bg-card/40 p-3 rounded-xs flex flex-col items-center justify-between">
+                    {/* Votos como box - Só exibe se tiver valor */}
+                    {isPositiveNumber(voteCount) && (
+                      <div className="bg-card/80 dark:bg-card/40 p-3 rounded-xs flex flex-col items-center justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           VOTOS
                         </h4>
                         <p className="text-sm text-foreground dark:text-foreground">
-                          {movie.voteCount}
+                          {voteCount}
                         </p>
                       </div>
                     )}
 
-                    {/* Rating circle */}
-                    {movie.rating !== undefined && (
-                      <RatingCircle rating={movie.rating} size={80} />
+                    {/* Rating circle - Só exibe se tiver valor */}
+                    {isPositiveNumber(rating) && (
+                      <RatingCircle rating={rating as number} size={80} />
                     )}
                   </div>
                 </div>
 
                 {/* Segunda seção: Sinopse e informações técnicas em duas colunas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Coluna 1: Sinopse */}
-                  <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-4 rounded-xs h-full">
+                  {/* Coluna 1: Sinopse - Sempre exibe, mesmo que vazia */}
+                  <div className="bg-card/90 p-4 rounded-xs h-full">
                     <h3 className="text-lg font-sans font-semibold uppercase mb-2 text-foreground dark:text-foreground">
                       SINOPSE
                     </h3>
                     <p className="text-foreground/80 dark:text-foreground/80 font-sans">
-                      {movie.description || 'Nenhuma descrição disponível.'}
+                      {!isEmpty(description)
+                        ? description
+                        : 'Nenhuma descrição disponível.'}
                     </p>
                   </div>
 
                   {/* Coluna 2: Informações técnicas em cards */}
                   <div className="grid grid-cols-2 gap-3">
-                    {movie.releaseDate && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                    {/* Data de lançamento - Só exibe se tiver valor */}
+                    {!isEmpty(releaseDate) && (
+                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           LANÇAMENTO
                         </h4>
                         <p className="text-sm text-foreground dark:text-foreground">
-                          {format(new Date(movie.releaseDate), 'dd/MM/yyyy', {
-                            locale: ptBR,
-                          })}
+                          {format(
+                            new Date(releaseDate as string),
+                            'dd/MM/yyyy',
+                            {
+                              locale: ptBR,
+                            },
+                          )}
                         </p>
                       </div>
                     )}
 
-                    {movie.duration && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                    {/* Duração - Só exibe se tiver valor */}
+                    {isPositiveNumber(duration) && (
+                      <div className="bg-card/95 p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           DURAÇÃO
                         </h4>
                         <p className="text-sm text-foreground dark:text-foreground">
-                          {movie.duration} min
+                          {duration} min
                         </p>
                       </div>
                     )}
 
-                    {movie.status && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                    {/* Status - Só exibe se tiver valor */}
+                    {!isEmpty(status) && (
+                      <div className="bg-card/95 p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           SITUAÇÃO
                         </h4>
                         <p className="text-sm text-foreground dark:text-foreground">
-                          {movie.status === MovieStatus.RELEASED
+                          {status === MovieStatus.RELEASED
                             ? 'Lançado'
                             : 'Em Produção'}
                         </p>
                       </div>
                     )}
 
-                    {movie.language && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                    {/* Idioma - Só exibe se tiver valor */}
+                    {!isEmpty(language) && (
+                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           IDIOMA
                         </h4>
                         <p className="text-sm text-foreground dark:text-foreground">
-                          {movie.language}
+                          {language}
                         </p>
                       </div>
                     )}
 
-                    {movie.budget !== undefined && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                    {/* Orçamento - Só exibe se tiver valor e for maior que zero */}
+                    {isPositiveNumber(budget) && (
+                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           ORÇAMENTO
                         </h4>
@@ -272,13 +311,14 @@ function MovieDetailsPage() {
                             style: 'currency',
                             currency: 'USD',
                             maximumFractionDigits: 0,
-                          }).format(movie.budget)}
+                          }).format(budget as number)}
                         </p>
                       </div>
                     )}
 
-                    {movie.revenue !== undefined && (
-                      <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-3 rounded-xs flex flex-col justify-between">
+                    {/* Receita - Só exibe se tiver valor e for maior que zero */}
+                    {isPositiveNumber(revenue) && (
+                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           RECEITA
                         </h4>
@@ -287,21 +327,21 @@ function MovieDetailsPage() {
                             style: 'currency',
                             currency: 'USD',
                             maximumFractionDigits: 0,
-                          }).format(movie.revenue)}
+                          }).format(revenue as number)}
                         </p>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Terceira seção: Gêneros - limitada ao tamanho do conteúdo */}
-                <div className="bg-card/70 dark:bg-card/40 backdrop-blur-sm p-4 rounded-xs inline-block">
-                  <h3 className="text-lg font-semibold uppercase mb-2 font-sans text-white dark:text-white">
+                {/* Terceira seção: Gêneros - exibe sempre, mas com mensagem se não houver gêneros */}
+                <div className="bg-card/90 p-4 rounded-xs inline-block">
+                  <h3 className="text-lg font-semibold uppercase mb-2 font-sans text-foreground">
                     GÊNEROS
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {movie.genres.length > 0 ? (
-                      movie.genres.map((genre) => (
+                    {genres.length > 0 ? (
+                      genres.map((genre) => (
                         <span
                           key={genre.id}
                           className="px-3 bg-primary/50 dark:bg-primary/30 py-2 font-sans rounded-xs text-sm uppercase text-white"
@@ -310,7 +350,7 @@ function MovieDetailsPage() {
                         </span>
                       ))
                     ) : (
-                      <p className="text-white/60 dark:text-white/60">
+                      <p className="text-foreground/80">
                         Nenhum gênero cadastrado
                       </p>
                     )}
@@ -321,14 +361,14 @@ function MovieDetailsPage() {
           </div>
         </div>
 
-        {/* Segunda seção: Trailer do filme */}
-        {movie.trailerUrl && (
+        {/* Segunda seção: Trailer do filme - Só exibe se tiver URL */}
+        {!isEmpty(trailerUrl) && (
           <div className="container mx-auto px-4 py-10">
             <h2 className="text-2xl font-bold mb-6 text-foreground dark:text-foreground">
               Trailer
             </h2>
             <div className="aspect-video bg-black/30 dark:bg-black/50 rounded-lg overflow-hidden">
-              <MovieTrailer trailerUrl={movie.trailerUrl} />
+              <MovieTrailer trailerUrl={trailerUrl as string} />
             </div>
           </div>
         )}
