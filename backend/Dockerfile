@@ -15,6 +15,7 @@ RUN npm install
 COPY . .
 
 # Dar permissão de execução ao script de inicialização
+RUN mkdir -p scripts
 COPY scripts/start.sh ./scripts/start.sh
 RUN chmod +x ./scripts/start.sh
 
