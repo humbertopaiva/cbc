@@ -4,6 +4,12 @@
 
 Uma aplicação web fullstack para gerenciamento de filmes, desenvolvida como parte do desafio técnico da Cubos Tecnologia.
 
+## ⭐ Demonstração em Produção
+
+**Acesse o projeto em produção:** [https://cbc-front.limei.app](https://cbc-front.limei.app)
+
+> 🌟 Esta URL é a versão final e otimizada do projeto para avaliação.
+
 ## 🌟 Visão Geral
 
 Cubos Movies é uma plataforma responsiva para cadastro, edição, visualização e exclusão de filmes. A aplicação oferece funcionalidades de autenticação, busca avançada e filtros personalizados.
@@ -66,10 +72,11 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
 
 - Node.js (v18+)
 - npm ou yarn
-- PostgreSQL (porta 5433)
-- Conta AWS (para o S3)
+- Docker e Docker Compose
+- Conta AWS (para o S3) com um bucket configurado para operações de leitura/escrita
+- Conta Resend para envio de emails
 
-### Configuração do Backend
+### Opção 1: Execução com Docker (Recomendada)
 
 1. Clone o repositório:
 
@@ -78,30 +85,95 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
    cd cbc
    ```
 
-2. Crie um arquivo `.env` na pasta backend com as seguintes variáveis:
+2. Crie um arquivo `.env` na raiz do projeto:
+
+   ```env
+   # Database Configuration
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=postgres
+   POSTGRES_DB=cubos_movies
+   DB_HOST=postgres
+   DB_PORT=5432
+   DB_USERNAME=postgres
+   DB_PASSWORD=postgres
+   DB_DATABASE=cubos_movies
+
+   # Frontend Configuration
+   FRONTEND_PORT=3000
+   VITE_API_URL=http://localhost:4000/graphql
+   FRONTEND_URL=http://localhost:3000
+
+   # Backend Configuration
+   BACKEND_PORT=4000
+   API_URL=http://localhost:4000/graphql
+   PORT=4000
+
+   # JWT Configuration
+   JWT_SECRET=sua_chave_secreta_aqui
+   JWT_EXPIRATION=1d
+
+   # Email Configuration
+   RESEND_API_KEY=sua_chave_resend_aqui
+   MAIL_FROM=seu_email_remetente@exemplo.com
+
+   # S3 Configuration
+   AWS_REGION=sua_regiao_aws
+   AWS_ACCESS_KEY=sua_access_key_aws
+   AWS_SECRET_KEY=sua_secret_key_aws
+   S3_BUCKET=nome_do_seu_bucket
+
+   # App Configuration
+   NODE_ENV=development
+   NOTIFICATION_DEV_MODE=true
+   ```
+
+   > **⚠️ IMPORTANTE:**
+   >
+   > - Substitua os valores das credenciais com suas próprias chaves.
+   > - É necessário ter uma conta Resend com uma API key válida para o envio de emails.
+   > - Configure um bucket S3 na AWS com permissões de leitura/escrita para armazenamento de imagens.
+
+3. Inicie os contêineres Docker:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+4. Acesse o aplicativo:
+   - Frontend: http://localhost:3000
+   - API GraphQL: http://localhost:4000/graphql
+   - Produção: https://cbc-front.limei.app
+
+### Opção 2: Execução Local (Desenvolvimento)
+
+#### Configuração do Backend
+
+1. Configure o PostgreSQL na porta 5432
+
+2. Crie um arquivo `.env` na pasta `backend`:
 
    ```env
    # Database
    DB_HOST=localhost
-   DB_PORT=5433
+   DB_PORT=5432
    DB_USERNAME=postgres
    DB_PASSWORD=postgres
    DB_DATABASE=cubos_movies
 
    # JWT
-   JWT_SECRET=jwt_super_secreto_123
+   JWT_SECRET=sua_chave_secreta_aqui
    JWT_EXPIRATION=1d
 
    # Email
-   RESEND_API_KEY=resend_fake_api_key
-   MAIL_FROM=contato@exemplo.com
-   FRONTEND_URL=https://cbc-frontend.limei.app/
+   RESEND_API_KEY=sua_chave_resend_aqui
+   MAIL_FROM=seu_email_remetente@exemplo.com
+   FRONTEND_URL=http://localhost:3000
 
    # AWS S3
-   AWS_REGION=us-east-1
-   AWS_ACCESS_KEY=aws_access_fake_key
-   AWS_SECRET_KEY=aws_secret_fake_key
-   S3_BUCKET=fake-bucket-name
+   AWS_REGION=sua_regiao_aws
+   AWS_ACCESS_KEY=sua_access_key_aws
+   AWS_SECRET_KEY=sua_secret_key_aws
+   S3_BUCKET=nome_do_seu_bucket
 
    # App
    NODE_ENV=development
@@ -114,24 +186,14 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
    ```bash
    cd backend
    npm install
+   npm run migration:run
+   npm run seed
    npm run start:dev
    ```
 
-4. Execute as migrações:
+#### Configuração do Frontend
 
-   ```bash
-   npm run migration:run
-   ```
-
-5. Popule o banco com dados iniciais:
-
-   ```bash
-   npm run seed
-   ```
-
-### Configuração do Frontend
-
-1. Crie um arquivo `.env` na pasta frontend:
+1. Crie um arquivo `.env` na pasta `frontend`:
 
    ```env
    VITE_API_URL=http://localhost:4000/graphql
@@ -142,10 +204,10 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
    ```bash
    cd frontend
    npm install
-   npm run dev -- --port 8080
+   npm run dev
    ```
 
-3. Acesse o aplicativo em `http://localhost:8080`
+3. Acesse o aplicativo em `http://localhost:3000`
 
 ## 🐳 Implantação com Docker
 
@@ -159,33 +221,43 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
 1. Crie um arquivo `.env` na raiz do projeto com:
 
    ```env
+   # Database Configuration
    POSTGRES_USER=postgres
    POSTGRES_PASSWORD=postgres
    POSTGRES_DB=cubos_movies
    DB_HOST=postgres
-   DB_PORT=5433
+   DB_PORT=5432
    DB_USERNAME=postgres
    DB_PASSWORD=postgres
    DB_DATABASE=cubos_movies
 
-   JWT_SECRET=jwt_super_secreto_123
+   # Frontend Configuration
+   FRONTEND_PORT=3000
+   VITE_API_URL=http://localhost:4000/graphql
+   FRONTEND_URL=http://localhost:3000
+
+   # Backend Configuration
+   BACKEND_PORT=4000
+   API_URL=http://localhost:4000/graphql
+   PORT=4000
+
+   # JWT Configuration
+   JWT_SECRET=sua_chave_secreta_aqui
    JWT_EXPIRATION=1d
 
-   RESEND_API_KEY=resend_fake_api_key
-   MAIL_FROM=contato@exemplo.com
-   FRONTEND_URL=https://cbc-frontend.limei.app/
+   # Email Configuration
+   RESEND_API_KEY=sua_chave_resend_aqui
+   MAIL_FROM=seu_email_remetente@exemplo.com
 
-   AWS_REGION=us-east-1
-   AWS_ACCESS_KEY=aws_access_fake_key
-   AWS_SECRET_KEY=aws_secret_fake_key
-   S3_BUCKET=fake-bucket-name
+   # S3 Configuration
+   AWS_REGION=sua_regiao_aws
+   AWS_ACCESS_KEY=sua_access_key_aws
+   AWS_SECRET_KEY=sua_secret_key_aws
+   S3_BUCKET=nome_do_seu_bucket
 
+   # App Configuration
    NODE_ENV=development
-   BACKEND_PORT=4000
-   FRONTEND_PORT=8080
    NOTIFICATION_DEV_MODE=true
-
-   VITE_API_URL=http://localhost:4000/graphql
    ```
 
 2. Inicie os contêineres:
@@ -195,9 +267,9 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
    ```
 
 3. Acesse:
-   - Frontend: http://localhost:8080
-   - Produção: https://cbc-frontend.limei.app/
-   - GraphQL API: http://localhost:4000/graphql
+   - Frontend: http://localhost:3000
+   - API GraphQL: http://localhost:4000/graphql
+   - Produção: https://cbc-front.limei.app
 
 ## 👨‍💻 Autor
 
