@@ -9,8 +9,8 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   app.enableCors({
-    origin: true,
-    credentials: true,
+    origin: false,
+    credentials: false,
   });
 
   app.useGlobalPipes(
