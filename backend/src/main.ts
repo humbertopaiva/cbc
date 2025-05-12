@@ -12,6 +12,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://cbc-frontend.limei.app',
+      'https://cb-front.limei.app',
       'http://localhost:3000',
       /\.limei\.app$/, // Aceita todos os subdomínios de limei.app
     ],
