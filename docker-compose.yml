@@ -17,35 +17,35 @@ services:
     restart: unless-stopped
 
   backend:
-  build:
-    context: ./backend
-    dockerfile: Dockerfile
-  container_name: cubos-movies-backend
-  environment:
-    - DB_HOST=${DB_HOST}
-    - DB_PORT=${DB_PORT}
-    - DB_USERNAME=${DB_USERNAME}
-    - DB_PASSWORD=${DB_PASSWORD}
-    - DB_DATABASE=${DB_DATABASE}
-    - JWT_SECRET=${JWT_SECRET}
-    - JWT_EXPIRATION=${JWT_EXPIRATION}
-    - RESEND_API_KEY=${RESEND_API_KEY}
-    - MAIL_FROM=${MAIL_FROM}
-    - FRONTEND_URL=${FRONTEND_URL}
-    - AWS_REGION=${AWS_REGION}
-    - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
-    - AWS_SECRET_KEY=${AWS_SECRET_KEY}
-    - S3_BUCKET=${S3_BUCKET}
-    - NODE_ENV=${NODE_ENV}
-    - PORT=${BACKEND_PORT}
-    - NOTIFICATION_DEV_MODE=${NOTIFICATION_DEV_MODE}
-  ports:
-    - "${BACKEND_PORT}:${BACKEND_PORT}"
-  depends_on:
-    - postgres
-  networks:
-    - cubos-network
-  restart: unless-stopped
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cubos-movies-backend
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      MAIL_FROM: ${MAIL_FROM}
+      FRONTEND_URL: ${FRONTEND_URL}
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${BACKEND_PORT}
+      NOTIFICATION_DEV_MODE: ${NOTIFICATION_DEV_MODE}
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    depends_on:
+      - postgres
+    networks:
+      - cubos-network
+    restart: unless-stopped
 
   frontend:
     build:
@@ -55,7 +55,7 @@ services:
         - VITE_API_URL=${VITE_API_URL}
     container_name: cubos-movies-frontend
     environment:
-      - VITE_API_URL=${VITE_API_URL}
+      VITE_API_URL: ${VITE_API_URL}
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
