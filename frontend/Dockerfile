@@ -1,24 +1,35 @@
-FROM node:24-alpine
+# Build stage
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
+# Copiar apenas os arquivos necessários para instalar dependências
 COPY package*.json ./
 
-RUN npm install
+# Instalar dependências
+RUN npm ci
 
+# Copiar o resto dos arquivos
 COPY . .
 
+# Definir variáveis de ambiente para produção
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 
 # Construir a aplicação
 RUN npm run build
 
-# Instalar serve para servir a aplicação
-RUN npm install -g serve
+# Production stage
+FROM nginx:stable-alpine AS production
 
-# Porta interna
-EXPOSE 3000
+# Copiar a configuração do nginx
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Comando para servir a aplicação em produção
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Copiar os arquivos de build
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expor a porta 80
+EXPOSE 80
+
+# Comando para iniciar o nginx
+CMD ["nginx", "-g", "daemon off;"]

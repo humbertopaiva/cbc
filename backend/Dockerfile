@@ -1,29 +1,44 @@
-FROM node:24-alpine
+# Build stage
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
-# Instalar dependências necessárias
-RUN apk add --no-cache bash
+# Instalar dependências necessárias para compilação
+RUN apk add --no-cache python3 make g++
 
-# Copiar package.json e package-lock.json
+# Copiar apenas os arquivos necessários para instalar dependências
 COPY package*.json ./
 
 # Instalar dependências
-RUN npm install
+RUN npm ci
 
-# Copiar todo o código fonte
+# Copiar o resto dos arquivos
 COPY . .
-
-# Dar permissão de execução ao script de inicialização
-RUN mkdir -p scripts
-COPY scripts/start.sh ./scripts/start.sh
-RUN chmod +x ./scripts/start.sh
 
 # Construir a aplicação
 RUN npm run build
 
-# Expor a porta da aplicação
+# Production stage
+FROM node:24-alpine AS production
+
+WORKDIR /app
+
+# Instalar apenas dependências de produção
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copiar os arquivos compilados
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/src/migrations ./dist/migrations
+COPY --from=build /app/nest-cli.json .
+COPY --from=build /app/typeorm.config.js ./dist
+
+# Criar script de inicialização
+COPY scripts/start.sh .
+RUN chmod +x start.sh
+
+# Expor a porta
 EXPOSE 4000
 
-# Executar o script de inicialização
-CMD ["./scripts/start.sh"]
+# Comando para iniciar a aplicação
+CMD ["./start.sh"]

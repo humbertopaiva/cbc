@@ -1,75 +1,74 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:14-alpine
-    container_name: cubos-movies-postgres
-    restart: always
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${API_URL:-http://localhost:4000/graphql}
     ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-cubos_movies}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - backend
     networks:
-      - cubos-movies-network
+      - app-network
+    restart: unless-stopped
 
   backend:
-    image: node:24-alpine
-    container_name: cubos-movies-backend
-    working_dir: /app
-    restart: always
-    depends_on:
-      - postgres
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "${BACKEND_PORT:-4000}:4000"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
     environment:
+      - NODE_ENV=production
+      - PORT=4000
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USERNAME=${POSTGRES_USER:-postgres}
       - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - DB_DATABASE=${POSTGRES_DB:-cubos_movies}
-      - JWT_SECRET=${JWT_SECRET:-sua_chave_secreta_aqui}
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-1d}
       - RESEND_API_KEY=${RESEND_API_KEY}
-      - MAIL_FROM=${MAIL_FROM:-contato@admin.limei.app}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3001}
+      - MAIL_FROM=${MAIL_FROM:-contato@admin.cubos-movies.com}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
       - AWS_SECRET_KEY=${AWS_SECRET_KEY}
-      - S3_BUCKET=${S3_BUCKET:-cubos-movies-humberto}
-      - NODE_ENV=${NODE_ENV:-development}
-      - NOTIFICATION_DEV_MODE=${NOTIFICATION_DEV_MODE:-true}
-    volumes:
-      - ./backend:/app
-    command: >
-      sh -c "npm install && 
-             npm install -D tsconfig-paths &&
-             npx nest start --watch"
-    networks:
-      - cubos-movies-network
+      - S3_BUCKET=${S3_BUCKET:-cubos-movies}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-cubos_movies}
+    restart: unless-stopped
 
-  frontend:
-    image: node:24-alpine
-    container_name: cubos-movies-frontend
-    working_dir: /app
-    restart: always
-    depends_on:
-      - backend
-    ports:
-      - "3001:3000"
-    environment:
-      - VITE_API_URL=${VITE_API_URL:-http://localhost:4000/graphql}
+  postgres:
+    image: postgres:16-alpine
     volumes:
-      - ./frontend:/app
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-cubos_movies}
     networks:
-      - cubos-movies-network
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
-  cubos-movies-network:
+  app-network:
     driver: bridge
 
 volumes:
