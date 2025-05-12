@@ -8,9 +8,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
+  // Configuração de CORS atualizada para aceitar requisições do frontend em produção
   app.enableCors({
-    origin: true,
+    origin: [
+      'https://cbc-frontend.limei.app',
+      'http://localhost:3000',
+      /\.limei\.app$/, // Aceita todos os subdomínios de limei.app
+    ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   app.useGlobalPipes(
@@ -28,7 +35,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = 4000;
+  const port = process.env.PORT || 4000;
   // Converter para número se for string
   const portNumber = typeof port === 'string' ? parseInt(port, 10) : port;
 

@@ -8,7 +8,10 @@ import { setContext } from '@apollo/client/link/context'
 import { onError } from '@apollo/client/link/error'
 
 // URL do nosso backend GraphQL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql'
+const isDevelopment = import.meta.env.DEV
+const API_URL = isDevelopment
+  ? 'http://localhost:4000/graphql'
+  : 'https://cbc-backend.limei.app/graphql'
 
 const httpLink = createHttpLink({
   uri: API_URL,
@@ -27,7 +30,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         console.error('Token de autenticação inválido ou ausente!')
 
         // Em produção, você pode querer redirecionar para página de login
-        if (import.meta.env.PROD) {
+        if (!isDevelopment) {
           window.location.href = '/login'
         }
       }
