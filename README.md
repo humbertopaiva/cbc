@@ -273,10 +273,4 @@ Cubos Movies é uma plataforma responsiva para cadastro, edição, visualizaçã
    - API GraphQL: http://localhost:4000/graphql
    - Produção: https://cb-front.limei.app
 
-## 👨‍💻 Autor
 
-Criado com 💜 por Seu Nome - [GitHub](https://github.com/seu-usuario) | [LinkedIn](https://linkedin.com/in/seu-perfil)
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
