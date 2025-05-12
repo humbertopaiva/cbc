@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { FiCalendar, FiClock, FiFilter, FiGlobe, FiX } from 'react-icons/fi'
 import { MovieStatus } from '../model/movie.model'
+import { GenreSelect } from './genre-select'
 import type { Genre, MovieFilters } from '../model/movie.model'
 import { Button } from '@/components/custom/button'
 import { Input } from '@/components/ui/input'
@@ -28,14 +29,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     const { name, value, type } = e.target as HTMLInputElement
     const numericTypes = ['number', 'range']
 
-    if (name === 'genreIds') {
-      const select = e.target as HTMLSelectElement
-      const selectedOptions = Array.from(
-        select.selectedOptions,
-        (option) => option.value,
-      )
-      setFilters((prev) => ({ ...prev, genreIds: selectedOptions }))
-    } else if (name === 'status') {
+    if (name === 'status') {
       setFilters((prev) => ({
         ...prev,
         status: value ? (value as MovieStatus) : undefined,
@@ -46,6 +40,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
         [name]: numericTypes.includes(type) && value ? Number(value) : value,
       }))
     }
+  }
+
+  // Novo método para lidar com a mudança de gêneros selecionados
+  const handleGenresChange = (selectedIds: Array<string>) => {
+    setFilters((prev) => ({ ...prev, genreIds: selectedIds }))
   }
 
   const handleApply = () => {
@@ -258,30 +257,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 </div>
               </div>
 
+              {/* Substituindo o select múltiplo pelo GenreSelect */}
               <div>
-                <label
-                  htmlFor="genreIds"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Gêneros
-                </label>
-                <select
-                  id="genreIds"
-                  name="genreIds"
-                  multiple
-                  className="w-full p-2 border rounded-md bg-background/70 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 h-32"
-                  value={filters.genreIds || []}
-                  onChange={handleChange}
-                >
-                  {genres.map((genre) => (
-                    <option key={genre.id} value={genre.id}>
-                      {genre.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Use Ctrl+Clique para selecionar múltiplos gêneros
-                </p>
+                <GenreSelect
+                  genres={genres}
+                  selectedGenres={filters.genreIds || []}
+                  onChange={handleGenresChange}
+                />
               </div>
 
               <div className="flex justify-end space-x-2 pt-4">
