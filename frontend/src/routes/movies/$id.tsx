@@ -246,7 +246,7 @@ function MovieDetailsPage() {
                   <div className="grid grid-cols-2 gap-3">
                     {/* Data de lançamento - Só exibe se tiver valor */}
                     {!isEmpty(releaseDate) && (
-                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between max-h-20">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           LANÇAMENTO
                         </h4>
@@ -264,7 +264,7 @@ function MovieDetailsPage() {
 
                     {/* Duração - Só exibe se tiver valor */}
                     {isPositiveNumber(duration) && (
-                      <div className="bg-card/95 p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/95 p-3 rounded-xs flex flex-col justify-between max-h-20">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           DURAÇÃO
                         </h4>
@@ -276,7 +276,7 @@ function MovieDetailsPage() {
 
                     {/* Status - Só exibe se tiver valor */}
                     {!isEmpty(status) && (
-                      <div className="bg-card/95 p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/95 p-3 rounded-xs flex flex-col justify-between max-h-20">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           SITUAÇÃO
                         </h4>
@@ -290,7 +290,7 @@ function MovieDetailsPage() {
 
                     {/* Idioma - Só exibe se tiver valor */}
                     {!isEmpty(language) && (
-                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between max-h-20">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           IDIOMA
                         </h4>
@@ -302,7 +302,7 @@ function MovieDetailsPage() {
 
                     {/* Orçamento - Só exibe se tiver valor e for maior que zero */}
                     {isPositiveNumber(budget) && (
-                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between max-h-20">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           ORÇAMENTO
                         </h4>
@@ -318,7 +318,7 @@ function MovieDetailsPage() {
 
                     {/* Receita - Só exibe se tiver valor e for maior que zero */}
                     {isPositiveNumber(revenue) && (
-                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between">
+                      <div className="bg-card/90 p-3 rounded-xs flex flex-col justify-between max-h-20">
                         <h4 className="text-xs font-semibold text-foreground/70 dark:text-foreground/70 uppercase">
                           RECEITA
                         </h4>
