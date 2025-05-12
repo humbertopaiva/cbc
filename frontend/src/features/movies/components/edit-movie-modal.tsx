@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { FiBookOpen, FiDollarSign, FiInfo, FiSave } from 'react-icons/fi'
+import { toast } from 'react-toastify'
 import { GenreSelect } from './genre-select'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
@@ -52,10 +53,36 @@ export const EditMovieModal: React.FC<EditMovieModalProps> = ({
   }, [open, reset])
 
   const onSubmit = async (data: any) => {
-    const success = await formSubmit(data)
-    if (success && onSuccess) {
-      onSuccess()
-      onClose()
+    try {
+      const success = await formSubmit(data)
+      if (success && onSuccess) {
+        onSuccess()
+        onClose()
+      }
+    } catch (error) {
+      const errorFields = Object.keys(errors)
+        .map((key) => {
+          const fieldError = errors[key as keyof typeof errors]
+          return fieldError?.message ? `${key}: ${fieldError.message}` : null
+        })
+        .filter(Boolean)
+
+      if (errorFields.length > 0) {
+        toast.error(
+          <div>
+            <p>Por favor, corrija os seguintes campos:</p>
+            <ul className="mt-2 list-disc pl-4">
+              {errorFields.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </div>,
+        )
+      } else {
+        toast.error(
+          'Erro ao editar filme. Verifique todos os campos e tente novamente.',
+        )
+      }
     }
   }
 
