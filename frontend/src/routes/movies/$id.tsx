@@ -111,7 +111,7 @@ function MovieDetailsPage() {
                   movie.imageUrl || 'https://placehold.co/300x450?text=No+Image'
                 }
                 alt={movie.title}
-                className="w-full h-auto rounded-lg shadow-lg"
+                className="w-full h-auto rounded-xs shadow-lg"
               />
             </div>
 
@@ -178,7 +178,7 @@ function MovieDetailsPage() {
                     'https://placehold.co/300x450?text=No+Image'
                   }
                   alt={movie.title}
-                  className="w-full h-auto rounded-lg shadow-lg"
+                  className="w-full h-auto rounded-xs shadow-lg"
                 />
               </div>
 
