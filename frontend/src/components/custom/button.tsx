@@ -53,8 +53,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     // Ajusta a combinação de classes
     const combinedClassName = cn(
-      'font-sans text-md cursor-pointer',
-      'rounded-none',
+      'font-sans text-md cursor-pointer px-6 py-2',
+      'rounded-xs',
       '', // Usando exatamente o mesmo padding do input
       'border', // Adicionando a borda padrão
       'flex items-center justify-center',
