@@ -21,4 +21,16 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
+  // Adicionar configuração de preview para permitir todos os hosts
+  preview: {
+    port: parseInt(process.env.PORT || '3000', 10),
+    host: true,
+    allowedHosts: 'all', // Permitir todos os hosts
+  },
+  // Configuração do servidor de desenvolvimento também
+  server: {
+    port: parseInt(process.env.PORT || '3000', 10),
+    host: true,
+    allowedHosts: 'all', // Permitir todos os hosts
+  },
 })
